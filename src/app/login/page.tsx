@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { LogIn, Mail, Lock, Chrome, ArrowRight, Loader2 } from "lucide-react";
-import { supabase } from "@/services/supabase";
+import { createClient, isSupabaseConfigured } from "@/services/supabase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
@@ -30,6 +30,13 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
 
+    if (!isSupabaseConfigured) {
+      setError("Login is not configured yet. Please add Supabase environment variables in Vercel.");
+      setLoading(false);
+      return;
+    }
+
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -46,6 +53,14 @@ export default function LoginPage() {
   const handleSocialLogin = async (provider: 'google') => {
     setLoading(true);
     setError(null);
+
+    if (!isSupabaseConfigured) {
+      setError("Google login is not configured yet. Please add Supabase environment variables in Vercel.");
+      setLoading(false);
+      return;
+    }
+
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {

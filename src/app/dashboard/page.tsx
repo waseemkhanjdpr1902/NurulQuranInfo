@@ -7,7 +7,7 @@ import {
   TrendingUp, Settings, LogOut, User, 
   ChevronRight, Sparkles, Heart
 } from "lucide-react";
-import { supabase } from "@/services/supabase";
+import { createClient, isSupabaseConfigured } from "@/services/supabase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
@@ -22,6 +22,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const checkUser = async () => {
+      if (!isSupabaseConfigured) {
+        router.push("/login?error=Login is not configured yet");
+        return;
+      }
+
+      const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         router.push("/login");
@@ -34,6 +40,12 @@ export default function DashboardPage() {
   }, [router]);
 
   const handleLogout = async () => {
+    if (!isSupabaseConfigured) {
+      router.push("/");
+      return;
+    }
+
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/");
   };
