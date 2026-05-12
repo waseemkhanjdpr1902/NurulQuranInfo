@@ -8,13 +8,14 @@ interface AudioPlayerProps {
   audioUrl: string | null;
   onNext?: () => void;
   onPrev?: () => void;
+  onPlayRequest?: () => void;
   onPlayStateChange?: (playing: boolean) => void;
   title: string;
   subtitle: string;
   autoPlay?: boolean;
 }
 
-export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayStateChange, title, subtitle, autoPlay }: AudioPlayerProps) {
+export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, onPlayStateChange, title, subtitle, autoPlay }: AudioPlayerProps) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -38,6 +39,11 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayStateChang
   }, [audioUrl]);
 
   const togglePlay = () => {
+    if (!audioUrl) {
+      onPlayRequest?.();
+      return;
+    }
+
     if (!audioRef.current) return;
     if (audioRef.current.paused) {
       const playPromise = audioRef.current.play();

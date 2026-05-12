@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { LogIn, Mail, Lock, Chrome, ArrowRight, Loader2 } from "lucide-react";
 import { supabase } from "@/services/supabase";
@@ -15,6 +15,15 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get("error");
+
+    if (authError) {
+      setError(authError);
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,17 +44,22 @@ export default function LoginPage() {
   };
 
   const handleSocialLogin = async (provider: 'google') => {
+    setLoading(true);
     setError(null);
-    const { data, error } = await supabase.auth.signInWithOAuth({
+    const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          prompt: "select_account",
+        },
       },
     });
 
     if (error) {
       console.error(`${provider} login failed:`, error.message);
       setError(error.message);
+      setLoading(false);
     }
   };
 
@@ -70,9 +84,10 @@ export default function LoginPage() {
           <div className="space-y-4 mb-10">
             <button 
               onClick={() => handleSocialLogin('google')}
+              disabled={loading}
               className="w-full flex items-center justify-center gap-4 py-4 gold-gradient border border-gold/20 rounded-2xl text-ink hover:scale-[1.02] transition-all font-bold shadow-lg shadow-gold/20"
             >
-              <Chrome size={20} /> Continue with Google
+              {loading ? <Loader2 className="animate-spin" size={20} /> : <Chrome size={20} />} Continue with Google
             </button>
           </div>
 

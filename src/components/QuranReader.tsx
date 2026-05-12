@@ -80,13 +80,13 @@ export default function QuranReader({
     setActiveTab("tafsir");
     try {
       const verseKey = `${surah.number}:${verse.verse_number}`;
-      const res = await fetch(`https://api.quran.com/api/v4/quran/tafsirs/169?verse_key=${verseKey}`);
+      const res = await fetch(`/api/tafsir?verse_key=${encodeURIComponent(verseKey)}`);
       if (!res.ok) {
         throw new Error(`Tafsir request failed with status ${res.status}`);
       }
 
       const data = await res.json();
-      const tafsirText = data?.tafsirs?.[0]?.text || data?.tafsir?.text;
+      const tafsirText = data?.text;
 
       if (tafsirText) {
         setTafsirContent(tafsirText);
@@ -121,25 +121,33 @@ export default function QuranReader({
 
   const fetchAiInsight = async (verse: Verse) => {
     setLoadingAi(true);
+    setAiInsight(null);
     setActiveTab("ai");
     try {
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-      
-      const prompt = `Provide deep spiritual insights, linguistic analysis, and relevant prophetic hadiths for Quran Verse ${surah.englishName} (${surah.number}:${verse.verse_number}). 
-      Arabic: ${verse.text_uthmani}
-      Translation: ${verse.translation}`;
-      
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are a profound Islamic scholar specializing in Quranic Tafsir and Hadith. Provide wisdom that bridges revelation and modern science/life. Include relevant Sahih Hadith citations."
+      const res = await fetch("/api/ai-insight", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          surahName: surah.englishName,
+          surahNumber: surah.number,
+          verseNumber: verse.verse_number,
+          arabic: verse.text_uthmani,
+          translation: verse.translation,
+        }),
       });
 
-      const response = await model.generateContent(prompt);
-      setAiInsight(response.response.text() || "Insight unavailable at the moment.");
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || "AI insight request failed");
+      }
+
+      setAiInsight(data?.text || "Insight unavailable at the moment.");
     } catch (error) {
       console.error("AI Insight Error:", error);
-      setAiInsight("Unable to generate AI insights. Please check your connection.");
+      setAiInsight("Unable to generate AI insights. Please check that the Gemini API key is configured in Vercel.");
     } finally {
       setLoadingAi(false);
     }
@@ -386,6 +394,11 @@ export default function QuranReader({
         title={surah.englishName}
         subtitle={RECITERS.find(r => r.id === reciterId)?.name || ""}
         autoPlay={autoplay}
+        onPlayRequest={() => {
+          if (verses.length > 0) {
+            playVerse(verses[0]);
+          }
+        }}
         onNext={playNextVerse}
         onPrev={playPrevVerse}
         onPlayStateChange={setIsAudioPlaying}

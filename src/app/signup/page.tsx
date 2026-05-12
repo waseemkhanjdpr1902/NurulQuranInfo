@@ -44,16 +44,22 @@ export default function SignupPage() {
   };
 
   const handleSocialLogin = async (provider: 'google') => {
+    setLoading(true);
+    setError(null);
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        queryParams: {
+          prompt: "select_account",
+        },
       },
     });
 
     if (error) {
       console.error(`${provider} login failed:`, error.message);
       setError(error.message);
+      setLoading(false);
     }
   };
 
@@ -94,9 +100,10 @@ export default function SignupPage() {
               <div className="space-y-4 mb-10">
                 <button 
                   onClick={() => handleSocialLogin('google')}
+                  disabled={loading}
                   className="w-full flex items-center justify-center gap-4 py-4 gold-gradient border border-gold/20 rounded-2xl text-ink hover:scale-[1.02] transition-all font-bold shadow-lg shadow-gold/20"
                 >
-                  <Chrome size={20} /> Sign up with Google
+                  {loading ? <Loader2 className="animate-spin" size={20} /> : <Chrome size={20} />} Sign up with Google
                 </button>
               </div>
 
