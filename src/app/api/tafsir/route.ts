@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic";
 
 function extractTafsirText(data: any) {
   return (
+    data?.text ||
     data?.tafsirs?.[0]?.text ||
     data?.tafsir?.text ||
     data?.verse?.tafsirs?.[0]?.text ||
@@ -19,7 +20,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "A valid verse_key is required." }, { status: 400 });
   }
 
+  const [chapter, verse] = verseKey.split(":");
   const endpoints = [
+    `https://cdn.jsdelivr.net/gh/spa5k/tafsir_api@main/tafsir/en-tafisr-ibn-kathir/${chapter}/${verse}.json`,
     `https://api.quran.com/api/v4/quran/tafsirs/169?verse_key=${encodeURIComponent(verseKey)}`,
     `https://api.quran.com/api/v4/verses/by_key/${encodeURIComponent(verseKey)}?tafsirs=169`,
   ];
