@@ -75,19 +75,27 @@ export default function QuranReader({
 
   const fetchTafsir = async (verse: Verse) => {
     setLoadingTafsir(true);
+    setTafsirContent(null);
     setSelectedTafsir(verse);
     setActiveTab("tafsir");
     try {
-      const res = await fetch(`https://api.quran.com/api/v4/quran/tafsirs/169?verse_key=${surah.number}:${verse.verse_number}`);
+      const verseKey = `${surah.number}:${verse.verse_number}`;
+      const res = await fetch(`https://api.quran.com/api/v4/quran/tafsirs/169?verse_key=${verseKey}`);
+      if (!res.ok) {
+        throw new Error(`Tafsir request failed with status ${res.status}`);
+      }
+
       const data = await res.json();
-      if (data.tafsir) {
-        setTafsirContent(data.tafsir.text);
+      const tafsirText = data?.tafsirs?.[0]?.text || data?.tafsir?.text;
+
+      if (tafsirText) {
+        setTafsirContent(tafsirText);
       } else {
         setTafsirContent("Tafsir Ibn Kathir not found for this verse.");
       }
     } catch (error) {
       console.error("Error fetching tafsir:", error);
-      setTafsirContent("Failed to load tafsir.");
+      setTafsirContent("Failed to load tafsir. Please try again in a moment.");
     } finally {
       setLoadingTafsir(false);
     }
@@ -347,7 +355,7 @@ export default function QuranReader({
                 {verse.translation}
               </p>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-6 opacity-0 group-hover:opacity-100 transition-all">
+            <div className="mt-8 flex flex-wrap items-center gap-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
               <button 
                 onClick={() => playVerse(verse)}
                 className={`flex items-center gap-2 transition-colors text-[10px] uppercase tracking-widest ${playingVerseId === verse.id && isAudioPlaying ? 'text-gold' : 'text-parchment/30 hover:text-gold'}`}

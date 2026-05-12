@@ -1,7 +1,9 @@
 node_modules/
+.next/
 build/
 dist/
 coverage/
+error.txt
 .DS_Store
 *.log
 .env*
