@@ -15,22 +15,23 @@ interface Verse {
 }
 
 const RECITERS = [
-  { id: 7, name: "Mishary Rashid Alafasy" },
-  { id: 1, name: "AbdulBaset AbdulSamad" },
-  { id: 3, name: "Abdur-Rahman as-Sudais" },
-  { id: 4, name: "Abu Bakr al-Shatri" },
-  { id: 6, name: "Hani ar-Rifai" },
-  { id: 12, name: "Mahmoud Al-Husary" },
+  { id: "ar.alafasy", name: "Mishary Rashid Alafasy" },
+  { id: "ar.abdulsamad", name: "AbdulBaset AbdulSamad" },
+  { id: "ar.abdurrahmaansudais", name: "Abdur-Rahman as-Sudais" },
+  { id: "ar.shaatree", name: "Abu Bakr Ash-Shaatree" },
+  { id: "ar.hanirifai", name: "Hani ar-Rifai" },
+  { id: "ar.husary", name: "Mahmoud Al-Husary" },
+  { id: "ar.abdullahbasfar", name: "Abdullah Basfar" },
+  { id: "ar.ahmedajamy", name: "Ahmed ibn Ali al-Ajamy" },
+  { id: "ar.hudhaify", name: "Ali al-Hudhaify" },
+  { id: "ar.ibrahimakhbar", name: "Ibrahim Akhdar" },
+  { id: "ar.mahermuaiqly", name: "Maher Al Muaiqly" },
+  { id: "ar.muhammadayyoub", name: "Muhammad Ayyoub" },
+  { id: "ar.muhammadjibreel", name: "Muhammad Jibreel" },
+  { id: "ar.saoodshuraym", name: "Saood Ash-Shuraym" },
+  { id: "ar.aymanswoaid", name: "Ayman Sowaid" },
+  { id: "ar.parhizgar", name: "Shahriar Parhizgar" },
 ];
-
-const RECITER_MAPPING: { [key: number]: string } = {
-  7: "ar.alafasy",
-  1: "ar.abdulsamad",
-  3: "ar.sudais",
-  4: "ar.shatri",
-  6: "ar.hanirifai",
-  12: "ar.husary",
-};
 
 interface Surah {
   number: number;
@@ -57,7 +58,7 @@ export default function QuranReader({
   const router = useRouter();
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [reciterId, setReciterId] = useState(7);
+  const [reciterId, setReciterId] = useState("ar.alafasy");
   const [playingVerseId, setPlayingVerseId] = useState<number | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [selectedTafsir, setSelectedTafsir] = useState<Verse | null>(null);
@@ -162,8 +163,7 @@ export default function QuranReader({
             setAudioUrl(null);
             return false;
           } else {
-            const reciterSlug = RECITER_MAPPING[reciterId] || "ar.alafasy";
-            const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterSlug}/${verse.id}`;
+            const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
             let finalAudio = verse.audio_url || fallbackAudio;
             if (finalAudio.startsWith("//")) finalAudio = `https:${finalAudio}`;
             setAudioUrl(finalAudio);
@@ -173,8 +173,7 @@ export default function QuranReader({
         return prevId;
       } else {
         // Switch to new verse
-        const reciterSlug = RECITER_MAPPING[reciterId] || "ar.alafasy";
-        const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterSlug}/${verse.id}`;
+        const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
         let finalAudio = verse.audio_url || fallbackAudio;
         if (finalAudio.startsWith("//")) finalAudio = `https:${finalAudio}`;
         
@@ -189,8 +188,7 @@ export default function QuranReader({
     const fetchVerses = async () => {
       setLoading(true);
       try {
-        const reciterSlug = RECITER_MAPPING[reciterId] || "ar.alafasy";
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,${reciterSlug}`);
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,${reciterId}`);
         if (!res.ok) throw new Error("Failed to fetch verses");
         const data = await res.json();
         
@@ -222,6 +220,12 @@ export default function QuranReader({
 
     fetchVerses();
   }, [surah.number, reciterId]);
+
+  useEffect(() => {
+    setAudioUrl(null);
+    setPlayingVerseId(null);
+    setIsAudioPlaying(false);
+  }, [reciterId]);
 
   // Handle autoplay on mount
   const hasAutoplayed = useRef(false);
@@ -303,7 +307,7 @@ export default function QuranReader({
             <h4 className="text-parchment font-bold">{surah.englishName}</h4>
             <select 
               value={reciterId}
-              onChange={(e) => setReciterId(parseInt(e.target.value))}
+              onChange={(e) => setReciterId(e.target.value)}
               className="bg-transparent text-gold/60 text-[10px] uppercase tracking-widest outline-none cursor-pointer hover:text-gold transition-colors"
             >
               {RECITERS.map(r => (
