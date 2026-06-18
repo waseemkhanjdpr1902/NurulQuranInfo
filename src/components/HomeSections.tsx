@@ -30,6 +30,8 @@ export default function HomeSections() {
 
   const tools = [
     { name: "Prayer Times", href: "/prayer-times", icon: <Clock size={24} /> },
+    { name: "Islamic Finance", href: "/islamic-finance", icon: <Landmark size={24} /> },
+    { name: "Halal Stocks", href: "/halal-stocks", icon: <Shield size={24} /> },
     { name: "Zakat Calc", href: "/zakat", icon: <Landmark size={24} /> },
     { name: "Dua Library", href: "/dua", icon: <Heart size={24} /> },
     { name: "Qibla Finder", href: "/prayer-times", icon: <Compass size={24} /> },

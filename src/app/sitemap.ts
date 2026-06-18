@@ -10,6 +10,8 @@ const routes = [
   "/tafseer",
   "/names-of-allah",
   "/zakat",
+  "/islamic-finance",
+  "/halal-stocks",
   "/dawah",
   "/islamic-science",
   "/spiritual-guide",

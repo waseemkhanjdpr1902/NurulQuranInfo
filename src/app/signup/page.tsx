@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { UserPlus, Mail, Lock, Chrome, ArrowRight, Loader2, User } from "lucide-react";
 import { createClient, isSupabaseConfigured } from "@/services/supabase";
@@ -9,6 +9,12 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+function getSafeNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  if (!/^\/[A-Za-z0-9/_?=&%#.-]*$/.test(value)) return "/dashboard";
+  return value;
+}
+
 export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,7 +22,13 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [nextPath, setNextPath] = useState("/dashboard");
   const router = useRouter();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setNextPath(getSafeNextPath(params.get("next")));
+  }, []);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,14 +42,14 @@ export default function SignupPage() {
     }
 
     const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
         },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
       },
     });
 
@@ -45,8 +57,12 @@ export default function SignupPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      setSuccess(true);
-      setLoading(false);
+      if (data.session) {
+        router.push(nextPath);
+      } else {
+        setSuccess(true);
+        setLoading(false);
+      }
     }
   };
 
@@ -64,7 +80,7 @@ export default function SignupPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
         queryParams: {
           prompt: "select_account",
         },

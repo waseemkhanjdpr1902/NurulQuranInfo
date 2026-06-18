@@ -9,21 +9,49 @@ import Footer from "@/components/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
+function getSafeNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  if (!/^\/[A-Za-z0-9/_?=&%#.-]*$/.test(value)) return "/dashboard";
+  return value;
+}
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [nextPath, setNextPath] = useState("/dashboard");
   const router = useRouter();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const authError = params.get("error");
+    const safeNext = getSafeNextPath(params.get("next"));
+
+    setNextPath(safeNext);
 
     if (authError) {
       setError(authError);
     }
-  }, []);
+
+    if (!isSupabaseConfigured) {
+      setCheckingSession(false);
+      return;
+    }
+
+    const supabase = createClient();
+    supabase.auth
+      .getSession()
+      .then(({ data }) => {
+        if (data.session) {
+          router.replace(safeNext);
+          return;
+        }
+        setCheckingSession(false);
+      })
+      .catch(() => setCheckingSession(false));
+  }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +74,7 @@ export default function LoginPage() {
       setError(error.message);
       setLoading(false);
     } else {
-      router.push("/dashboard");
+      router.push(nextPath);
     }
   };
 
@@ -64,7 +92,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
         queryParams: {
           prompt: "select_account",
         },
@@ -96,10 +124,17 @@ export default function LoginPage() {
             <p className="text-parchment/40 text-sm">Sign in to your spiritual dashboard</p>
           </div>
 
+          {checkingSession && (
+            <div className="mb-8 flex items-center justify-center gap-3 text-parchment/40 text-sm">
+              <Loader2 className="animate-spin text-gold" size={18} />
+              Checking your session...
+            </div>
+          )}
+
           <div className="space-y-4 mb-10">
             <button 
               onClick={() => handleSocialLogin('google')}
-              disabled={loading}
+              disabled={loading || checkingSession}
               className="w-full flex items-center justify-center gap-4 py-4 gold-gradient border border-gold/20 rounded-2xl text-ink hover:scale-[1.02] transition-all font-bold shadow-lg shadow-gold/20"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Chrome size={20} />} Continue with Google
@@ -153,7 +188,7 @@ export default function LoginPage() {
             )}
 
             <button 
-              disabled={loading}
+              disabled={loading || checkingSession}
               className="w-full py-4 gold-gradient text-ink font-bold rounded-2xl hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 shadow-xl shadow-gold/20"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <>Sign In with Email <ArrowRight size={20} /></>}

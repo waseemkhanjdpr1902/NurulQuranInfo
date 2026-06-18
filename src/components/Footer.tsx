@@ -10,9 +10,11 @@ export default function Footer() {
       { name: "Hadith Library", href: "/hadith" },
       { name: "Tafseer & AI", href: "/tafseer" },
       { name: "Islamic Science", href: "/islamic-science" },
+      { name: "Islamic Finance", href: "/islamic-finance" },
     ],
     tools: [
       { name: "Supplications", href: "/dua" },
+      { name: "Halal Stocks", href: "/halal-stocks" },
       { name: "Tasbih Counter", href: "/tasbih" },
       { name: "Zakat Calculator", href: "/zakat" },
       { name: "Hajj Guide", href: "/hajj" },

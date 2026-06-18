@@ -5,6 +5,8 @@ import { Search, BookOpen, Heart, Sparkles, Menu, X, LayoutDashboard, LogIn, Boo
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { createClient, isSupabaseConfigured } from "@/services/supabase";
 
 const SEARCH_ITEMS = [
   { title: "Quran Explorer", href: "/quran", keywords: "surah ayah recitation audio tafsir" },
@@ -15,6 +17,8 @@ const SEARCH_ITEMS = [
   { title: "99 Names of Allah", href: "/names-of-allah", keywords: "asmaul husna divine names" },
   { title: "Tafseer", href: "/tafseer", keywords: "ibn kathir explanation study" },
   { title: "Zakat Calculator", href: "/zakat", keywords: "charity calculation nisab" },
+  { title: "Islamic Finance", href: "/islamic-finance", keywords: "riba halal investing zakat banking sukuk takaful" },
+  { title: "Halal Stocks", href: "/halal-stocks", keywords: "stock screener shariah watchlist investing" },
   { title: "Dawah", href: "/dawah", keywords: "islam questions outreach" },
 ];
 
@@ -24,6 +28,7 @@ export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [recentPages, setRecentPages] = useState<typeof SEARCH_ITEMS>([]);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -42,6 +47,31 @@ export default function Navbar() {
     window.localStorage.setItem("nurulquran.recentPages", JSON.stringify(updated));
   }, [pathname]);
 
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    if (!isSupabaseConfigured) return;
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setIsMobileMenuOpen(false);
+  };
+
   const searchResults = SEARCH_ITEMS.filter((item) =>
     [item.title, item.keywords].join(" ").toLowerCase().includes(search.trim().toLowerCase())
   );
@@ -50,9 +80,12 @@ export default function Navbar() {
     { name: "Quran", href: "/quran", icon: Book },
     { name: "Hadith", href: "/hadith", icon: BookOpen },
     { name: "Science", href: "/islamic-science", icon: Atom },
+    { name: "Finance", href: "/islamic-finance", icon: Landmark },
     { name: "Features", href: "/#features", icon: Sparkles },
     { name: "Tools", href: "/#tools", icon: Landmark },
   ];
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Account";
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${
@@ -102,11 +135,23 @@ export default function Navbar() {
             >
               <Search size={22} strokeWidth={1.5} />
             </button>
-            <Link href="/login" className="group relative px-7 py-3 rounded-2xl overflow-hidden glass border border-gold/20 flex items-center gap-3">
-              <div className="absolute inset-0 bg-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <LogIn size={18} className="text-gold group-hover:text-ink transition-colors relative z-10" />
-              <span className="text-gold group-hover:text-ink transition-colors text-xs font-bold uppercase tracking-widest relative z-10">Join</span>
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <Link href="/dashboard" className="group relative px-5 py-3 rounded-2xl overflow-hidden glass border border-gold/20 flex items-center gap-3">
+                  <LayoutDashboard size={18} className="text-gold relative z-10" />
+                  <span className="text-gold text-xs font-bold uppercase tracking-widest relative z-10 max-w-28 truncate">{displayName}</span>
+                </Link>
+                <button onClick={handleLogout} className="text-parchment/40 hover:text-red-400 transition-colors text-[10px] font-bold uppercase tracking-widest">
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <Link href="/login" className="group relative px-7 py-3 rounded-2xl overflow-hidden glass border border-gold/20 flex items-center gap-3">
+                <div className="absolute inset-0 bg-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <LogIn size={18} className="text-gold group-hover:text-ink transition-colors relative z-10" />
+                <span className="text-gold group-hover:text-ink transition-colors text-xs font-bold uppercase tracking-widest relative z-10">Join</span>
+              </Link>
+            )}
           </div>
         </div>
 
@@ -147,9 +192,20 @@ export default function Navbar() {
                 ))}
               </div>
               <div className="h-px bg-white/5" />
-              <Link href="/login" className="w-full py-5 rounded-3xl gold-gradient text-ink font-bold flex items-center justify-center gap-2 shadow-xl shadow-gold/20">
-                <LogIn size={20} /> Sign In
-              </Link>
+              {user ? (
+                <div className="space-y-4">
+                  <Link href="/dashboard" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-5 rounded-3xl gold-gradient text-ink font-bold flex items-center justify-center gap-2 shadow-xl shadow-gold/20">
+                    <LayoutDashboard size={20} /> {displayName}
+                  </Link>
+                  <button onClick={handleLogout} className="w-full py-4 rounded-3xl glass text-red-400 font-bold">
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)} className="w-full py-5 rounded-3xl gold-gradient text-ink font-bold flex items-center justify-center gap-2 shadow-xl shadow-gold/20">
+                  <LogIn size={20} /> Sign In
+                </Link>
+              )}
             </div>
           </motion.div>
         )}
