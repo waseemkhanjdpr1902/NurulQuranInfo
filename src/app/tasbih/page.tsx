@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { RotateCcw, Zap, Sparkles, ChevronRight } from "lucide-react";
+import { RotateCcw, Save, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -16,6 +16,22 @@ export default function TasbihPage() {
   const [count, setCount] = useState(0);
   const [activeRemembrance, setActiveRemembrance] = useState(0);
   const [totalCount, setTotalCount] = useState(0);
+  const [history, setHistory] = useState<{ name: string; count: number; savedAt: string }[]>([]);
+  const [hydrated, setHydrated] = useState(false);
+
+  useEffect(() => {
+    setCount(Number(window.localStorage.getItem("tasbih.sessionCount") || 0));
+    setTotalCount(Number(window.localStorage.getItem("tasbih.totalCount") || 0));
+    setHistory(JSON.parse(window.localStorage.getItem("tasbih.history") || "[]"));
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    window.localStorage.setItem("tasbih.sessionCount", String(count));
+    window.localStorage.setItem("tasbih.totalCount", String(totalCount));
+    window.localStorage.setItem("tasbih.history", JSON.stringify(history.slice(0, 10)));
+  }, [count, totalCount, history, hydrated]);
 
   const increment = useCallback(() => {
     setCount(prev => prev + 1);
@@ -27,22 +43,37 @@ export default function TasbihPage() {
     }
   }, []);
 
+  const saveSession = () => {
+    if (count === 0) return;
+    setHistory((current) => [
+      {
+        name: REMEMBRANCES[activeRemembrance].en,
+        count,
+        savedAt: new Date().toISOString(),
+      },
+      ...current,
+    ].slice(0, 10));
+  };
+
   const reset = () => {
+    saveSession();
     setCount(0);
   };
 
   const nextDhikir = () => {
+    saveSession();
     setActiveRemembrance((prev) => (prev + 1) % REMEMBRANCES.length);
     setCount(0);
   };
 
   const current = REMEMBRANCES[activeRemembrance];
+  const progress = Math.min((count / current.target) * 100, 100);
 
   return (
-    <main className="min-h-screen bg-ink" onClick={increment}>
+    <main className="min-h-screen bg-ink">
       <Navbar />
       
-      <div className="pt-40 pb-24 px-6 max-w-7xl mx-auto flex flex-col items-center min-h-[80vh] cursor-pointer touch-none select-none">
+      <div className="pt-40 pb-24 px-6 max-w-7xl mx-auto flex flex-col items-center min-h-[80vh] select-none">
         <div className="text-center mb-20 pointer-events-none">
           <motion.h1 className="text-4xl md:text-6xl font-display text-parchment/40 mb-6">Digital <span className="text-gold italic">Tasbih</span></motion.h1>
           <div className="flex items-center justify-center gap-4 text-gold/30 font-mono text-xs uppercase tracking-widest">
@@ -52,7 +83,12 @@ export default function TasbihPage() {
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center gap-12 pointer-events-none">
+        <button
+          type="button"
+          onClick={increment}
+          aria-label={`Count ${current.en}`}
+          className="flex-1 w-full flex flex-col items-center justify-center gap-12 cursor-pointer rounded-[48px] focus:outline-none focus:ring-2 focus:ring-gold/40"
+        >
           <AnimatePresence mode="wait">
             <motion.div 
               key={activeRemembrance}
@@ -64,6 +100,9 @@ export default function TasbihPage() {
               <p className="text-5xl md:text-8xl font-arabic text-gold mb-6">{current.ar}</p>
               <h2 className="text-2xl font-bold text-parchment mb-2">{current.en}</h2>
               <p className="text-parchment/40 text-sm italic">{current.mean}</p>
+              <p className="text-gold/40 text-[10px] uppercase tracking-[0.3em] font-bold mt-4">
+                Target {current.target}
+              </p>
             </motion.div>
           </AnimatePresence>
 
@@ -78,12 +117,23 @@ export default function TasbihPage() {
             </motion.div>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gold/5 blur-[100px] rounded-full -z-10" />
           </div>
-        </div>
+          <div className="w-full max-w-sm h-2 rounded-full bg-white/5 overflow-hidden">
+            <div className="h-full bg-gold transition-all duration-300" style={{ width: `${progress}%` }} />
+          </div>
+        </button>
 
         {/* Controls */}
         <div className="flex items-center gap-8 pb-20 relative z-20" onClick={(e) => e.stopPropagation()}>
+          <button
+            onClick={saveSession}
+            aria-label="Save current tasbih session"
+            className="w-16 h-16 glass rounded-full flex items-center justify-center text-parchment/30 hover:text-gold transition-all"
+          >
+            <Save size={24} />
+          </button>
           <button 
             onClick={reset}
+            aria-label="Reset tasbih counter"
             className="w-16 h-16 glass rounded-full flex items-center justify-center text-parchment/30 hover:text-gold transition-all"
           >
             <RotateCcw size={24} />
@@ -93,11 +143,25 @@ export default function TasbihPage() {
             onClick={nextDhikir}
             className="px-8 py-4 glass text-gold font-bold text-xs uppercase tracking-widest rounded-2xl flex items-center gap-3 hover:bg-gold/10 transition-all"
           >
-            Switch Dhikikr <ChevronRight size={18} />
+            Switch Dhikr <ChevronRight size={18} />
           </button>
         </div>
 
-        <p className="text-parchment/10 text-[10px] uppercase tracking-[0.5em] font-bold pb-10 pointer-events-none">Tap anywhere to count</p>
+        {history.length > 0 && (
+          <div className="w-full max-w-2xl glass p-6 rounded-[32px] border-white/5 mb-10">
+            <h3 className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold mb-4">Saved History</h3>
+            <div className="space-y-3">
+              {history.slice(0, 5).map((item, index) => (
+                <div key={`${item.savedAt}-${index}`} className="flex items-center justify-between text-sm">
+                  <span className="text-parchment/60">{item.name}</span>
+                  <span className="text-gold font-mono">{item.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <p className="text-parchment/10 text-[10px] uppercase tracking-[0.5em] font-bold pb-10 pointer-events-none">Tap the counter area to count</p>
       </div>
 
       <Footer />

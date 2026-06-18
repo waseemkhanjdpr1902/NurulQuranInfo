@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Play, Pause, SkipForward, SkipBack, Volume2, BookOpen, Info, Loader2, CheckCircle2, Copy, Share2, X, Heart, Sparkles } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, Volume2, BookOpen, Info, Loader2, CheckCircle2, Copy, Share2, X, Heart, Sparkles, Search } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -33,6 +33,14 @@ const RECITERS = [
   { id: "ar.parhizgar", name: "Shahriar Parhizgar" },
 ];
 
+function sanitizeTafsirHtml(html: string) {
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/\son\w+="[^"]*"/gi, "")
+    .replace(/\son\w+='[^']*'/gi, "")
+    .replace(/javascript:/gi, "");
+}
+
 interface Surah {
   number: number;
   name: string;
@@ -58,6 +66,11 @@ export default function QuranReader({
   const router = useRouter();
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+  const [verseSearch, setVerseSearch] = useState("");
+  const [arabicSize, setArabicSize] = useState(1);
+  const [translationSize, setTranslationSize] = useState(1);
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [reciterId, setReciterId] = useState("ar.alafasy");
   const [playingVerseId, setPlayingVerseId] = useState<number | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -73,6 +86,21 @@ export default function QuranReader({
   const [loadingHadith, setLoadingHadith] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
+
+  useEffect(() => {
+    const stored = JSON.parse(window.localStorage.getItem("nurulquran.readingPreferences") || "{}");
+    if (typeof stored.arabicSize === "number") setArabicSize(stored.arabicSize);
+    if (typeof stored.translationSize === "number") setTranslationSize(stored.translationSize);
+    setPreferencesLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!preferencesLoaded) return;
+    window.localStorage.setItem(
+      "nurulquran.readingPreferences",
+      JSON.stringify({ arabicSize, translationSize })
+    );
+  }, [arabicSize, translationSize, preferencesLoaded]);
 
   const fetchTafsir = async (verse: Verse) => {
     setLoadingTafsir(true);
@@ -187,6 +215,7 @@ export default function QuranReader({
   useEffect(() => {
     const fetchVerses = async () => {
       setLoading(true);
+      setFetchError(null);
       try {
         const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,${reciterId}`);
         if (!res.ok) throw new Error("Failed to fetch verses");
@@ -213,6 +242,7 @@ export default function QuranReader({
         setVerses(combinedVerses);
       } catch (error) {
         console.error("Error fetching verses:", error);
+        setFetchError("Unable to load this Surah right now. Please check your connection and try again.");
       } finally {
         setLoading(false);
       }
@@ -283,14 +313,71 @@ export default function QuranReader({
         text: `Read and listen to Surah ${surah.englishName} on NurulQuran`,
         url: window.location.href,
       });
+      return;
     }
+    navigator.clipboard.writeText(window.location.href);
+    setShowCopyToast(true);
+    setTimeout(() => setShowCopyToast(false), 2000);
   };
+
+  const displayedVerses = verses.filter((verse) => {
+    const term = verseSearch.trim().toLowerCase();
+    if (!term) return true;
+    return (
+      verse.text_uthmani.includes(term) ||
+      verse.translation.toLowerCase().includes(term) ||
+      String(verse.verse_number) === term
+    );
+  });
+
+  useEffect(() => {
+    const activeVerse = verses.find((verse) => verse.id === playingVerseId);
+    const slug = surah.englishName.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+    window.localStorage.setItem(
+      "nurulquran.continueReading",
+      JSON.stringify({
+        title: `Surah ${surah.englishName}`,
+        href: `/quran/${slug}`,
+        verse: activeVerse?.verse_number || 1,
+        updatedAt: new Date().toISOString(),
+      })
+    );
+  }, [playingVerseId, surah.englishName, verses]);
 
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-6">
         <Loader2 className="text-gold animate-spin" size={48} />
         <p className="text-parchment/40 font-display text-xl">Loading verses...</p>
+      </div>
+
+      <div className="relative mb-12">
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-parchment/20" size={20} />
+        <input
+          aria-label={`Search inside Surah ${surah.englishName}`}
+          value={verseSearch}
+          onChange={(event) => setVerseSearch(event.target.value)}
+          placeholder="Search within this Surah by verse, Arabic, or translation..."
+          className="w-full pl-16 pr-6 py-5 glass rounded-[32px] text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-colors"
+        />
+      </div>
+
+      <div className="glass p-5 rounded-[28px] border-white/5 mb-12 flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <p className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold">Reading Preferences</p>
+        <div className="flex flex-wrap gap-3">
+          <button onClick={() => setArabicSize((value) => Math.max(0.85, value - 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Arabic -
+          </button>
+          <button onClick={() => setArabicSize((value) => Math.min(1.3, value + 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Arabic +
+          </button>
+          <button onClick={() => setTranslationSize((value) => Math.max(0.9, value - 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Translation -
+          </button>
+          <button onClick={() => setTranslationSize((value) => Math.min(1.25, value + 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Translation +
+          </button>
+        </div>
       </div>
     );
   }
@@ -319,6 +406,7 @@ export default function QuranReader({
         
         <div className="flex items-center gap-4">
           <button 
+            aria-label={isAudioPlaying ? "Stop recitation" : "Play full Surah"}
             onClick={() => {
               if (verses.length > 0) {
                 if (isAudioPlaying && playingVerseId !== null) {
@@ -335,6 +423,7 @@ export default function QuranReader({
             {isAudioPlaying ? 'Stop Recitation' : 'Play All'}
           </button>
           <button 
+            aria-label={`Share Surah ${surah.englishName}`}
             onClick={shareSurah}
             className="px-6 py-3 glass rounded-2xl text-parchment/60 text-[10px] font-bold uppercase tracking-widest hover:text-gold transition-all flex items-center gap-2"
           >
@@ -344,8 +433,14 @@ export default function QuranReader({
       </div>
 
       {/* Verses List */}
+      {fetchError && (
+        <div className="glass p-8 rounded-[32px] border-red-500/20 text-center mb-12">
+          <p className="text-red-400">{fetchError}</p>
+        </div>
+      )}
+
       <div className="space-y-16 mb-40">
-        {verses.map((verse) => (
+        {displayedVerses.map((verse) => (
           <motion.div 
             key={verse.id} 
             id={`verse-${verse.verse_number}`}
@@ -359,16 +454,17 @@ export default function QuranReader({
             </div>
             <div className="text-right mb-8">
               <p className="text-3xl md:text-6xl font-arabic text-parchment leading-[2.2] text-right selection:bg-gold/40">
-                {verse.text_uthmani}
+                <span style={{ fontSize: `${arabicSize}em` }}>{verse.text_uthmani}</span>
               </p>
             </div>
             <div className="pl-6 md:pl-8 border-l-2 border-gold/10 group-hover:border-gold/30 transition-colors">
-              <p className="text-parchment/70 text-lg md:text-xl leading-relaxed font-light">
+              <p className="text-parchment/70 text-lg md:text-xl leading-relaxed font-light" style={{ fontSize: `${translationSize}em` }}>
                 {verse.translation}
               </p>
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
               <button 
+                aria-label={`Play verse ${verse.verse_number}`}
                 onClick={() => playVerse(verse)}
                 className={`flex items-center gap-2 transition-colors text-[10px] uppercase tracking-widest ${playingVerseId === verse.id && isAudioPlaying ? 'text-gold' : 'text-parchment/30 hover:text-gold'}`}
               >
@@ -376,12 +472,14 @@ export default function QuranReader({
                 {playingVerseId === verse.id && isAudioPlaying ? 'Playing' : 'Play Verse'}
               </button>
               <button 
+                aria-label={`Copy verse ${verse.verse_number}`}
                 onClick={() => copyVerse(verse)}
                 className="flex items-center gap-2 text-parchment/30 hover:text-gold transition-colors text-[10px] uppercase tracking-widest"
               >
                 <Copy size={14} /> Copy
               </button>
               <button 
+                aria-label={`Open tafsir for verse ${verse.verse_number}`}
                 onClick={() => fetchTafsir(verse)}
                 className="flex items-center gap-2 text-parchment/30 hover:text-gold transition-colors text-[10px] uppercase tracking-widest"
               >
@@ -391,6 +489,12 @@ export default function QuranReader({
           </motion.div>
         ))}
       </div>
+
+      {displayedVerses.length === 0 && (
+        <div className="text-center py-24">
+          <p className="text-parchment/30 font-display text-2xl">No verses match your search.</p>
+        </div>
+      )}
 
       {/* Persistent Audio Player */}
       <AudioPlayer 
@@ -443,6 +547,7 @@ export default function QuranReader({
               className="relative w-full max-w-3xl glass p-8 md:p-12 rounded-[40px] border-gold/20 shadow-2xl max-h-[85vh] flex flex-col"
             >
               <button 
+                aria-label="Close study modal"
                 onClick={() => {
                   setSelectedTafsir(null);
                   setTafsirContent(null);
@@ -497,7 +602,7 @@ export default function QuranReader({
                           <p className="text-gold/40 text-[10px] uppercase tracking-widest mb-6">Authoritative Commentary: Ibn Kathir</p>
                           <div 
                             className="text-parchment/70 leading-relaxed space-y-4 tafsir-content text-sm md:text-base"
-                            dangerouslySetInnerHTML={{ __html: tafsirContent || "" }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeTafsirHtml(tafsirContent || "") }}
                           />
                         </div>
                       )

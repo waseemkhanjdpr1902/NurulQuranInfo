@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { Clock, MapPin, Compass, Loader2, Sun, Moon, Sunrise, Sunset, CloudSun } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -35,6 +35,15 @@ export default function PrayerTimesPage() {
   const [error, setError] = useState<string | null>(null);
   const [qiblaAngle, setQiblaAngle] = useState<number | null>(null);
   const [compassHeading, setCompassHeading] = useState(0);
+  const [compassActive, setCompassActive] = useState(false);
+  const [qiblaError, setQiblaError] = useState<string | null>(null);
+  const [now, setNow] = useState(() => new Date());
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const calculateQibla = useCallback((lat: number, lng: number) => {
     const phi1 = lat * (Math.PI / 180);
@@ -50,33 +59,50 @@ export default function PrayerTimesPage() {
     setQiblaAngle((qibla + 360) % 360);
   }, []);
 
+  const handleOrientation = useCallback((event: DeviceOrientationEvent) => {
+    const safariHeading = (event as DeviceOrientationEvent & { webkitCompassHeading?: number }).webkitCompassHeading;
+    const heading = typeof safariHeading === "number" ? safariHeading : event.alpha || 0;
+    setCompassHeading(heading);
+  }, []);
+
+  useEffect(() => {
+    if (!compassActive) return;
+    window.addEventListener("deviceorientation", handleOrientation);
+    return () => window.removeEventListener("deviceorientation", handleOrientation);
+  }, [compassActive, handleOrientation]);
+
   const startCompass = () => {
+    setQiblaError(null);
     if (typeof window !== "undefined" && "DeviceOrientationEvent" in window) {
       // Request permission for iOS 13+
       if ((DeviceOrientationEvent as any).requestPermission) {
         (DeviceOrientationEvent as any).requestPermission()
           .then((response: string) => {
             if (response === "granted") {
-              window.addEventListener("deviceorientation", handleOrientation);
+              setCompassActive(true);
+            } else {
+              setQiblaError("Compass permission was denied.");
             }
           })
-          .catch(console.error);
+          .catch(() => setQiblaError("Unable to start the compass on this device."));
       } else {
-        window.addEventListener("deviceorientation", handleOrientation);
+        setCompassActive(true);
       }
+    } else {
+      setQiblaError("Device compass is not supported in this browser.");
     }
 
     // Get location for Qibla calculation
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        calculateQibla(pos.coords.latitude, pos.coords.longitude);
-      });
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          calculateQibla(pos.coords.latitude, pos.coords.longitude);
+        },
+        () => setQiblaError("Location permission is needed to calculate Qibla direction.")
+      );
+    } else {
+      setQiblaError("Geolocation is not supported by your browser.");
     }
-  };
-
-  const handleOrientation = (e: DeviceOrientationEvent) => {
-    const heading = e.alpha || 0;
-    setCompassHeading(heading);
   };
 
   useEffect(() => {
@@ -88,7 +114,7 @@ export default function PrayerTimesPage() {
         if (location.lat && location.lng) {
           url = `https://api.aladhan.com/v1/timings?latitude=${location.lat}&longitude=${location.lng}&method=2`;
         } else {
-          url = `https://api.aladhan.com/v1/timingsByCity?city=${location.city}&country=${location.country}&method=2`;
+          url = `https://api.aladhan.com/v1/timingsByCity?city=${encodeURIComponent(location.city)}&country=${encodeURIComponent(location.country || "United Kingdom")}&method=2`;
         }
         
         const res = await fetch(url);
@@ -141,10 +167,33 @@ export default function PrayerTimesPage() {
     }
   }, [calculateQibla]);
 
-  useEffect(() => {
-    // Attempt auto-detection on mount
-    detectLocation();
-  }, [detectLocation]);
+  const updateManualLocation = () => {
+    const [cityPart, countryPart] = inputValue.split(",").map((part) => part.trim());
+    if (!cityPart) return;
+    setLocation({
+      city: cityPart,
+      country: countryPart || location.country || "United Kingdom",
+      lat: undefined,
+      lng: undefined,
+    });
+  };
+
+  const prayerEntries = times
+    ? Object.entries(times).filter(([key]) => prayerIcons[key])
+    : [];
+
+  const nextPrayer = prayerEntries.reduce<{ name: string; time: string; date: Date } | null>((next, [name, time]) => {
+    const [hours, minutes] = time.split(":").map(Number);
+    const date = new Date(now);
+    date.setHours(hours, minutes, 0, 0);
+    if (date <= now) date.setDate(date.getDate() + 1);
+    if (!next || date < next.date) return { name, time, date };
+    return next;
+  }, null);
+
+  const countdown = nextPrayer
+    ? new Date(nextPrayer.date.getTime() - now.getTime()).toISOString().slice(11, 19)
+    : null;
 
   return (
     <main className="min-h-screen bg-ink">
@@ -184,14 +233,14 @@ export default function PrayerTimesPage() {
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
-                  setLocation({ city: inputValue, country: "", lat: undefined, lng: undefined });
+                  updateManualLocation();
                 }
               }}
               className="w-full px-8 py-5 glass rounded-[32px] text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-colors"
             />
           </div>
           <button 
-            onClick={() => setLocation({ city: inputValue, country: "", lat: undefined, lng: undefined })}
+            onClick={updateManualLocation}
             className="px-8 py-5 gold-gradient text-ink font-bold rounded-[32px] hover:scale-105 transition-transform shadow-lg shadow-gold/20"
           >
             Update
@@ -206,6 +255,15 @@ export default function PrayerTimesPage() {
           </button>
         </div>
 
+        {nextPrayer && (
+          <div className="max-w-3xl mx-auto glass p-8 rounded-[40px] border-gold/10 mb-16 text-center">
+            <p className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold mb-3">Next Prayer</p>
+            <h2 className="text-4xl font-display text-parchment mb-2">{nextPrayer.name}</h2>
+            <p className="text-parchment/40 font-mono text-sm mb-4">{nextPrayer.time}</p>
+            <p className="text-gold font-mono text-3xl">{countdown}</p>
+          </div>
+        )}
+
         {/* Times Grid */}
         {loading ? (
           <div className="flex flex-col items-center justify-center py-32 gap-6">
@@ -214,7 +272,7 @@ export default function PrayerTimesPage() {
           </div>
         ) : times ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Object.entries(times).filter(([key]) => prayerIcons[key]).map(([name, time], i) => (
+            {prayerEntries.map(([name, time], i) => (
               <motion.div
                 key={name}
                 initial={{ opacity: 0, y: 20 }}
@@ -226,12 +284,20 @@ export default function PrayerTimesPage() {
                   <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-gold group-hover:bg-gold group-hover:text-ink transition-all">
                     {prayerIcons[name]}
                   </div>
-                  <span className="text-gold/30 font-mono text-xs uppercase tracking-widest">Upcoming</span>
+                  <span className={`font-mono text-xs uppercase tracking-widest ${nextPrayer?.name === name ? "text-gold" : "text-gold/30"}`}>
+                    {nextPrayer?.name === name ? "Next" : "Today"}
+                  </span>
                 </div>
                 <h3 className="text-3xl font-display text-parchment mb-2">{name}</h3>
                 <p className="text-5xl font-mono text-gold mb-8">{time}</p>
-                <button className="w-full py-4 glass rounded-2xl text-parchment/40 text-[10px] font-bold uppercase tracking-widest hover:text-gold hover:bg-white/10 transition-all">
-                  Set Notification
+                <button
+                  onClick={() => {
+                    setNotificationMessage("Prayer notifications will be available after browser notification setup is enabled.");
+                    window.setTimeout(() => setNotificationMessage(null), 2500);
+                  }}
+                  className="w-full py-4 glass rounded-2xl text-parchment/40 text-[10px] font-bold uppercase tracking-widest hover:text-gold hover:bg-white/10 transition-all"
+                >
+                  Notification Soon
                 </button>
               </motion.div>
             ))}
@@ -269,6 +335,9 @@ export default function PrayerTimesPage() {
               Find the direction of the Kaaba from your current location using our 
               real-time digital compass.
             </p>
+            {qiblaError && (
+              <p className="text-red-400 text-sm mb-8">{qiblaError}</p>
+            )}
             <button 
               onClick={startCompass}
               className="px-12 py-5 gold-gradient text-ink font-bold rounded-full hover:scale-105 transition-transform shadow-xl shadow-gold/20"
@@ -278,6 +347,12 @@ export default function PrayerTimesPage() {
           </div>
         </div>
       </div>
+
+      {notificationMessage && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 px-5 py-3 rounded-full bg-gold text-ink text-xs font-bold shadow-2xl z-50">
+          {notificationMessage}
+        </div>
+      )}
 
       <Footer />
     </main>

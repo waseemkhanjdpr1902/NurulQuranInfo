@@ -50,7 +50,24 @@ export default function DashboardPage() {
     router.push("/");
   };
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-ink">
+        <Navbar />
+        <div className="pt-40 pb-24 px-6 max-w-5xl mx-auto">
+          <div className="glass p-10 rounded-[40px] border-white/5 animate-pulse">
+            <div className="h-8 w-1/3 bg-white/10 rounded-full mb-6" />
+            <div className="h-4 w-2/3 bg-white/5 rounded-full mb-10" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="h-32 rounded-[28px] bg-white/5" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-ink">

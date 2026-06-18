@@ -18,12 +18,12 @@ export default function HomeSections() {
     },
     {
       title: "Multi-Reciter Audio",
-      desc: "Listen to the Quran in beautiful voices from 10 world-renowned reciters.",
+      desc: "Listen to the Quran in beautiful voices from 16 world-renowned reciters.",
       icon: <Zap className="text-gold" />
     },
     {
       title: "Authentic Library",
-      desc: "Browse 30,000+ verified hadiths from Sahih Bukhari and other major collections.",
+      desc: "Browse selected hadiths from Sahih Bukhari, Sahih Muslim, and other major collections.",
       icon: <Shield className="text-gold" />
     }
   ];
@@ -50,7 +50,7 @@ export default function HomeSections() {
     },
     { 
       q: "Can I use it offline?", 
-      a: "The Quran text is cached for basic offline reading, but audio recitation and AI features require an active internet connection." 
+      a: "Core pages are lightweight, but Quran audio, prayer times, hadith data, and AI study currently require an active internet connection."
     }
   ];
 
@@ -151,9 +151,9 @@ export default function HomeSections() {
               <div className="px-12 py-6 gold-gradient text-ink font-bold rounded-2xl">
                 Always $0 / mo
               </div>
-              <button className="px-12 py-6 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
+              <a href="mailto:support@nurulquran.info?subject=Support%20NurulQuran" className="px-12 py-6 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
                 Support our Mission
-              </button>
+              </a>
             </div>
             <p className="mt-12 text-[10px] text-parchment/20 uppercase tracking-[0.3em] font-bold">
               Join 10,000+ users worldwide

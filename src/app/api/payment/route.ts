@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { createClient } from "@/utils/supabase/server";
 
 let razorpay: Razorpay | null = null;
 
@@ -17,13 +18,31 @@ function getRazorpay() {
 
 export async function POST(req: Request) {
   try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      return NextResponse.json({ error: "Payments require authentication setup." }, { status: 503 });
+    }
+
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Authentication required." }, { status: 401 });
+    }
+
     const { amount } = await req.json();
+    const numericAmount = Number(amount);
+
+    if (!Number.isFinite(numericAmount) || numericAmount < 10 || numericAmount > 100000) {
+      return NextResponse.json({ error: "Amount must be between 10 and 100000 INR." }, { status: 400 });
+    }
 
     const rzp = getRazorpay();
     const options = {
-      amount: amount * 100, // amount in smallest currency unit (paise)
+      amount: Math.round(numericAmount * 100), // amount in smallest currency unit (paise)
       currency: "INR",
-      receipt: `receipt_${Date.now()}`,
+      receipt: `receipt_${user.id}_${Date.now()}`.slice(0, 40),
     };
 
     const order = await rzp.orders.create(options);

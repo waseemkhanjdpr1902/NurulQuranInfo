@@ -7,12 +7,8 @@ import {
   MessageCircle, Info, Quote, CheckCircle2, X,
   ArrowRight, Globe, Shield, Heart
 } from "lucide-react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-// Initialize Gemini
-const ai = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
 
 const DAWAH_CONCEPTS = [
   {
@@ -82,13 +78,24 @@ export default function DawahPage() {
     setIsLoading(true);
 
     try {
-      const model = ai.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are a wise and kind Dawah companion. Answer questions about Islam with wisdom, evidence from Quran and Sunnah, and a gentle tone. Keep responses scannable and profound."
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: "dawah",
+          prompt: userMessage,
+        }),
       });
 
-      const response = await model.generateContent(userMessage);
-      const aiContent = response.response.text() || "I apologize, I'm having trouble processing that right now. Please try again.";
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Dawah assistant request failed");
+      }
+
+      const aiContent = data?.text || "I apologize, I'm having trouble processing that right now. Please try again.";
       setMessages(prev => [...prev, { role: 'ai', content: aiContent }]);
     } catch (error) {
       console.error("Gemini Error:", error);
@@ -208,6 +215,7 @@ export default function DawahPage() {
                     className="w-full pl-6 pr-16 py-4 bg-white/5 border border-white/10 rounded-2xl text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-all"
                   />
                   <button 
+                    aria-label="Send dawah question"
                     onClick={handleSendMessage}
                     disabled={isLoading || !input.trim()}
                     className="absolute right-2 top-2 w-12 h-12 gold-gradient rounded-xl flex items-center justify-center text-ink hover:scale-95 active:scale-90 transition-all disabled:opacity-50"
@@ -276,12 +284,12 @@ export default function DawahPage() {
             we are here to support your spiritual growth.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="px-10 py-5 gold-gradient text-ink font-bold rounded-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3">
+            <a href="mailto:support@nurulquran.info?subject=Request%20Islam%20Info%20Materials" className="px-10 py-5 gold-gradient text-ink font-bold rounded-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3">
               Request Info Materials <ArrowRight size={20} />
-            </button>
-            <button className="px-10 py-5 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
+            </a>
+            <a href="mailto:support@nurulquran.info?subject=Talk%20to%20an%20Imam" className="px-10 py-5 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
               Talk to an Imam
-            </button>
+            </a>
           </div>
         </div>
       </section>

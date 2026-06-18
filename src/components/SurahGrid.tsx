@@ -2,13 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { motion } from "motion/react";
-import { Search, Loader2 } from "lucide-react";
+import { Search, Loader2, BookOpen } from "lucide-react";
+import Link from "next/link";
 import QuranCard from "@/components/QuranCard/QuranCard";
 
 export default function SurahGrid() {
   const [search, setSearch] = useState("");
   const [surahs, setSurahs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [continueReading, setContinueReading] = useState<{ title: string; href: string; verse: number } | null>(null);
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("nurulquran.continueReading");
+    if (stored) setContinueReading(JSON.parse(stored));
+  }, []);
 
   useEffect(() => {
     const fetchSurahs = async () => {
@@ -80,6 +87,24 @@ export default function SurahGrid() {
           />
         </div>
       </div>
+
+      {continueReading && (
+        <Link
+          href={continueReading.href}
+          className="mb-12 glass p-6 rounded-[32px] border-gold/10 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-gold/5 transition-colors"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl gold-gradient text-ink flex items-center justify-center">
+              <BookOpen size={22} />
+            </div>
+            <div>
+              <p className="text-gold text-[10px] uppercase tracking-[0.25em] font-bold mb-1">Continue Reading</p>
+              <h3 className="text-parchment font-display text-2xl">{continueReading.title}</h3>
+            </div>
+          </div>
+          <span className="text-parchment/40 text-sm">Last opened near verse {continueReading.verse}</span>
+        </Link>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredSurahs.map((surah) => (

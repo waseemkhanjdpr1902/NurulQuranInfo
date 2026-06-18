@@ -4,16 +4,47 @@ import { useState, useEffect } from "react";
 import { Search, BookOpen, Heart, Sparkles, Menu, X, LayoutDashboard, LogIn, Book, TrendingUp, Landmark, Clock, MapPin, Globe, Compass, Atom } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const SEARCH_ITEMS = [
+  { title: "Quran Explorer", href: "/quran", keywords: "surah ayah recitation audio tafsir" },
+  { title: "Hadith Library", href: "/hadith", keywords: "sunnah bukhari muslim tradition" },
+  { title: "Dua & Adhkar", href: "/dua", keywords: "supplication morning evening protection" },
+  { title: "Prayer Times", href: "/prayer-times", keywords: "salah qibla compass location" },
+  { title: "Tasbih Counter", href: "/tasbih", keywords: "dhikr counter remembrance" },
+  { title: "99 Names of Allah", href: "/names-of-allah", keywords: "asmaul husna divine names" },
+  { title: "Tafseer", href: "/tafseer", keywords: "ibn kathir explanation study" },
+  { title: "Zakat Calculator", href: "/zakat", keywords: "charity calculation nisab" },
+  { title: "Dawah", href: "/dawah", keywords: "islam questions outreach" },
+];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [recentPages, setRecentPages] = useState<typeof SEARCH_ITEMS>([]);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    const stored = JSON.parse(window.localStorage.getItem("nurulquran.recentPages") || "[]") as typeof SEARCH_ITEMS;
+    const current = SEARCH_ITEMS.find((item) => item.href === pathname);
+    const updated = current
+      ? [current, ...stored.filter((item) => item.href !== current.href)].slice(0, 5)
+      : stored;
+    setRecentPages(updated);
+    window.localStorage.setItem("nurulquran.recentPages", JSON.stringify(updated));
+  }, [pathname]);
+
+  const searchResults = SEARCH_ITEMS.filter((item) =>
+    [item.title, item.keywords].join(" ").toLowerCase().includes(search.trim().toLowerCase())
+  );
 
   const navLinks = [
     { name: "Quran", href: "/quran", icon: Book },
@@ -64,7 +95,11 @@ export default function Navbar() {
           <div className="h-8 w-px bg-white/10" />
           
           <div className="flex items-center gap-6">
-            <button className="text-parchment/40 hover:text-gold transition-colors">
+            <button
+              aria-label="Open global search"
+              onClick={() => setIsSearchOpen(true)}
+              className="text-parchment/40 hover:text-gold transition-colors"
+            >
               <Search size={22} strokeWidth={1.5} />
             </button>
             <Link href="/login" className="group relative px-7 py-3 rounded-2xl overflow-hidden glass border border-gold/20 flex items-center gap-3">
@@ -78,6 +113,8 @@ export default function Navbar() {
         {/* Mobile Toggle */}
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+          aria-label="Toggle navigation menu"
+          aria-expanded={isMobileMenuOpen}
           className="lg:hidden w-12 h-12 glass rounded-2xl flex items-center justify-center text-parchment hover:text-gold transition-colors"
         >
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -115,6 +152,60 @@ export default function Navbar() {
               </Link>
             </div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isSearchOpen && (
+          <div className="fixed inset-0 z-[120] flex items-start justify-center px-6 pt-28">
+            <motion.button
+              aria-label="Close global search"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSearchOpen(false)}
+              className="absolute inset-0 bg-ink/80 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -20, scale: 0.98 }}
+              className="relative w-full max-w-2xl glass-card rounded-[36px] p-6 shadow-2xl"
+            >
+              <div className="relative mb-6">
+                <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-parchment/20" size={20} />
+                <input
+                  autoFocus
+                  aria-label="Search NurulQuran"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search Quran, duas, prayer times, tasbih..."
+                  className="w-full pl-14 pr-12 py-5 bg-white/5 border border-white/10 rounded-3xl text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50"
+                />
+                <button
+                  aria-label="Close search"
+                  onClick={() => setIsSearchOpen(false)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-parchment/30 hover:text-gold"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {(search.trim() ? searchResults : recentPages.length ? recentPages : SEARCH_ITEMS.slice(0, 5)).map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    onClick={() => setIsSearchOpen(false)}
+                    className="block p-4 rounded-2xl bg-white/5 hover:bg-gold/10 transition-colors"
+                  >
+                    <span className="text-parchment font-bold">{item.title}</span>
+                    <span className="block text-parchment/30 text-xs mt-1">{item.href}</span>
+                  </Link>
+                ))}
+              </div>
+            </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </nav>
