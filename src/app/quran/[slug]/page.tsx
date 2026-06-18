@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import QuranReader from "@/components/QuranReader";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
@@ -41,6 +42,35 @@ async function getSurahData(slug: string) {
     console.error("Error fetching surah data:", error);
     return null;
   }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const surah = await getSurahData(slug);
+
+  if (!surah) {
+    return {
+      title: "Surah Not Found",
+    };
+  }
+
+  return {
+    title: `Surah ${surah.englishName} (${surah.name})`,
+    description: `Read Surah ${surah.englishName}, ${surah.englishNameTranslation}, with Arabic text, English translation, tafsir study, and working audio recitation.`,
+    alternates: {
+      canonical: `/quran/${slug}`,
+    },
+    openGraph: {
+      title: `Surah ${surah.englishName} | NurulQuran.info`,
+      description: `Read and listen to Surah ${surah.englishName} on NurulQuran.info.`,
+      url: `/quran/${slug}`,
+      type: "article",
+    },
+  };
 }
 
 export default async function SurahPage({ 

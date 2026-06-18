@@ -7,6 +7,7 @@ const nextConfig = {
       { protocol: "https", hostname: "cdn.islamic.network" },
       { protocol: "https", hostname: "picsum.photos" },
       { protocol: "https", hostname: "api.alquran.cloud" },
+      { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
   },
   eslint: {

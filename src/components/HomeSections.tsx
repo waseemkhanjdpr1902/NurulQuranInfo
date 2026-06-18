@@ -8,6 +8,9 @@ import {
   Compass, Atom, MessageSquare
 } from "lucide-react";
 import Link from "next/link";
+import BuyMeCoffeeCard from "@/components/BuyMeCoffeeCard";
+import { tools as allTools } from "@/lib/tools";
+import { ToolIcon } from "@/components/tooling";
 
 export default function HomeSections() {
   const features = [
@@ -18,26 +21,29 @@ export default function HomeSections() {
     },
     {
       title: "Multi-Reciter Audio",
-      desc: "Listen to the Quran in beautiful voices from 10 world-renowned reciters.",
+      desc: "Listen to the Quran in beautiful voices from 16 world-renowned reciters.",
       icon: <Zap className="text-gold" />
     },
     {
       title: "Authentic Library",
-      desc: "Browse 30,000+ verified hadiths from Sahih Bukhari and other major collections.",
+      desc: "Browse selected hadiths from Sahih Bukhari, Sahih Muslim, and other major collections.",
       icon: <Shield className="text-gold" />
     }
   ];
 
-  const tools = [
-    { name: "Prayer Times", href: "/prayer-times", icon: <Clock size={24} /> },
-    { name: "Zakat Calc", href: "/zakat", icon: <Landmark size={24} /> },
-    { name: "Dua Library", href: "/dua", icon: <Heart size={24} /> },
-    { name: "Qibla Finder", href: "/prayer-times", icon: <Compass size={24} /> },
-    { name: "Islamic Science", href: "/islamic-science", icon: <Atom size={24} /> },
-    { name: "Names of Allah", href: "/names-of-allah", icon: <BookOpen size={24} /> },
-    { name: "AI Dawah", href: "/dawah", icon: <MessageSquare size={24} /> },
-    { name: "Tasbih Counter", href: "/tasbih", icon: <Zap size={24} /> },
+  const priorityToolNames = [
+    "Zakat Calculator",
+    "Halal Stock Finder",
+    "Tasbih Counter",
+    "Asmaul Husna",
+    "Duas",
+    "Prayer Times",
+    "Islamic Finance",
+    "Qibla Finder",
   ];
+  const tools = priorityToolNames
+    .map((name) => allTools.find((tool) => tool.name === name))
+    .filter(Boolean) as typeof allTools;
 
   const faqs = [
     { 
@@ -50,7 +56,7 @@ export default function HomeSections() {
     },
     { 
       q: "Can I use it offline?", 
-      a: "The Quran text is cached for basic offline reading, but audio recitation and AI features require an active internet connection." 
+      a: "Core pages are lightweight, but Quran audio, prayer times, hadith data, and AI study currently require an active internet connection."
     }
   ];
 
@@ -94,20 +100,20 @@ export default function HomeSections() {
         </div>
       </section>
 
-      {/* Tools Grid Section */}
+      {/* Explore Islamic Tools Section */}
       <section id="tools" className="px-6 scroll-mt-32 relative py-40 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[600px] bg-gold/5 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-24">
             <div className="max-w-2xl">
-              <span className="text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-6 block">Unified Experience</span>
+              <span className="text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-6 block">Explore Islamic Tools</span>
               <h2 className="text-4xl md:text-6xl font-display text-parchment leading-tight">
-                Every Tool for <br/> <span className="text-gold italic">Your Journey</span>
+                Useful tools for <br/> <span className="text-gold italic">daily worship</span>
               </h2>
             </div>
-            <Link href="/quran" className="px-8 py-4 glass text-gold font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-gold/10 transition-all flex items-center gap-3">
-              Explore All <ArrowRight size={18} />
+            <Link href="/tools" className="px-8 py-4 glass text-gold font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-gold/10 transition-all flex items-center gap-3">
+              View All Tools <ArrowRight size={18} />
             </Link>
           </div>
 
@@ -125,7 +131,7 @@ export default function HomeSections() {
                   className="glass flex flex-col items-center justify-center p-12 rounded-[40px] border-white/5 hover:border-gold/30 hover:bg-white/5 transition-all aspect-square group text-center"
                 >
                   <div className="text-gold/60 mb-6 group-hover:scale-110 group-hover:text-gold transition-all duration-500">
-                    {t.icon}
+                    <ToolIcon name={t.icon} size={24} />
                   </div>
                   <span className="text-parchment text-xs font-bold uppercase tracking-widest leading-relaxed">
                     {t.name}
@@ -137,28 +143,10 @@ export default function HomeSections() {
         </div>
       </section>
 
-      {/* Pricing / Supporters Section */}
+      {/* Buy Me a Coffee Support Section */}
       <section className="px-6 relative py-20">
-        <div className="max-w-4xl mx-auto glass p-12 md:p-24 rounded-[60px] border-gold/20 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gold/5 pointer-events-none" />
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">Free and <span className="italic">Open</span></h2>
-            <p className="text-parchment/60 text-lg leading-relaxed mb-12 max-w-2xl mx-auto font-light">
-              NurulQuran is dedicated to serving the Ummah. Access to 
-              sacred texts and essential tools will always remain free.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <div className="px-12 py-6 gold-gradient text-ink font-bold rounded-2xl">
-                Always $0 / mo
-              </div>
-              <button className="px-12 py-6 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
-                Support our Mission
-              </button>
-            </div>
-            <p className="mt-12 text-[10px] text-parchment/20 uppercase tracking-[0.3em] font-bold">
-              Join 10,000+ users worldwide
-            </p>
-          </div>
+        <div className="max-w-5xl mx-auto">
+          <BuyMeCoffeeCard />
         </div>
       </section>
 

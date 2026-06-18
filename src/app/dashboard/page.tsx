@@ -1,56 +1,58 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { motion } from "motion/react";
 import { 
   LayoutDashboard, BookOpen, Bookmark, Clock, 
   TrendingUp, Settings, LogOut, User, 
   ChevronRight, Sparkles, Heart
 } from "lucide-react";
-import { createClient, isSupabaseConfigured } from "@/services/supabase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const dynamic = 'force-dynamic';
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { user, loading, isConfigured, logout } = useAuth();
 
   useEffect(() => {
-    const checkUser = async () => {
-      if (!isSupabaseConfigured) {
-        router.push("/login?error=Login is not configured yet");
-        return;
-      }
-
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.push("/login");
-      } else {
-        setUser(session.user);
-        setLoading(false);
-      }
-    };
-    checkUser();
-  }, [router]);
-
-  const handleLogout = async () => {
-    if (!isSupabaseConfigured) {
-      router.push("/");
+    if (loading) return;
+    if (!isConfigured) {
+      router.push("/login?error=Firebase%20login%20is%20not%20configured%20yet");
       return;
     }
+    if (!user) {
+      router.push("/login?next=/dashboard");
+    }
+  }, [isConfigured, loading, router, user]);
 
-    const supabase = createClient();
-    await supabase.auth.signOut();
+  const handleLogout = async () => {
+    await logout();
     router.push("/");
   };
 
-  if (loading) return null;
+  if (loading || !user) {
+    return (
+      <main className="min-h-screen bg-ink">
+        <Navbar />
+        <div className="pt-40 pb-24 px-6 max-w-5xl mx-auto">
+          <div className="glass p-10 rounded-[40px] border-white/5 animate-pulse">
+            <div className="h-8 w-1/3 bg-white/10 rounded-full mb-6" />
+            <div className="h-4 w-2/3 bg-white/5 rounded-full mb-10" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[1, 2, 3].map((item) => (
+                <div key={item} className="h-32 rounded-[28px] bg-white/5" />
+              ))}
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-ink">
@@ -64,9 +66,9 @@ export default function DashboardPage() {
               <div className="flex flex-col items-center text-center mb-10">
                 <div className="w-20 h-20 rounded-full gold-gradient p-1 mb-4">
                   <div className="w-full h-full rounded-full bg-ink flex items-center justify-center overflow-hidden">
-                    {user?.user_metadata?.avatar_url && user.user_metadata.avatar_url.trim() !== "" ? (
+                    {user?.photoURL && user.photoURL.trim() !== "" ? (
                       <Image 
-                        src={user.user_metadata.avatar_url} 
+                        src={user.photoURL}
                         alt="Avatar" 
                         width={80} 
                         height={80} 
@@ -78,8 +80,8 @@ export default function DashboardPage() {
                     )}
                   </div>
                 </div>
-                <h3 className="text-parchment font-display text-lg">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</h3>
-                <p className="text-parchment/30 text-[10px] uppercase tracking-widest mt-1">Premium Member</p>
+                <h3 className="text-parchment font-display text-lg">{user?.displayName || user?.email?.split('@')[0]}</h3>
+                <p className="text-parchment/30 text-[10px] uppercase tracking-widest mt-1">{user?.email}</p>
               </div>
 
               <nav className="space-y-2">
@@ -116,7 +118,7 @@ export default function DashboardPage() {
             {/* Welcome Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
               <div>
-                <h1 className="text-4xl font-display text-parchment mb-2">Assalamu Alaikum, <span className="text-gold italic">{user?.user_metadata?.full_name?.split(' ')[0] || 'Brother'}</span></h1>
+                <h1 className="text-4xl font-display text-parchment mb-2">Assalamu Alaikum, <span className="text-gold italic">{user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || 'Friend'}</span></h1>
                 <p className="text-parchment/40 text-sm">Welcome back to your spiritual journey.</p>
               </div>
               <div className="flex items-center gap-4">

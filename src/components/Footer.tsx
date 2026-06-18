@@ -10,9 +10,11 @@ export default function Footer() {
       { name: "Hadith Library", href: "/hadith" },
       { name: "Tafseer & AI", href: "/tafseer" },
       { name: "Islamic Science", href: "/islamic-science" },
+      { name: "Islamic Finance", href: "/islamic-finance" },
     ],
     tools: [
       { name: "Supplications", href: "/dua" },
+      { name: "Halal Stocks", href: "/halal-stocks" },
       { name: "Tasbih Counter", href: "/tasbih" },
       { name: "Zakat Calculator", href: "/zakat" },
       { name: "Hajj Guide", href: "/hajj" },
@@ -43,8 +45,8 @@ export default function Footer() {
               Nurturing the modern spiritual journey with authentic wisdom and cutting-edge technology. Built for the global Ummah.
             </p>
             <div className="flex items-center gap-4">
-              <SocialLink icon={<Twitter size={18} />} href="#" />
-              <SocialLink icon={<Instagram size={18} />} href="#" />
+              <SocialLink icon={<Twitter size={18} />} href="/feedback" label="Send feedback" />
+              <SocialLink icon={<Instagram size={18} />} href="/support" label="Open support" />
             </div>
           </div>
 
@@ -65,9 +67,9 @@ export default function Footer() {
                   placeholder="Email" 
                   className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-xs text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-all"
                 />
-                <button className="absolute right-2 top-2 p-1 text-gold hover:translate-x-1 transition-transform">
+                <a href="mailto:support@nurulquran.info?subject=NurulQuran%20Newsletter" aria-label="Request newsletter updates" className="absolute right-2 top-2 p-1 text-gold hover:translate-x-1 transition-transform">
                   <ArrowUpRight size={18} />
-                </button>
+                </a>
               </div>
             </div>
           </div>
@@ -88,10 +90,11 @@ export default function Footer() {
   );
 }
 
-function SocialLink({ icon, href }: { icon: React.ReactNode, href: string }) {
+function SocialLink({ icon, href, label }: { icon: React.ReactNode, href: string, label: string }) {
   return (
     <Link 
       href={href} 
+      aria-label={label}
       className="w-12 h-12 glass rounded-xl flex items-center justify-center text-parchment/30 hover:text-gold hover:border-gold/20 transition-all duration-300"
     >
       {icon}

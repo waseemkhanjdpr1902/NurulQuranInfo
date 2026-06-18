@@ -3,77 +3,80 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { LogIn, Mail, Lock, Chrome, ArrowRight, Loader2 } from "lucide-react";
-import { createClient, isSupabaseConfigured } from "@/services/supabase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+
+function getSafeNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  if (!/^\/[A-Za-z0-9/_?=&%#.-]*$/.test(value)) return "/dashboard";
+  return value;
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [nextPath, setNextPath] = useState("/dashboard");
   const router = useRouter();
+  const { user, loading: authLoading, isConfigured, loginWithEmail, loginWithGoogle } = useAuth();
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const authError = params.get("error");
+    const safeNext = getSafeNextPath(params.get("next"));
+
+    setNextPath(safeNext);
 
     if (authError) {
       setError(authError);
     }
-  }, []);
+  }, [router]);
+
+  useEffect(() => {
+    if (!authLoading && user) {
+      router.replace(nextPath);
+    }
+  }, [authLoading, nextPath, router, user]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    if (!isSupabaseConfigured) {
-      setError("Login is not configured yet. Please add Supabase environment variables in Vercel.");
+    if (!isConfigured) {
+      setError("Firebase login is not configured yet. Please add Firebase environment variables in Vercel.");
       setLoading(false);
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
+    try {
+      await loginWithEmail(email, password);
+      router.push(nextPath);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Login failed. Please try again.");
       setLoading(false);
-    } else {
-      router.push("/dashboard");
     }
   };
 
-  const handleSocialLogin = async (provider: 'google') => {
+  const handleSocialLogin = async () => {
     setLoading(true);
     setError(null);
 
-    if (!isSupabaseConfigured) {
-      setError("Google login is not configured yet. Please add Supabase environment variables in Vercel.");
+    if (!isConfigured) {
+      setError("Google login is not configured yet. Please add Firebase environment variables in Vercel.");
       setLoading(false);
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          prompt: "select_account",
-        },
-      },
-    });
-
-    if (error) {
-      console.error(`${provider} login failed:`, error.message);
-      setError(error.message);
+    try {
+      await loginWithGoogle();
+      router.push(nextPath);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Google login failed. Please try again.");
       setLoading(false);
     }
   };
@@ -96,10 +99,17 @@ export default function LoginPage() {
             <p className="text-parchment/40 text-sm">Sign in to your spiritual dashboard</p>
           </div>
 
+          {authLoading && (
+            <div className="mb-8 flex items-center justify-center gap-3 text-parchment/40 text-sm">
+              <Loader2 className="animate-spin text-gold" size={18} />
+              Checking your session...
+            </div>
+          )}
+
           <div className="space-y-4 mb-10">
             <button 
-              onClick={() => handleSocialLogin('google')}
-              disabled={loading}
+              onClick={handleSocialLogin}
+              disabled={loading || authLoading}
               className="w-full flex items-center justify-center gap-4 py-4 gold-gradient border border-gold/20 rounded-2xl text-ink hover:scale-[1.02] transition-all font-bold shadow-lg shadow-gold/20"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <Chrome size={20} />} Continue with Google
@@ -153,7 +163,7 @@ export default function LoginPage() {
             )}
 
             <button 
-              disabled={loading}
+              disabled={loading || authLoading}
               className="w-full py-4 gold-gradient text-ink font-bold rounded-2xl hover:scale-[1.02] transition-transform flex items-center justify-center gap-2 shadow-xl shadow-gold/20"
             >
               {loading ? <Loader2 className="animate-spin" size={20} /> : <>Sign In with Email <ArrowRight size={20} /></>}

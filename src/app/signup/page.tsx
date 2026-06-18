@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { UserPlus, Mail, Lock, Chrome, ArrowRight, Loader2, User } from "lucide-react";
-import { createClient, isSupabaseConfigured } from "@/services/supabase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+
+function getSafeNextPath(value: string | null) {
+  if (!value || !value.startsWith("/") || value.startsWith("//")) return "/dashboard";
+  if (!/^\/[A-Za-z0-9/_?=&%#.-]*$/.test(value)) return "/dashboard";
+  return value;
+}
 
 export default function SignupPage() {
   const [email, setEmail] = useState("");
@@ -15,65 +21,50 @@ export default function SignupPage() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [nextPath, setNextPath] = useState("/dashboard");
   const router = useRouter();
+  const { isConfigured, loginWithGoogle, signupWithEmail } = useAuth();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setNextPath(getSafeNextPath(params.get("next")));
+  }, []);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
-    if (!isSupabaseConfigured) {
-      setError("Signup is not configured yet. Please add Supabase environment variables in Vercel.");
+    if (!isConfigured) {
+      setError("Signup is not configured yet. Please add Firebase environment variables in Vercel.");
       setLoading(false);
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      setSuccess(true);
+    try {
+      await signupWithEmail(fullName, email, password);
+      router.push(nextPath);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Signup failed. Please try again.");
       setLoading(false);
     }
   };
 
-  const handleSocialLogin = async (provider: 'google') => {
+  const handleSocialLogin = async () => {
     setLoading(true);
     setError(null);
 
-    if (!isSupabaseConfigured) {
-      setError("Google signup is not configured yet. Please add Supabase environment variables in Vercel.");
+    if (!isConfigured) {
+      setError("Google signup is not configured yet. Please add Firebase environment variables in Vercel.");
       setLoading(false);
       return;
     }
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider,
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        queryParams: {
-          prompt: "select_account",
-        },
-      },
-    });
-
-    if (error) {
-      console.error(`${provider} login failed:`, error.message);
-      setError(error.message);
+    try {
+      await loginWithGoogle();
+      router.push(nextPath);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Google signup failed. Please try again.");
       setLoading(false);
     }
   };
@@ -96,25 +87,10 @@ export default function SignupPage() {
             <p className="text-parchment/40 text-sm">Join the NurulQuran community</p>
           </div>
 
-          {success ? (
-            <div className="text-center py-10">
-              <div className="w-20 h-20 rounded-full bg-green-500/10 flex items-center justify-center mx-auto mb-6 text-green-500 border border-green-500/20">
-                <Mail size={40} />
-              </div>
-              <h2 className="text-2xl font-display text-parchment mb-4">Check your email</h2>
-              <p className="text-parchment/40 leading-relaxed mb-8">
-                We&apos;ve sent a verification link to <span className="text-gold">{email}</span>. 
-                Please verify your account to continue.
-              </p>
-              <Link href="/login" className="text-gold font-bold hover:underline flex items-center justify-center gap-2">
-                Return to Login <ArrowRight size={16} />
-              </Link>
-            </div>
-          ) : (
-            <>
+          <>
               <div className="space-y-4 mb-10">
                 <button 
-                  onClick={() => handleSocialLogin('google')}
+                  onClick={handleSocialLogin}
                   disabled={loading}
                   className="w-full flex items-center justify-center gap-4 py-4 gold-gradient border border-gold/20 rounded-2xl text-ink hover:scale-[1.02] transition-all font-bold shadow-lg shadow-gold/20"
                 >
@@ -194,8 +170,7 @@ export default function SignupPage() {
               <p className="mt-10 text-center text-parchment/40 text-sm">
                 Already have an account? <Link href="/login" className="text-gold hover:underline">Sign in</Link>
               </p>
-            </>
-          )}
+          </>
         </motion.div>
       </div>
 

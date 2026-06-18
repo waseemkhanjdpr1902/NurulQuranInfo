@@ -19,6 +19,9 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
   const [showAiContext, setShowAiContext] = useState(false);
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const hadithText = `"${hadith.text}"\n\n${hadith.collection} #${hadith.number}`;
 
   const fetchAiContext = async () => {
     if (aiInsight) {
@@ -29,22 +32,48 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
     setLoadingAi(true);
     setShowAiContext(true);
     try {
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-      
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are an Islamic scholar specializing in the relationship between Quran and Sunnah. Find related Quranic verses for this Hadith and explain the connection. Provide surah name and verse numbers clearly. Use a profound and wise tone."
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          mode: "hadith-context",
+          prompt: `Hadith: "${hadith.text}". Source: ${hadith.collection} ${hadith.number}. Provide related Quran themes, meanings, and study insights.`,
+        }),
       });
 
-      const response = await model.generateContent(`Hadith: "${hadith.text}". Source: ${hadith.collection} ${hadith.number}. Provide related Quran verses, their meanings, and study insights.`);
-      setAiInsight(response.response.text() || "Insight unavailable.");
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "AI context request failed");
+      }
+
+      setAiInsight(data?.text || "Insight unavailable.");
     } catch (error) {
       console.error("AI Context Error:", error);
       setAiInsight("Unable to load spiritual context at this time. Please check your connectivity.");
     } finally {
       setLoadingAi(false);
     }
+  };
+
+  const saveHadith = () => {
+    setSaved((current) => !current);
+    onSave?.();
+  };
+
+  const shareHadith = async () => {
+    if (navigator.share) {
+      await navigator.share({
+        title: `${hadith.collection} #${hadith.number}`,
+        text: hadithText,
+        url: window.location.href,
+      });
+      return;
+    }
+
+    await navigator.clipboard.writeText(hadithText);
   };
 
   return (
@@ -66,12 +95,17 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
         </div>
         <div className="flex items-center gap-2">
           <button 
-            onClick={onSave}
+            aria-label={saved ? "Remove saved hadith" : "Save hadith"}
+            onClick={saveHadith}
+            className={`w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-gold/10 transition-all ${saved ? "text-gold" : "text-parchment/30 hover:text-gold"}`}
+          >
+            <Bookmark size={18} className={saved ? "fill-gold" : ""} />
+          </button>
+          <button
+            aria-label="Share hadith"
+            onClick={shareHadith}
             className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-parchment/30 hover:text-gold hover:bg-gold/10 transition-all"
           >
-            <Bookmark size={18} />
-          </button>
-          <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-parchment/30 hover:text-gold hover:bg-gold/10 transition-all">
             <Share2 size={18} />
           </button>
         </div>
@@ -93,6 +127,7 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
           <span className="text-[10px] uppercase tracking-[0.3em] text-parchment/20 font-bold">Authentic Tradition</span>
           <button 
             onClick={fetchAiContext}
+            aria-label="Study hadith with Quran"
             className={`px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${showAiContext ? 'bg-gold text-ink' : 'glass text-gold/60 hover:text-gold'}`}
           >
             {loadingAi ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />} 
@@ -110,6 +145,7 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
             >
               <div className="p-8 rounded-[32px] bg-gold/5 border border-gold/10 mt-2 relative">
                 <button 
+                  aria-label="Close hadith study context"
                   onClick={() => setShowAiContext(false)}
                   className="absolute top-4 right-4 text-parchment/20 hover:text-gold transition-colors"
                 >
