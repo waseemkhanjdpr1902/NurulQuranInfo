@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { Clock, MapPin, Compass, Loader2, Sun, Moon, Sunrise, Sunset, CloudSun } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 
 interface PrayerTimes {
   Fajr: string;
@@ -200,6 +201,7 @@ export default function PrayerTimesPage() {
       <Navbar />
       
       <div className="pt-40 pb-24 px-6 max-w-7xl mx-auto">
+        <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Prayer Times" }]} />
         {/* Header */}
         <div className="text-center mb-24">
           <motion.span 
@@ -309,7 +311,7 @@ export default function PrayerTimesPage() {
         )}
 
         {/* Qibla Finder Section */}
-        <div className="mt-32 glass p-12 md:p-24 rounded-[60px] border-white/5 relative overflow-hidden text-center">
+        <div id="qibla" className="mt-32 glass p-12 md:p-24 rounded-[60px] border-white/5 relative overflow-hidden text-center scroll-mt-32">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gold/5 blur-[120px] rounded-full pointer-events-none" />
           <div className="relative z-10">
             <div className="relative w-48 h-48 mx-auto mb-12">
@@ -354,6 +356,16 @@ export default function PrayerTimesPage() {
         </div>
       )}
 
+      <ToolGuidance
+        title="Plan your salah and find Qibla"
+        what="Prayer Times shows daily timings, a next-prayer countdown, manual/auto location support, and a Qibla finder for compatible devices."
+        how={[
+          "Enter your city and country, or use auto-detect when location permission is available.",
+          "Use the next-prayer card to see the upcoming salah and countdown.",
+          "Open the Qibla section and allow location/compass permissions when your browser supports them.",
+        ]}
+      />
+      <RelatedTools currentHref="/prayer-times" />
       <Footer />
     </main>
   );

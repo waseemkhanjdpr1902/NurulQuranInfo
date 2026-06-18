@@ -1,12 +1,24 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import BuyMeCoffeeCard from "@/components/BuyMeCoffeeCard";
+import { Breadcrumbs, RelatedTools } from "@/components/tooling";
+
+export const metadata: Metadata = {
+  title: "Support NurulQuran.info",
+  description: "Get support, send feedback, or use Buy Me a Coffee to help maintain NurulQuran.info Islamic tools.",
+  alternates: {
+    canonical: "/support",
+  },
+};
 
 export default function SupportPage() {
   return (
     <main className="min-h-screen bg-ink">
       <Navbar />
       <section className="pt-40 pb-24 px-6 max-w-4xl mx-auto">
+        <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Support" }]} />
         <div className="glass p-8 md:p-14 rounded-[40px] border-white/5 text-center">
           <p className="text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-6">Support</p>
           <h1 className="text-4xl md:text-6xl font-display text-parchment mb-8">How can we help?</h1>
@@ -23,6 +35,12 @@ export default function SupportPage() {
           </div>
         </div>
       </section>
+      <section className="px-6 pb-16">
+        <div className="max-w-5xl mx-auto">
+          <BuyMeCoffeeCard />
+        </div>
+      </section>
+      <RelatedTools currentHref="/support" />
       <Footer />
     </main>
   );

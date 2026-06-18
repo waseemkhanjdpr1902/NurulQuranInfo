@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { Calculator, Coins, Landmark, Briefcase, Info, AlertCircle, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 
 export default function ZakatCalculatorPage() {
   const [goldGrams, setGoldGrams] = useState(0);
@@ -32,6 +33,7 @@ export default function ZakatCalculatorPage() {
       <Navbar />
       
       <div className="pt-40 pb-24 px-6 max-w-7xl mx-auto">
+        <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Zakat Calculator" }]} />
         {/* Header */}
         <div className="text-center mb-24">
           <motion.span 
@@ -173,6 +175,16 @@ export default function ZakatCalculatorPage() {
         </div>
       </div>
 
+      <ToolGuidance
+        title="Estimate your zakatable wealth"
+        what="The Zakat Calculator helps estimate 2.5% zakat on eligible assets after liabilities using editable gold and silver nisab assumptions."
+        how={[
+          "Enter gold, silver, cash, investments, business assets, and short-term liabilities.",
+          "Review net zakatable assets and compare them against the gold and silver nisab estimates.",
+          "Use the result as an estimate and consult a qualified scholar for complex cases.",
+        ]}
+      />
+      <RelatedTools currentHref="/zakat" />
       <Footer />
     </main>
   );

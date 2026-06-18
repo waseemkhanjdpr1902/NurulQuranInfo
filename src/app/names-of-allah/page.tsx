@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { ALLAH_NAMES, type AllahName } from "@/lib/names-of-allah";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 
 const STORAGE_KEY = "nurulquran.favoriteAllahNames";
 
@@ -82,6 +83,7 @@ export default function NamesOfAllahPage() {
       <Navbar />
       
       <div className="pt-40 pb-24 px-6 max-w-7xl mx-auto">
+        <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Asmaul Husna" }]} />
         <div className="text-center mb-24">
           <motion.span 
             initial={{ opacity: 0, y: 10 }}
@@ -179,6 +181,16 @@ export default function NamesOfAllahPage() {
         </div>
       )}
 
+      <ToolGuidance
+        title="Learn and call upon Allah by His names"
+        what="Asmaul Husna helps you search, listen to, copy, share, and favorite the 99 Names of Allah with concise meanings and reflection prompts."
+        how={[
+          "Search by Arabic, transliteration, or meaning.",
+          "Use audio, copy, and share actions to memorize and teach each name.",
+          "Favorite names you want to revisit in your personal reflection.",
+        ]}
+      />
+      <RelatedTools currentHref="/names-of-allah" />
       <Footer />
     </main>
   );

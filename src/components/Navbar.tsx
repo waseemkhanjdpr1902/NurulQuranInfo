@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 const SEARCH_ITEMS = [
+  { title: "Tools & Features", href: "/tools", keywords: "all tools features islamic utilities" },
   { title: "Quran Explorer", href: "/quran", keywords: "surah ayah recitation audio tafsir" },
   { title: "Hadith Library", href: "/hadith", keywords: "sunnah bukhari muslim tradition" },
   { title: "Dua & Adhkar", href: "/dua", keywords: "supplication morning evening protection" },
@@ -18,6 +19,9 @@ const SEARCH_ITEMS = [
   { title: "Zakat Calculator", href: "/zakat", keywords: "charity calculation nisab" },
   { title: "Islamic Finance", href: "/islamic-finance", keywords: "riba halal investing zakat banking sukuk takaful" },
   { title: "Halal Stocks", href: "/halal-stocks", keywords: "stock screener shariah watchlist investing" },
+  { title: "Islamic Calendar", href: "/islamic-calendar", keywords: "hijri gregorian islamic dates events" },
+  { title: "Daily Verse", href: "/daily-verse", keywords: "quran ayah reflection daily verse" },
+  { title: "Daily Hadith", href: "/daily-hadith", keywords: "hadith sunnah daily reflection" },
   { title: "Dawah", href: "/dawah", keywords: "islam questions outreach" },
 ];
 
@@ -56,12 +60,13 @@ export default function Navbar() {
   );
 
   const navLinks = [
+    { name: "Tools", href: "/tools", icon: Landmark },
     { name: "Quran", href: "/quran", icon: Book },
-    { name: "Hadith", href: "/hadith", icon: BookOpen },
-    { name: "Science", href: "/islamic-science", icon: Atom },
+    { name: "Duas", href: "/dua", icon: Heart },
     { name: "Finance", href: "/islamic-finance", icon: Landmark },
-    { name: "Features", href: "/#features", icon: Sparkles },
-    { name: "Tools", href: "/#tools", icon: Landmark },
+    { name: "Zakat", href: "/zakat", icon: TrendingUp },
+    { name: "Tasbih", href: "/tasbih", icon: Sparkles },
+    { name: "Prayer Times", href: "/prayer-times", icon: Clock },
   ];
 
   const displayName = user?.displayName || user?.email?.split("@")[0] || "Account";
@@ -88,8 +93,8 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-12">
-          <div className="flex items-center gap-10">
+        <div className="hidden lg:flex items-center gap-6">
+          <div className="flex items-center gap-5 xl:gap-7">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 

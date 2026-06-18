@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 const routes = [
   "",
+  "/tools",
   "/quran",
   "/hadith",
   "/dua",
@@ -12,6 +13,9 @@ const routes = [
   "/zakat",
   "/islamic-finance",
   "/halal-stocks",
+  "/islamic-calendar",
+  "/daily-verse",
+  "/daily-hadith",
   "/dawah",
   "/islamic-science",
   "/spiritual-guide",

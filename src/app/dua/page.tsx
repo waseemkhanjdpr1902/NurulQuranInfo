@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { Heart, Search, BookOpen, Sun, Moon, Shield, Home, Copy, Share2, Volume2, VolumeX } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 
 interface Dua {
   id: number;
@@ -186,6 +187,7 @@ export default function DuaPage() {
       <Navbar />
       
       <div className="pt-40 pb-24 px-6 max-w-7xl mx-auto">
+        <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Duas" }]} />
         <div className="text-center mb-20">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
@@ -302,6 +304,16 @@ export default function DuaPage() {
         </div>
       )}
 
+      <ToolGuidance
+        title="Keep authentic duas close"
+        what="The Duas tool collects supplications and adhkar with Arabic, transliteration, translation, audio, categories, search, copy, share, and favorites."
+        how={[
+          "Search or filter by category such as morning, evening, protection, or home.",
+          "Read the Arabic and transliteration, then listen if you need pronunciation support.",
+          "Favorite duas you use often and copy or share them when helpful.",
+        ]}
+      />
+      <RelatedTools currentHref="/dua" />
       <Footer />
     </main>
   );

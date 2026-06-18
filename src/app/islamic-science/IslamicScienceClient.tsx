@@ -14,6 +14,7 @@ import {
   ShieldAlert,
   Star,
 } from "lucide-react";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 
 const topics = [
   {
@@ -113,6 +114,7 @@ export default function IslamicScienceClient() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto relative z-10"
         >
+          <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Islamic Science" }]} />
           <span className="text-gold font-medium tracking-[0.4em] uppercase text-xs mb-6 block">
             Knowledge with humility
           </span>
@@ -211,6 +213,16 @@ export default function IslamicScienceClient() {
           </div>
         </div>
       </section>
+      <ToolGuidance
+        title="Study science with humility"
+        what="Islamic Science introduces scholarly contributions, Quranic encouragement to observe creation, and the ethics of knowledge while avoiding unsupported miracle claims."
+        how={[
+          "Search or filter by topic, such as astronomy, medicine, algebra, optics, or ethics.",
+          "Use the resource notes to continue with reliable academic and Islamic sources.",
+          "Avoid viral claims that force modern science into verses without sound scholarship.",
+        ]}
+      />
+      <RelatedTools currentHref="/islamic-science" />
     </>
   );
 }

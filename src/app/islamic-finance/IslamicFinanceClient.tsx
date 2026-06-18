@@ -14,6 +14,7 @@ import {
   Search,
   ShieldCheck,
 } from "lucide-react";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 
 const foundations = [
   {
@@ -115,6 +116,7 @@ export default function IslamicFinanceClient() {
     <>
       <header className="pt-40 pb-20 px-6 text-center">
         <div className="max-w-4xl mx-auto">
+          <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Islamic Finance" }]} />
           <p className="text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-6">Wealth with accountability</p>
           <h1 className="text-5xl md:text-8xl font-display text-parchment mb-8">
             Islamic <span className="text-gold italic">Finance</span>
@@ -205,6 +207,16 @@ export default function IslamicFinanceClient() {
           </div>
         </div>
       </section>
+      <ToolGuidance
+        title="Learn finance through a Shariah-aware lens"
+        what="This hub organizes core Islamic finance concepts so you can understand riba, halal income, investments, zakat, debt, and common Islamic banking structures before making decisions."
+        how={[
+          "Use search or category filters to focus on the finance topic you need.",
+          "Read the disclaimer and avoid treating educational notes as a fatwa or investment advice.",
+          "Open the Zakat Calculator or Halal Stock Finder for practical next steps.",
+        ]}
+      />
+      <RelatedTools currentHref="/islamic-finance" />
     </>
   );
 }

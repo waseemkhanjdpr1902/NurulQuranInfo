@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { RotateCcw, Save, ChevronRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 
 const REMEMBRANCES = [
   { ar: "سُبْحَانَ ٱللَّٰهِ", en: "SubhanAllah", mean: "Glory be to Allah", target: 33 },
@@ -74,6 +75,9 @@ export default function TasbihPage() {
       <Navbar />
       
       <div className="pt-40 pb-24 px-6 max-w-7xl mx-auto flex flex-col items-center min-h-[80vh] select-none">
+        <div className="w-full">
+          <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Tasbih Counter" }]} />
+        </div>
         <div className="text-center mb-20 pointer-events-none">
           <motion.h1 className="text-4xl md:text-6xl font-display text-parchment/40 mb-6">Digital <span className="text-gold italic">Tasbih</span></motion.h1>
           <div className="flex items-center justify-center gap-4 text-gold/30 font-mono text-xs uppercase tracking-widest">
@@ -164,6 +168,16 @@ export default function TasbihPage() {
         <p className="text-parchment/10 text-[10px] uppercase tracking-[0.5em] font-bold pb-10 pointer-events-none">Tap the counter area to count</p>
       </div>
 
+      <ToolGuidance
+        title="Count dhikr with focus"
+        what="The Tasbih Counter gives you a tap-friendly dhikr counter with session totals, lifetime totals, targets, and saved history."
+        how={[
+          "Choose a remembrance and tap the main counter area.",
+          "Use Save before switching or resetting when you want to keep a session record.",
+          "Review recent saved sessions below the controls.",
+        ]}
+      />
+      <RelatedTools currentHref="/tasbih" />
       <Footer />
     </main>
   );

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Bookmark, CheckCircle2, Filter, HelpCircle, Search, ShieldAlert, XCircle } from "lucide-react";
+import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
 import { getScreenedDemoStocks, manualReviewChecklist, type Country, type ShariahStatus, type StockScreeningResult } from "@/lib/halal-screening";
 
 const statusStyles: Record<ShariahStatus, string> = {
@@ -62,6 +63,7 @@ export default function HalalStocksClient() {
     <>
       <header className="pt-40 pb-20 px-6 text-center">
         <div className="max-w-4xl mx-auto">
+          <Breadcrumbs items={[{ label: "Tools", href: "/tools" }, { label: "Halal Stock Finder" }]} />
           <p className="text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-6">Demo Shariah screener</p>
           <h1 className="text-5xl md:text-8xl font-display text-parchment mb-8">
             Halal <span className="text-gold italic">Stocks</span>
@@ -79,6 +81,28 @@ export default function HalalStocksClient() {
             <p className="text-parchment/55 leading-relaxed">
               Demo data only. Please verify with qualified Shariah screening sources before investing. No stock is 100% halal guaranteed, and this page does not provide buy/sell recommendations.
             </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-10">
+            <div className="lg:col-span-2 glass p-5 rounded-[28px] border-emerald-400/10 bg-emerald-950/20">
+              <p className="text-emerald-300 text-[10px] uppercase tracking-[0.25em] font-bold mb-2">Data status</p>
+              <p className="text-parchment/55 leading-relaxed">
+                Demo mode is active. Live stock APIs are not required for this version; future API keys can be connected later without changing the screening UI.
+              </p>
+            </div>
+            <div className="glass p-5 rounded-[28px] border-white/5">
+              <p className="text-gold text-[10px] uppercase tracking-[0.25em] font-bold mb-2">Watchlist</p>
+              <p className="text-parchment/60 mb-3">{watchlist.length} saved {watchlist.length === 1 ? "stock" : "stocks"}</p>
+              {watchlist.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {watchlist.slice(0, 6).map((ticker) => (
+                    <span key={ticker} className="px-3 py-1 rounded-full bg-white/5 text-gold text-xs font-bold">
+                      {ticker}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="glass p-6 rounded-[36px] border-white/5 mb-10">
@@ -163,6 +187,16 @@ export default function HalalStocksClient() {
           </div>
         </div>
       </section>
+      <ToolGuidance
+        title="Screen stocks for learning, not recommendations"
+        what="The Halal Stock Finder helps you explore sample Shariah screening categories, business activity concerns, ratio concerns, and manual review notes across multiple countries."
+        how={[
+          "Search by company or ticker, then filter by country, sector, or Shariah status.",
+          "Open “Why this rating?” to see the screening explanation and missing-data notes.",
+          "Use the watchlist for follow-up, then verify with qualified Shariah screening sources before investing.",
+        ]}
+      />
+      <RelatedTools currentHref="/halal-stocks" />
     </>
   );
 }
