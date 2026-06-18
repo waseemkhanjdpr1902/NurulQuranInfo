@@ -1,6 +1,6 @@
 # NurulQuran - Modern Islamic Spiritual Platform
 
-NurulQuran is a production-ready, full-stack application dedicated to the preservation, study, and contemplation of the Holy Quran and Islamic sciences. Built with Next.js 15, Supabase, and Gemini AI.
+NurulQuran is a production-ready Islamic web application dedicated to Quran study, authentic Islamic tools, Islamic science, and ethical finance education. Built with Next.js 15, Firebase Authentication, Razorpay donations, and Gemini AI.
 
 ## 🚀 Features
 
@@ -10,14 +10,14 @@ NurulQuran is a production-ready, full-stack application dedicated to the preser
 - **Arabic Academy**: Structured courses for learning Quranic Arabic.
 - **Halal Stocks**: Shariah-compliance screening for ethical investing.
 - **User Dashboard**: Personalized experience with bookmarks, progress tracking, and activity logs.
-- **Secure Auth**: Full authentication system with Google and GitHub integration via Supabase.
+- **Secure Auth**: Firebase Authentication with email/password and Google login.
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), Tailwind CSS, Framer Motion, Lucide Icons.
-- **Backend**: Supabase (Auth, PostgreSQL, Real-time).
+- **Backend**: Next.js App Router API routes and Firebase Authentication.
 - **AI**: Google Gemini Pro (via @google/genai).
-- **Payments**: Razorpay (Subscription model).
+- **Payments**: Razorpay donation support with external fallback links.
 
 ## 📂 Folder Structure
 
@@ -27,11 +27,11 @@ NurulQuran is a production-ready, full-stack application dedicated to the preser
 ├── /src
 │   ├── /app         # Next.js App Router (Pages & API Routes)
 │   ├── /components  # Modular UI Components
-│   ├── /services    # API & Backend Services (Supabase, Gemini)
+│   ├── /contexts    # Shared client contexts, including Firebase auth
+│   ├── /lib         # App utilities, Firebase config, and finance helpers
 │   ├── /hooks       # Custom React Hooks
 │   ├── /utils       # Utility functions
 │   └── /styles      # Global styles
-├── schema.sql       # Database schema for Supabase
 ├── .env.example     # Environment variables template
 └── package.json     # Dependencies and scripts
 ```
@@ -51,14 +51,11 @@ npm install
 
 ### 3. Configure Environment Variables
 Copy `.env.example` to `.env` and fill in your credentials:
-- **Supabase**: Create a project at [supabase.com](https://supabase.com).
+- **Firebase**: Create a Firebase project and enable Email/Password and Google Authentication.
 - **Gemini API**: Get your key at [aistudio.google.com](https://aistudio.google.com).
 - **Razorpay**: Get your keys at [razorpay.com](https://razorpay.com).
 
-### 4. Database Setup
-Run the contents of `schema.sql` in your Supabase SQL Editor to create the required tables and RLS policies.
-
-### 5. Run Development Server
+### 4. Run Development Server
 ```bash
 npm run dev
 ```

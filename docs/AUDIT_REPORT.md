@@ -107,9 +107,9 @@ Reviewed the Next.js App Router project, shared components, API routes, public P
 
 11. Add real Daily Verse and Daily Hadith modules with favorites/share.
 12. Add Islamic Calendar route with Hijri/Gregorian dates and important events.
-13. Add persistent Quran bookmarks and reading progress backed by Supabase.
+13. Add persistent Quran bookmarks and reading progress backed by the chosen production data store.
 14. Add notification permission workflow and scheduled local reminders.
-15. Replace local admin drafts with Supabase-backed admin tables and role checks.
+15. Replace local admin drafts with production admin tables and role checks.
 16. Add multilingual content structure and translation files.
 
 ### P3 - SEO, accessibility, and performance
