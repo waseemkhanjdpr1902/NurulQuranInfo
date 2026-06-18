@@ -1,86 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { motion } from "motion/react";
-import {
-  Atom,
-  BookOpen,
-  Compass,
-  Eye,
-  FlaskConical,
-  Globe,
-  Microscope,
-  Search,
-  ShieldAlert,
-  Star,
-} from "lucide-react";
+import { BookOpen, MapPin, Search, ShieldAlert, Sparkles } from "lucide-react";
 import { Breadcrumbs, RelatedTools, ToolGuidance } from "@/components/tooling";
-
-const topics = [
-  {
-    title: "Islam and the pursuit of knowledge",
-    category: "Foundations",
-    icon: BookOpen,
-    summary:
-      "Islamic learning joins revelation, reason, observation, and humility. The Quran repeatedly invites people to reflect on creation as signs of Allah.",
-  },
-  {
-    title: "Quranic encouragement to observe",
-    category: "Quranic Reflection",
-    icon: Star,
-    summary:
-      "Verses call believers to look at the heavens, earth, life, history, and the self. Reflection should deepen faith and responsibility, not become sensational claims.",
-  },
-  {
-    title: "Astronomy and Islamic civilization",
-    category: "Astronomy",
-    icon: Atom,
-    summary:
-      "Muslim astronomers improved star catalogues, observatories, calendar calculations, navigation, and prayer-time/qibla determination.",
-  },
-  {
-    title: "Medicine and Muslim scholars",
-    category: "Medicine",
-    icon: FlaskConical,
-    summary:
-      "Scholars such as Ibn Sina and Al-Razi helped organize clinical observation, hospitals, pharmacology, and medical writing across centuries.",
-  },
-  {
-    title: "Mathematics and algebra",
-    category: "Mathematics",
-    icon: Microscope,
-    summary:
-      "Al-Khwarizmi's works influenced algebra, algorithms, decimal notation, inheritance calculations, astronomy, trade, and engineering.",
-  },
-  {
-    title: "Optics and Ibn al-Haytham",
-    category: "Optics",
-    icon: Eye,
-    summary:
-      "Ibn al-Haytham's experimental approach to light and vision shaped optics and scientific method discussions in later traditions.",
-  },
-  {
-    title: "Geography and navigation",
-    category: "Geography",
-    icon: Globe,
-    summary:
-      "Geographers and navigators mapped routes, seas, climates, trade networks, and qibla directions using mathematics and field observation.",
-  },
-  {
-    title: "Ethics of knowledge",
-    category: "Ethics",
-    icon: Compass,
-    summary:
-      "Knowledge should produce humility, justice, service, environmental care, and protection from harm. Not every possible use of science is ethical.",
-  },
-  {
-    title: "Avoiding fake miracle claims",
-    category: "Methodology",
-    icon: ShieldAlert,
-    summary:
-      "This section avoids unsupported scientific miracle claims. Strong faith does not require weak evidence, forced interpretations, or viral misinformation.",
-  },
-];
+import { scienceTopics } from "./topics";
 
 const resources = [
   "Study the Quran with reliable tafsir before making scientific claims.",
@@ -92,18 +16,42 @@ const resources = [
 export default function IslamicScienceClient() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [selectedTopicId, setSelectedTopicId] = useState(scienceTopics[0].id);
+  const detailRef = useRef<HTMLElement | null>(null);
 
-  const categories = ["All", ...Array.from(new Set(topics.map((topic) => topic.category)))];
+  const categories = ["All", ...Array.from(new Set(scienceTopics.map((topic) => topic.category)))];
   const filteredTopics = useMemo(() => {
     const term = search.trim().toLowerCase();
-    return topics.filter((topic) => {
+    return scienceTopics.filter((topic) => {
       const matchesCategory = category === "All" || topic.category === category;
       const matchesSearch =
         !term ||
-        [topic.title, topic.category, topic.summary].join(" ").toLowerCase().includes(term);
+        [
+          topic.title,
+          topic.category,
+          topic.summary,
+          topic.explanation,
+          topic.scholar.name,
+          topic.scholar.contribution,
+        ]
+          .join(" ")
+          .toLowerCase()
+          .includes(term);
       return matchesCategory && matchesSearch;
     });
   }, [category, search]);
+
+  const selectedTopic =
+    scienceTopics.find((topic) => topic.id === selectedTopicId) || filteredTopics[0] || scienceTopics[0];
+
+  const selectTopic = (topicId: string) => {
+    setSelectedTopicId(topicId);
+    window.setTimeout(() => {
+      if (window.innerWidth < 1024) {
+        detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
+  };
 
   return (
     <>
@@ -132,7 +80,7 @@ export default function IslamicScienceClient() {
           <div className="glass p-6 md:p-8 rounded-[36px] border-gold/10 mb-12">
             <p className="text-gold font-bold mb-2">Educational disclaimer</p>
             <p className="text-parchment/55 leading-relaxed">
-              This section is educational and should avoid unsupported scientific miracle claims.
+              This page is educational and historical. It avoids unsupported scientific miracle claims and does not replace scholarly Islamic or academic study.
             </p>
           </div>
 
@@ -162,17 +110,23 @@ export default function IslamicScienceClient() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.2fr] gap-8 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-5">
             {filteredTopics.map((topic, index) => {
               const Icon = topic.icon;
+              const isSelected = selectedTopic.id === topic.id;
               return (
-                <motion.article
+                <motion.button
                   key={topic.title}
+                  type="button"
+                  onClick={() => selectTopic(topic.id)}
                   initial={{ opacity: 0, y: 16 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: Math.min(index * 0.05, 0.2) }}
                   viewport={{ once: true }}
-                  className="glass p-8 rounded-[36px] border-white/5 hover:border-gold/20 transition-all"
+                  className={`glass p-6 rounded-[30px] text-left transition-all ${
+                    isSelected ? "border-gold/60 bg-gold/10" : "border-white/5 hover:border-gold/20"
+                  }`}
                 >
                   <div className="flex items-start gap-5">
                     <div className="w-14 h-14 rounded-2xl bg-gold/10 flex items-center justify-center text-gold shrink-0">
@@ -182,15 +136,18 @@ export default function IslamicScienceClient() {
                       <p className="text-gold/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-3">
                         {topic.category}
                       </p>
-                      <h2 className="text-2xl md:text-3xl font-display text-parchment mb-4">
+                      <h2 className="text-2xl font-display text-parchment mb-4">
                         {topic.title}
                       </h2>
                       <p className="text-parchment/55 leading-relaxed">{topic.summary}</p>
                     </div>
                   </div>
-                </motion.article>
+                </motion.button>
               );
             })}
+            </div>
+
+            <TopicDetail topic={selectedTopic} onSelectTopic={selectTopic} detailRef={detailRef} />
           </div>
 
           {filteredTopics.length === 0 && (
@@ -224,5 +181,122 @@ export default function IslamicScienceClient() {
       />
       <RelatedTools currentHref="/islamic-science" />
     </>
+  );
+}
+
+function TopicDetail({
+  topic,
+  onSelectTopic,
+  detailRef,
+}: {
+  topic: (typeof scienceTopics)[number];
+  onSelectTopic: (topicId: string) => void;
+  detailRef: React.MutableRefObject<HTMLElement | null>;
+}) {
+  const ScholarIcon = topic.icon;
+  const related = topic.relatedTopics
+    .map((title) => scienceTopics.find((item) => item.title === title || item.category === title))
+    .filter(Boolean) as typeof scienceTopics;
+
+  return (
+    <section ref={detailRef} className="glass p-6 md:p-8 rounded-[36px] border-gold/20 scroll-mt-28">
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-5 mb-8">
+        <div>
+          <p className="text-gold/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-3">
+            Selected topic
+          </p>
+          <h2 className="text-4xl md:text-5xl font-display text-parchment mb-4">{topic.title}</h2>
+          <p className="text-parchment/55 leading-relaxed">{topic.explanation}</p>
+        </div>
+        <div className="w-16 h-16 rounded-2xl bg-gold/10 text-gold flex items-center justify-center shrink-0">
+          <ScholarIcon size={30} />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-8">
+        <div className="p-6 rounded-[28px] bg-white/5 border border-white/5">
+          <div className="flex items-center gap-3 mb-5">
+            <BookOpen className="text-gold" size={22} />
+            <h3 className="text-2xl font-display text-parchment">Scholar biography</h3>
+          </div>
+          <h4 className="text-xl font-bold text-gold mb-2">{topic.scholar.name}</h4>
+          <div className="flex flex-wrap gap-3 text-xs text-parchment/40 mb-5">
+            <span>{topic.scholar.period}</span>
+            <span className="flex items-center gap-1"><MapPin size={12} /> {topic.scholar.region}</span>
+          </div>
+          <p className="text-parchment/60 leading-relaxed mb-5">{topic.scholar.biography}</p>
+          <p className="text-parchment/60 leading-relaxed">
+            <span className="text-gold font-bold">Contribution:</span> {topic.scholar.contribution}
+          </p>
+        </div>
+
+        <div className="p-6 rounded-[28px] bg-white/5 border border-white/5">
+          <div className="flex items-center gap-3 mb-5">
+            <Sparkles className="text-gold" size={22} />
+            <h3 className="text-2xl font-display text-parchment">Why this matters</h3>
+          </div>
+          <p className="text-parchment/60 leading-relaxed mb-6">{topic.whyItMatters}</p>
+          <p className="text-gold/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-3">Key works</p>
+          <div className="flex flex-wrap gap-2">
+            {topic.scholar.keyWorks.map((work) => (
+              <span key={work} className="px-3 py-2 rounded-xl bg-gold/10 text-gold text-xs font-bold">
+                {work}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-8">
+        <div className="p-6 rounded-[28px] bg-white/5">
+          <p className="text-gold/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-4">Contribution timeline</p>
+          <ol className="space-y-4">
+            {topic.timeline.map((item, index) => (
+              <li key={item} className="flex gap-4 text-parchment/60 leading-relaxed">
+                <span className="w-8 h-8 rounded-full bg-gold/10 text-gold flex items-center justify-center shrink-0 text-sm font-bold">
+                  {index + 1}
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="p-6 rounded-[28px] bg-white/5">
+          <p className="text-gold/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-4">Quranic reflection</p>
+          <p className="text-parchment/60 leading-relaxed mb-5">{topic.islamicReflection}</p>
+          <div className="flex gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+            <ShieldAlert className="text-amber-300 shrink-0 mt-1" size={18} />
+            <p className="text-amber-100/80 text-sm leading-relaxed">{topic.warning}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="p-6 rounded-[28px] bg-white/5">
+          <p className="text-gold/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-4">Related topics</p>
+          <div className="flex flex-wrap gap-2">
+            {related.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onSelectTopic(item.id)}
+                className="px-4 py-2 rounded-xl bg-gold/10 text-gold text-xs font-bold hover:bg-gold hover:text-ink transition-colors"
+              >
+                {item.title}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="p-6 rounded-[28px] bg-white/5">
+          <p className="text-gold/60 text-[10px] uppercase tracking-[0.25em] font-bold mb-4">Sources / references</p>
+          <ul className="space-y-2 text-parchment/55 text-sm leading-relaxed">
+            {topic.references.map((reference) => (
+              <li key={reference}>- {reference}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </section>
   );
 }

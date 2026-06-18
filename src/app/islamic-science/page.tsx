@@ -4,9 +4,9 @@ import Footer from "@/components/Footer";
 import IslamicScienceClient from "./IslamicScienceClient";
 
 export const metadata: Metadata = {
-  title: "Islamic Science",
+  title: "Islamic Science and Muslim Scholars",
   description:
-    "Educational Islamic Science topics covering Quranic reflection, astronomy, medicine, algebra, optics, geography, ethics, and warnings against unsupported miracle claims.",
+    "Explore Islamic science topics and biographies of Muslim scholars in astronomy, medicine, optics, mathematics, geography, and engineering.",
   alternates: {
     canonical: "/islamic-science",
   },
