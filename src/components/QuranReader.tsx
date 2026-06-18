@@ -350,35 +350,6 @@ export default function QuranReader({
         <Loader2 className="text-gold animate-spin" size={48} />
         <p className="text-parchment/40 font-display text-xl">Loading verses...</p>
       </div>
-
-      <div className="relative mb-12">
-        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-parchment/20" size={20} />
-        <input
-          aria-label={`Search inside Surah ${surah.englishName}`}
-          value={verseSearch}
-          onChange={(event) => setVerseSearch(event.target.value)}
-          placeholder="Search within this Surah by verse, Arabic, or translation..."
-          className="w-full pl-16 pr-6 py-5 glass rounded-[32px] text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-colors"
-        />
-      </div>
-
-      <div className="glass p-5 rounded-[28px] border-white/5 mb-12 flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <p className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold">Reading Preferences</p>
-        <div className="flex flex-wrap gap-3">
-          <button onClick={() => setArabicSize((value) => Math.max(0.85, value - 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
-            Arabic -
-          </button>
-          <button onClick={() => setArabicSize((value) => Math.min(1.3, value + 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
-            Arabic +
-          </button>
-          <button onClick={() => setTranslationSize((value) => Math.max(0.9, value - 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
-            Translation -
-          </button>
-          <button onClick={() => setTranslationSize((value) => Math.min(1.25, value + 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
-            Translation +
-          </button>
-        </div>
-      </div>
     );
   }
 
@@ -428,6 +399,35 @@ export default function QuranReader({
             className="px-6 py-3 glass rounded-2xl text-parchment/60 text-[10px] font-bold uppercase tracking-widest hover:text-gold transition-all flex items-center gap-2"
           >
             <Share2 size={14} /> Share Surah
+          </button>
+        </div>
+      </div>
+
+      <div className="relative mb-12">
+        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-parchment/20" size={20} />
+        <input
+          aria-label={`Search inside Surah ${surah.englishName}`}
+          value={verseSearch}
+          onChange={(event) => setVerseSearch(event.target.value)}
+          placeholder="Search within this Surah by verse, Arabic, or translation..."
+          className="w-full pl-16 pr-6 py-5 glass rounded-[32px] text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-colors"
+        />
+      </div>
+
+      <div className="glass p-5 rounded-[28px] border-white/5 mb-12 flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <p className="text-gold text-[10px] uppercase tracking-[0.3em] font-bold">Reading Preferences</p>
+        <div className="flex flex-wrap gap-3">
+          <button onClick={() => setArabicSize((value) => Math.max(0.85, value - 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Arabic -
+          </button>
+          <button onClick={() => setArabicSize((value) => Math.min(1.3, value + 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Arabic +
+          </button>
+          <button onClick={() => setTranslationSize((value) => Math.max(0.9, value - 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Translation -
+          </button>
+          <button onClick={() => setTranslationSize((value) => Math.min(1.25, value + 0.1))} className="px-4 py-2 glass rounded-xl text-parchment/50 hover:text-gold text-xs font-bold">
+            Translation +
           </button>
         </div>
       </div>
