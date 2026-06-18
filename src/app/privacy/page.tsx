@@ -11,7 +11,7 @@ export default function PrivacyPage() {
           <h1 className="text-4xl md:text-6xl font-display text-parchment mb-8">Privacy Policy</h1>
           <div className="space-y-6 text-parchment/60 leading-relaxed">
             <p>NurulQuran.info is designed to collect only the information needed to provide core Islamic learning tools, authentication, and saved preferences.</p>
-            <p>When sign-in is enabled, authentication is handled by Supabase. Quran reading, prayer-time lookup, and AI study features may use trusted third-party APIs to fulfill user requests.</p>
+            <p>When sign-in is enabled, authentication is handled by Firebase Authentication. Quran reading, prayer-time lookup, and AI study features may use trusted third-party APIs to fulfill user requests.</p>
             <p>We do not sell personal information. For privacy questions, contact support@nurulquran.info.</p>
           </div>
         </div>

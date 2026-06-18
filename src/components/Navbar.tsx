@@ -5,8 +5,7 @@ import { Search, BookOpen, Heart, Sparkles, Menu, X, LayoutDashboard, LogIn, Boo
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { User as SupabaseUser } from "@supabase/supabase-js";
-import { createClient, isSupabaseConfigured } from "@/services/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
 const SEARCH_ITEMS = [
   { title: "Quran Explorer", href: "/quran", keywords: "surah ayah recitation audio tafsir" },
@@ -28,8 +27,8 @@ export default function Navbar() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [recentPages, setRecentPages] = useState<typeof SEARCH_ITEMS>([]);
-  const [user, setUser] = useState<SupabaseUser | null>(null);
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -47,28 +46,8 @@ export default function Navbar() {
     window.localStorage.setItem("nurulquran.recentPages", JSON.stringify(updated));
   }, [pathname]);
 
-  useEffect(() => {
-    if (!isSupabaseConfigured) return;
-
-    const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data.session?.user ?? null);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   const handleLogout = async () => {
-    if (!isSupabaseConfigured) return;
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    setUser(null);
+    await logout();
     setIsMobileMenuOpen(false);
   };
 
@@ -85,7 +64,7 @@ export default function Navbar() {
     { name: "Tools", href: "/#tools", icon: Landmark },
   ];
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "Account";
+  const displayName = user?.displayName || user?.email?.split("@")[0] || "Account";
 
   return (
     <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-700 ${

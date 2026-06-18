@@ -5,8 +5,8 @@ import type { ElementType } from "react";
 import { BookOpen, Bell, FileAudio, Newspaper, Plus, Star, Trash2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { createClient, isSupabaseConfigured } from "@/services/supabase";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
 
 type AdminType = "Article" | "Dua" | "Daily Verse" | "Daily Hadith" | "Audio File" | "Notification" | "Featured Content";
 
@@ -30,41 +30,32 @@ const contentTypes: { type: AdminType; icon: ElementType }[] = [
 
 export default function AdminPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<AdminType>("Article");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [items, setItems] = useState<AdminItem[]>([]);
+  const [draftsLoaded, setDraftsLoaded] = useState(false);
+  const { user, loading, isConfigured } = useAuth();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      if (!isSupabaseConfigured) {
-        router.push("/login?error=Admin%20requires%20Supabase%20authentication");
-        return;
-      }
-
-      const supabase = createClient();
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session) {
-        router.push("/login?next=/admin");
-        return;
-      }
-
-      setItems(JSON.parse(window.localStorage.getItem("nurulquran.adminDrafts") || "[]"));
-      setLoading(false);
-    };
-
-    checkAuth();
-  }, [router]);
+    if (loading) return;
+    if (!isConfigured) {
+      router.push("/login?error=Firebase%20login%20is%20not%20configured%20yet");
+      return;
+    }
+    if (!user) {
+      router.push("/login?next=/admin");
+      return;
+    }
+    setItems(JSON.parse(window.localStorage.getItem("nurulquran.adminDrafts") || "[]"));
+    setDraftsLoaded(true);
+  }, [isConfigured, loading, router, user]);
 
   useEffect(() => {
-    if (!loading) {
+    if (draftsLoaded) {
       window.localStorage.setItem("nurulquran.adminDrafts", JSON.stringify(items));
     }
-  }, [items, loading]);
+  }, [draftsLoaded, items]);
 
   const visibleItems = useMemo(
     () => items.filter((item) => item.type === selectedType),
@@ -88,7 +79,7 @@ export default function AdminPage() {
     setContent("");
   };
 
-  if (loading) {
+  if (loading || !user) {
     return (
       <main className="min-h-screen bg-ink">
         <Navbar />

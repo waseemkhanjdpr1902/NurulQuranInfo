@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, Amiri } from "next/font/google";
 import PWARegister from "@/components/PWARegister";
+import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -57,8 +58,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} ${amiri.variable}`}>
-        <PWARegister />
-        {children}
+        <AuthProvider>
+          <PWARegister />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

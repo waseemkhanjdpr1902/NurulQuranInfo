@@ -8,6 +8,7 @@ import {
   Compass, Atom, MessageSquare
 } from "lucide-react";
 import Link from "next/link";
+import BuyMeCoffeeCard from "@/components/BuyMeCoffeeCard";
 
 export default function HomeSections() {
   const features = [
@@ -139,28 +140,10 @@ export default function HomeSections() {
         </div>
       </section>
 
-      {/* Pricing / Supporters Section */}
+      {/* Buy Me a Coffee Support Section */}
       <section className="px-6 relative py-20">
-        <div className="max-w-4xl mx-auto glass p-12 md:p-24 rounded-[60px] border-gold/20 text-center relative overflow-hidden">
-          <div className="absolute inset-0 bg-gold/5 pointer-events-none" />
-          <div className="relative z-10">
-            <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">Free and <span className="italic">Open</span></h2>
-            <p className="text-parchment/60 text-lg leading-relaxed mb-12 max-w-2xl mx-auto font-light">
-              NurulQuran is dedicated to serving the Ummah. Access to 
-              sacred texts and essential tools will always remain free.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <div className="px-12 py-6 gold-gradient text-ink font-bold rounded-2xl">
-                Always $0 / mo
-              </div>
-              <a href="mailto:support@nurulquran.info?subject=Support%20NurulQuran" className="px-12 py-6 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
-                Support our Mission
-              </a>
-            </div>
-            <p className="mt-12 text-[10px] text-parchment/20 uppercase tracking-[0.3em] font-bold">
-              Join 10,000+ users worldwide
-            </p>
-          </div>
+        <div className="max-w-5xl mx-auto">
+          <BuyMeCoffeeCard />
         </div>
       </section>
 

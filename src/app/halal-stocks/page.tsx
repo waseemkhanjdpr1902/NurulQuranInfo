@@ -6,7 +6,7 @@ import HalalStocksClient from "./HalalStocksClient";
 export const metadata: Metadata = {
   title: "Halal Stock Screener",
   description:
-    "Demo halal stock screener with Shariah screening categories, local watchlist, business activity checks, ratio concerns, and manual review checklist.",
+    "Demo multi-country halal stock screener for India, US, UK, Saudi Arabia, UAE, Malaysia, Indonesia, Qatar, Kuwait, Canada, and Australia with Shariah screening categories and local watchlist.",
   alternates: {
     canonical: "/halal-stocks",
   },

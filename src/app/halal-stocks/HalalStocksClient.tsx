@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AlertTriangle, Bookmark, CheckCircle2, Filter, HelpCircle, Search, ShieldAlert, XCircle } from "lucide-react";
-import { getScreenedDemoStocks, type Market, type ShariahStatus, type StockScreeningResult } from "@/lib/halal-screening";
+import { getScreenedDemoStocks, manualReviewChecklist, type Country, type ShariahStatus, type StockScreeningResult } from "@/lib/halal-screening";
 
 const statusStyles: Record<ShariahStatus, string> = {
   "Likely Halal": "text-emerald-300 bg-emerald-500/10 border-emerald-500/20",
@@ -18,19 +18,11 @@ const statusIcons: Record<ShariahStatus, React.ElementType> = {
   "Needs Manual Review": HelpCircle,
 };
 
-const checklist = [
-  "Confirm the company's current business segments and revenue sources.",
-  "Check debt, cash, and interest-bearing securities against your chosen Shariah standard.",
-  "Review interest income and impure income disclosures.",
-  "Look for subsidiaries involved in prohibited activities.",
-  "Verify with a reliable Shariah screening provider or qualified scholar.",
-  "Do not treat demo ratings as buy, sell, or fatwa advice.",
-];
-
 export default function HalalStocksClient() {
   const stocks = useMemo(() => getScreenedDemoStocks(), []);
   const [search, setSearch] = useState("");
-  const [market, setMarket] = useState<"All" | Market>("All");
+  const [country, setCountry] = useState<"All" | Country>("All");
+  const [sector, setSector] = useState("All");
   const [status, setStatus] = useState<"All" | ShariahStatus>("All");
   const [watchlist, setWatchlist] = useState<string[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -43,17 +35,21 @@ export default function HalalStocksClient() {
     window.localStorage.setItem("nurulquran.halalStocksWatchlist", JSON.stringify(watchlist));
   }, [watchlist]);
 
+  const countries = useMemo(() => ["All", ...Array.from(new Set(stocks.map((stock) => stock.country)))] as Array<"All" | Country>, [stocks]);
+  const sectors = useMemo(() => ["All", ...Array.from(new Set(stocks.map((stock) => stock.sector)))], [stocks]);
+
   const filteredStocks = stocks.filter((stock) => {
     const term = search.trim().toLowerCase();
     const matchesSearch =
       !term ||
-      [stock.companyName, stock.ticker, stock.sector, stock.businessActivity, stock.status]
+      [stock.companyName, stock.ticker, stock.country, stock.exchange, stock.sector, stock.businessActivity, stock.status]
         .join(" ")
         .toLowerCase()
         .includes(term);
-    const matchesMarket = market === "All" || stock.market === market;
+    const matchesCountry = country === "All" || stock.country === country;
+    const matchesSector = sector === "All" || stock.sector === sector;
     const matchesStatus = status === "All" || stock.status === status;
-    return matchesSearch && matchesMarket && matchesStatus;
+    return matchesSearch && matchesCountry && matchesSector && matchesStatus;
   });
 
   const toggleWatchlist = (ticker: string) => {
@@ -71,7 +67,7 @@ export default function HalalStocksClient() {
             Halal <span className="text-gold italic">Stocks</span>
           </h1>
           <p className="text-parchment/50 text-lg md:text-xl leading-relaxed max-w-3xl mx-auto">
-            Search demo stocks by company or ticker, review screening reasons, and save a local watchlist for manual follow-up.
+            Search demo stocks across 11 markets, review screening reasons, and save a local watchlist for manual follow-up.
           </p>
         </div>
       </header>
@@ -81,7 +77,7 @@ export default function HalalStocksClient() {
           <div className="glass p-6 md:p-8 rounded-[36px] border-gold/10 mb-10">
             <p className="text-gold font-bold mb-2">Not financial advice</p>
             <p className="text-parchment/55 leading-relaxed">
-              All ratings use sample demo data only. No stock is guaranteed halal. Do not use this page as a buy/sell recommendation, investment advice, tax advice, or religious fatwa.
+              Demo data only. Please verify with qualified Shariah screening sources before investing. No stock is 100% halal guaranteed, and this page does not provide buy/sell recommendations.
             </p>
           </div>
 
@@ -98,16 +94,27 @@ export default function HalalStocksClient() {
                 />
               </div>
               <div className="flex gap-3 overflow-x-auto">
-                {(["All", "India", "US"] as const).map((item) => (
+                {countries.map((item) => (
                   <button
                     key={item}
-                    onClick={() => setMarket(item)}
-                    className={`px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest whitespace-nowrap ${market === item ? "gold-gradient text-ink" : "bg-white/5 text-parchment/50 hover:text-gold"}`}
+                    onClick={() => setCountry(item)}
+                    className={`px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest whitespace-nowrap ${country === item ? "gold-gradient text-ink" : "bg-white/5 text-parchment/50 hover:text-gold"}`}
                   >
                     {item}
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="mt-4 flex gap-3 overflow-x-auto">
+              {sectors.map((item) => (
+                <button
+                  key={item}
+                  onClick={() => setSector(item)}
+                  className={`px-5 py-3 rounded-2xl text-xs font-bold uppercase tracking-widest whitespace-nowrap flex items-center gap-2 ${sector === item ? "gold-gradient text-ink" : "bg-white/5 text-parchment/50 hover:text-gold"}`}
+                >
+                  <Filter size={14} /> {item}
+                </button>
+              ))}
             </div>
             <div className="mt-4 flex gap-3 overflow-x-auto">
               {(["All", "Likely Halal", "Doubtful", "Avoid", "Needs Manual Review"] as const).map((item) => (
@@ -147,7 +154,7 @@ export default function HalalStocksClient() {
               <h2 className="text-3xl md:text-4xl font-display text-parchment">Manual review checklist</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {checklist.map((item) => (
+              {manualReviewChecklist.map((item) => (
                 <div key={item} className="p-5 rounded-2xl bg-white/5 text-parchment/60 leading-relaxed">
                   {item}
                 </div>
@@ -181,7 +188,7 @@ function StockCard({
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <p className="text-gold/50 text-[10px] uppercase tracking-[0.25em] font-bold mb-2">
-            {stock.market} - {stock.ticker}
+            {stock.country} - {stock.exchange} - {stock.ticker}
           </p>
           <h2 className="text-2xl font-display text-parchment">{stock.companyName}</h2>
           <p className="text-parchment/35 text-sm mt-1">{stock.sector}</p>
@@ -204,10 +211,16 @@ function StockCard({
       <div className="grid grid-cols-1 gap-3 mb-6 text-sm">
         <Metric label="Debt level" value={formatRatio(ratios.debtRatio)} />
         <Metric label="Interest income concern" value={formatRatio(ratios.interestIncomeRatio)} />
-        <Metric label="Impure income concern" value={stock.status === "Avoid" ? "High concern" : "Demo review required"} />
+        <Metric label="Impure income concern" value={formatRatio(ratios.impureIncomeRatio)} />
         <Metric label="Cash / interest-bearing securities" value={formatRatio(ratios.cashAndInterestBearingRatio)} />
+        <Metric label="Shariah status" value={stock.status} />
         <Metric label="Risk level" value={stock.riskLevel} />
         <Metric label="Last reviewed" value={stock.lastReviewed} />
+      </div>
+
+      <div className="mb-6 rounded-2xl bg-white/5 p-4">
+        <p className="text-gold/50 text-[10px] uppercase tracking-[0.25em] font-bold mb-2">Notes</p>
+        <p className="text-parchment/55 text-sm leading-relaxed">{stock.notes}</p>
       </div>
 
       <button onClick={onToggleExpanded} className="w-full py-3 rounded-2xl bg-white/5 text-gold text-xs font-bold uppercase tracking-widest hover:bg-gold/10">
