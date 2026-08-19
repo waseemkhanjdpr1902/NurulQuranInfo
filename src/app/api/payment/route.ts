@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { createClient } from "@/utils/supabase/server";
 
 let razorpay: Razorpay | null = null;
 
@@ -17,17 +18,30 @@ function getRazorpay() {
 
 export async function POST(req: Request) {
   try {
-    const { amount } = await req.json();
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return NextResponse.json({ error: "Sign in is required." }, { status: 401 });
+
+    const { planId } = await req.json();
+    const configuredPlans: Record<string, number> = {
+      supporter: Number(process.env.RAZORPAY_SUPPORTER_AMOUNT_PAISE || 0),
+      premium: Number(process.env.RAZORPAY_PREMIUM_AMOUNT_PAISE || 0),
+    };
+    const amount = configuredPlans[String(planId || "")];
+    if (!Number.isInteger(amount) || amount < 100) {
+      return NextResponse.json({ error: "Select a valid configured plan." }, { status: 400 });
+    }
 
     const rzp = getRazorpay();
     const options = {
-      amount: amount * 100, // amount in smallest currency unit (paise)
+      amount,
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
+      notes: { user_id: user.id, plan_id: String(planId) },
     };
 
     const order = await rzp.orders.create(options);
-    return NextResponse.json(order);
+    return NextResponse.json({ id: order.id, amount: order.amount, currency: order.currency });
   } catch (error) {
     console.error("Payment API error:", error);
     return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
