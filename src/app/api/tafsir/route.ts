@@ -12,6 +12,19 @@ function extractTafsirText(data: any) {
   );
 }
 
+function plainText(value: string) {
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const verseKey = searchParams.get("verse_key");
@@ -43,7 +56,7 @@ export async function GET(request: Request) {
       const text = extractTafsirText(data);
 
       if (text) {
-        return NextResponse.json({ text });
+        return NextResponse.json({ text: plainText(String(text)) });
       }
     } catch (error) {
       console.error("Tafsir fetch failed:", error);
