@@ -7,12 +7,8 @@ import {
   MessageCircle, Info, Quote, CheckCircle2, X,
   ArrowRight, Globe, Shield, Heart
 } from "lucide-react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-// Initialize Gemini
-const ai = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
 
 const DAWAH_CONCEPTS = [
   {
@@ -82,17 +78,18 @@ export default function DawahPage() {
     setIsLoading(true);
 
     try {
-      const model = ai.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are a wise and kind Dawah companion. Answer questions about Islam with wisdom, evidence from Quran and Sunnah, and a gentle tone. Keep responses scannable and profound."
+      const response = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: "dawah", messages: [{ role: "user", content: userMessage }] }),
       });
-
-      const response = await model.generateContent(userMessage);
-      const aiContent = response.response.text() || "I apologize, I'm having trouble processing that right now. Please try again.";
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "The study assistant is unavailable.");
+      const aiContent = data.text || "I apologize, I'm having trouble processing that right now. Please try again.";
       setMessages(prev => [...prev, { role: 'ai', content: aiContent }]);
     } catch (error) {
       console.error("Gemini Error:", error);
-      setMessages(prev => [...prev, { role: 'ai', content: "I encountered an error. Please try again shortly." }]);
+      setMessages(prev => [...prev, { role: 'ai', content: error instanceof Error ? error.message : "I encountered an error. Please try again shortly." }]);
     } finally {
       setIsLoading(false);
     }
