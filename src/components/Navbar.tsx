@@ -4,15 +4,27 @@ import { useState, useEffect } from "react";
 import { BookOpen, Sparkles, Menu, X, LogIn, Book, Landmark, Atom } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import { createClient, isSupabaseConfigured } from "@/services/supabase";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+    const supabase = createClient();
+    supabase.auth.getSession().then(({ data }) => setIsAuthenticated(Boolean(data.session)));
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(Boolean(session));
+    });
+    return () => data.subscription.unsubscribe();
   }, []);
 
   const navLinks = [
@@ -64,10 +76,10 @@ export default function Navbar() {
           <div className="h-8 w-px bg-white/10" />
           
           <div className="flex items-center gap-5">
-            <Link href="/login" className="group relative px-7 py-3 rounded-2xl overflow-hidden glass border border-gold/20 flex items-center gap-3">
+            <Link href={isAuthenticated ? "/dashboard" : "/login"} className="group relative px-7 py-3 rounded-2xl overflow-hidden glass border border-gold/20 flex items-center gap-3">
               <div className="absolute inset-0 bg-gold opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <LogIn size={18} className="text-gold group-hover:text-ink transition-colors relative z-10" />
-              <span className="text-gold group-hover:text-ink transition-colors text-xs font-bold uppercase tracking-widest relative z-10">Join</span>
+              <span className="text-gold group-hover:text-ink transition-colors text-xs font-bold uppercase tracking-widest relative z-10">{isAuthenticated ? "Dashboard" : "Join"}</span>
             </Link>
           </div>
         </div>
@@ -109,8 +121,8 @@ export default function Navbar() {
                 ))}
               </div>
               <div className="h-px bg-white/5" />
-              <Link onClick={() => setIsMobileMenuOpen(false)} href="/login" className="w-full py-4 rounded-2xl gold-gradient text-ink font-bold flex items-center justify-center gap-2 shadow-xl shadow-gold/20">
-                <LogIn size={20} /> Sign In
+              <Link onClick={() => setIsMobileMenuOpen(false)} href={isAuthenticated ? "/dashboard" : "/login"} className="w-full py-4 rounded-2xl gold-gradient text-ink font-bold flex items-center justify-center gap-2 shadow-xl shadow-gold/20">
+                <LogIn size={20} /> {isAuthenticated ? "Open Dashboard" : "Sign In"}
               </Link>
             </div>
           </motion.div>
