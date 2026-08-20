@@ -13,17 +13,17 @@ export default function HomeSections() {
   const features = [
     {
       title: "AI Spiritual Study",
-      desc: "Connect verses with authentic Hadith and spiritual insights using state-of-the-art AI.",
+      desc: "Explore verses alongside guided study insights, with clear reminders to verify religious rulings with qualified scholars.",
       icon: <Sparkles className="text-gold" />
     },
     {
-      title: "Multi-Reciter Audio",
-      desc: "Listen to the Quran in beautiful voices from 10 world-renowned reciters.",
+      title: "Quran Listening",
+      desc: "Listen while you read and keep Arabic text and translation together in one focused experience.",
       icon: <Zap className="text-gold" />
     },
     {
-      title: "Authentic Library",
-      desc: "Browse 30,000+ verified hadiths from Sahih Bukhari and other major collections.",
+      title: "Islamic Library",
+      desc: "Browse Quran study, hadith, duas and spiritual learning resources from a single, simple interface.",
       icon: <Shield className="text-gold" />
     }
   ];
@@ -55,12 +55,12 @@ export default function HomeSections() {
   ];
 
   return (
-    <div className="space-y-40 pb-40">
+    <div className="space-y-24 md:space-y-36 pb-24 md:pb-36">
       
       {/* Features Section */}
       <section id="features" className="px-6 scroll-mt-32">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-24">
+          <div className="text-center mb-14 md:mb-20">
             <motion.span 
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -68,8 +68,8 @@ export default function HomeSections() {
             >
               Why NurulQuran?
             </motion.span>
-            <h2 className="text-4xl md:text-7xl font-display text-parchment leading-tight">
-              Crafting a <span className="text-gold italic">Brighter</span> Faith
+            <h2 className="text-4xl md:text-6xl font-display text-parchment leading-tight">
+              Designed for <span className="text-gold italic">meaningful</span> study
             </h2>
           </div>
 
@@ -81,7 +81,7 @@ export default function HomeSections() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
                 viewport={{ once: true }}
-                className="glass p-12 rounded-[40px] border-white/5 hover:border-gold/20 transition-all group"
+                className="glass p-7 md:p-10 rounded-3xl border-white/5 hover:border-gold/25 hover:-translate-y-1 transition-all group"
               >
                 <div className="w-16 h-16 rounded-2xl bg-gold/10 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform">
                   {f.icon}
@@ -95,11 +95,11 @@ export default function HomeSections() {
       </section>
 
       {/* Tools Grid Section */}
-      <section id="tools" className="px-6 scroll-mt-32 relative py-40 overflow-hidden">
+      <section id="tools" className="px-5 sm:px-6 scroll-mt-32 relative py-20 md:py-28 overflow-hidden">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[600px] bg-gold/5 blur-[120px] rounded-full pointer-events-none" />
         
         <div className="max-w-7xl mx-auto relative z-10">
-          <div className="flex flex-col md:flex-row items-end justify-between gap-8 mb-24">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-14 md:mb-20">
             <div className="max-w-2xl">
               <span className="text-gold text-[10px] uppercase tracking-[0.4em] font-bold mb-6 block">Unified Experience</span>
               <h2 className="text-4xl md:text-6xl font-display text-parchment leading-tight">
@@ -122,7 +122,7 @@ export default function HomeSections() {
               >
                 <Link 
                   href={t.href}
-                  className="glass flex flex-col items-center justify-center p-12 rounded-[40px] border-white/5 hover:border-gold/30 hover:bg-white/5 transition-all aspect-square group text-center"
+                  className="glass flex flex-col items-center justify-center p-5 sm:p-8 rounded-3xl border-white/5 hover:border-gold/30 hover:bg-white/5 transition-all min-h-40 sm:aspect-square group text-center"
                 >
                   <div className="text-gold/60 mb-6 group-hover:scale-110 group-hover:text-gold transition-all duration-500">
                     {t.icon}
@@ -137,35 +137,28 @@ export default function HomeSections() {
         </div>
       </section>
 
-      {/* Pricing / Supporters Section */}
+      {/* Mission Section */}
       <section className="px-6 relative py-20">
-        <div className="max-w-4xl mx-auto glass p-12 md:p-24 rounded-[60px] border-gold/20 text-center relative overflow-hidden">
+        <div className="max-w-4xl mx-auto glass p-8 sm:p-12 md:p-20 rounded-[36px] md:rounded-[52px] border-gold/20 text-center relative overflow-hidden">
           <div className="absolute inset-0 bg-gold/5 pointer-events-none" />
           <div className="relative z-10">
-            <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">Free and <span className="italic">Open</span></h2>
+            <span className="text-gold text-[10px] uppercase tracking-[0.35em] font-bold mb-5 block">Our mission</span>
+            <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">Knowledge made <span className="italic text-gold">accessible</span></h2>
             <p className="text-parchment/60 text-lg leading-relaxed mb-12 max-w-2xl mx-auto font-light">
               NurulQuran is dedicated to serving the Ummah. Access to 
               sacred texts and essential tools will always remain free.
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center">
-              <div className="px-12 py-6 gold-gradient text-ink font-bold rounded-2xl">
-                Always $0 / mo
-              </div>
-              <button className="px-12 py-6 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
-                Support our Mission
-              </button>
-            </div>
-            <p className="mt-12 text-[10px] text-parchment/20 uppercase tracking-[0.3em] font-bold">
-              Join 10,000+ users worldwide
-            </p>
+            <Link href="/quran" className="px-9 py-4 gold-gradient text-ink font-bold rounded-2xl inline-flex items-center justify-center gap-3 hover:-translate-y-0.5 transition-transform">
+              Open the Quran <ArrowRight size={18} />
+            </Link>
           </div>
         </div>
       </section>
 
       {/* FAQ Section */}
-      <section className="px-6 pb-40">
+      <section className="px-6 pb-20 md:pb-32">
         <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-24">
+          <div className="text-center mb-14 md:mb-20">
              <HelpCircle size={48} className="text-gold mx-auto mb-8" />
              <h2 className="text-4xl md:text-5xl font-display text-parchment">Common Questions</h2>
           </div>
@@ -177,7 +170,7 @@ export default function HomeSections() {
                 initial={{ opacity: 0, x: -10 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
-                className="glass p-8 md:p-12 rounded-[40px] border-white/5"
+                className="glass p-6 md:p-9 rounded-3xl border-white/5"
               >
                 <div className="flex items-start gap-6">
                   <span className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-ink shrink-0 font-bold">

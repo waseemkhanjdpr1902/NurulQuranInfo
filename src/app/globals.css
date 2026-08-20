@@ -18,27 +18,43 @@
 }
 
 body {
-  background: #0F172A;
+  background:
+    radial-gradient(circle at 50% -10%, rgba(212, 175, 55, 0.08), transparent 32rem),
+    #0F172A;
   color: #F5F5DC;
   font-family: var(--font-sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
+}
+
+html { scroll-behavior: smooth; }
+
+::selection { background: rgba(212, 175, 55, 0.28); color: #fffbed; }
+
+button, a { -webkit-tap-highlight-color: transparent; }
+
+:focus-visible {
+  outline: 2px solid #D4AF37;
+  outline-offset: 4px;
 }
 
 .font-display { font-family: var(--font-display); }
 .font-arabic { font-family: var(--font-arabic); }
 
 .glass {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.025);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, rgba(255, 255, 255, 0.01) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 100%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.22);
 }
 
 .gold-gradient {

@@ -7,8 +7,14 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-displa
 const amiri = Amiri({ subsets: ["arabic"], weight: ["400", "700"], variable: "--font-arabic" });
 
 export const metadata: Metadata = {
-  title: "NurulQuran",
-  description: "A modern Islamic spiritual companion app.",
+  title: {
+    default: "NurulQuran — Read, Reflect and Remember",
+    template: "%s | NurulQuran",
+  },
+  description: "Read the Holy Quran, explore tafseer and authentic Islamic resources, and use practical tools for prayer, duas, tasbih and zakat.",
+  applicationName: "NurulQuran",
+  keywords: ["Quran", "Holy Quran", "Tafseer", "Islamic tools", "Dua", "Prayer times"],
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
