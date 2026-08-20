@@ -18,10 +18,15 @@ function getRazorpay() {
 export async function POST(req: Request) {
   try {
     const { amount } = await req.json();
+    const numericAmount = Number(amount);
+
+    if (!Number.isFinite(numericAmount) || numericAmount < 1 || numericAmount > 100000) {
+      return NextResponse.json({ error: "Enter a valid amount between ₹1 and ₹1,00,000." }, { status: 400 });
+    }
 
     const rzp = getRazorpay();
     const options = {
-      amount: amount * 100, // amount in smallest currency unit (paise)
+      amount: Math.round(numericAmount * 100),
       currency: "INR",
       receipt: `receipt_${Date.now()}`,
     };

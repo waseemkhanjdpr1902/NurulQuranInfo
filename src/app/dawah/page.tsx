@@ -7,12 +7,9 @@ import {
   MessageCircle, Info, Quote, CheckCircle2, X,
   ArrowRight, Globe, Shield, Heart
 } from "lucide-react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-// Initialize Gemini
-const ai = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
+import Link from "next/link";
 
 const DAWAH_CONCEPTS = [
   {
@@ -82,13 +79,17 @@ export default function DawahPage() {
     setIsLoading(true);
 
     try {
-      const model = ai.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are a wise and kind Dawah companion. Answer questions about Islam with wisdom, evidence from Quran and Sunnah, and a gentle tone. Keep responses scannable and profound."
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          intent: "dawah",
+          messages: [{ role: "user", content: userMessage }],
+        }),
       });
-
-      const response = await model.generateContent(userMessage);
-      const aiContent = response.response.text() || "I apologize, I'm having trouble processing that right now. Please try again.";
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Dawah companion unavailable");
+      const aiContent = data.text || "I apologize, I'm having trouble processing that right now. Please try again.";
       setMessages(prev => [...prev, { role: 'ai', content: aiContent }]);
     } catch (error) {
       console.error("Gemini Error:", error);
@@ -252,7 +253,7 @@ export default function DawahPage() {
                 </h3>
                 <p className="text-parchment font-medium mb-8 leading-relaxed italic">&quot;{item.myth}&quot;</p>
                 
-                <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                <h3 className="text-parchment font-bold mb-4 flex items-center gap-2">
                   <CheckCircle2 className="text-emerald-500" size={16} /> Reality
                 </h3>
                 <p className="text-parchment/60 text-sm leading-relaxed">{item.truth}</p>
@@ -276,12 +277,12 @@ export default function DawahPage() {
             we are here to support your spiritual growth.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
-            <button className="px-10 py-5 gold-gradient text-ink font-bold rounded-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3">
-              Request Info Materials <ArrowRight size={20} />
-            </button>
-            <button className="px-10 py-5 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
-              Talk to an Imam
-            </button>
+            <Link href="/quran" className="px-10 py-5 gold-gradient text-ink font-bold rounded-2xl hover:scale-105 transition-transform flex items-center justify-center gap-3">
+              Explore the Quran <ArrowRight size={20} />
+            </Link>
+            <Link href="/spiritual-guide" className="px-10 py-5 glass border border-gold/20 text-gold font-bold rounded-2xl hover:bg-gold/5 transition-colors">
+              Spiritual Guide
+            </Link>
           </div>
         </div>
       </section>

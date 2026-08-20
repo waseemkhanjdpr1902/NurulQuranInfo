@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Sparkles, Send, User, Bot, X, Loader2 } from "lucide-react";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
 interface Message {
   role: "user" | "model";
@@ -46,23 +45,17 @@ export default function AIAssistant() {
     setIsLoading(true);
 
     try {
-      const ai = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-      const model = ai.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are a scholarly Quranic assistant. Provide accurate information based on traditional Tafsir and Quranic linguistics. Always be respectful and start with a polite Islamic greeting if appropriate. Keep your answers concise but profound.",
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          intent: "quran",
+          messages: newMessages.slice(-8),
+        }),
       });
-      
-      // Prepare history for the model
-      const history = newMessages.map(msg => ({
-        role: msg.role,
-        parts: [{ text: msg.content }]
-      }));
-
-      const response = await model.generateContent({
-        contents: history,
-      });
-
-      const text = response.response.text();
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "AI guide unavailable");
+      const text = data.text;
       
       if (text) {
         setMessages((prev) => [...prev, { role: "model", content: text }]);
@@ -71,8 +64,7 @@ export default function AIAssistant() {
       }
     } catch (error) {
       console.error("AI Error:", error);
-      const errorMessage = error instanceof Error ? error.message : "I apologize, but I encountered an error. Please try again later.";
-      setMessages((prev) => [...prev, { role: "model", content: errorMessage }]);
+      setMessages((prev) => [...prev, { role: "model", content: "I apologize, but the study guide is temporarily unavailable. Please try again later." }]);
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +75,7 @@ export default function AIAssistant() {
       {/* Floating Button */}
       <button
         id="ai"
+        aria-label="Open AI Quranic Guide"
         onClick={() => setIsOpen(true)}
         className="fixed bottom-8 right-8 w-16 h-16 rounded-full gold-gradient flex items-center justify-center shadow-2xl shadow-gold/30 hover:scale-110 transition-transform z-40"
       >
@@ -109,7 +102,7 @@ export default function AIAssistant() {
                   <p className="text-[10px] text-gold uppercase tracking-widest">Powered by Gemini</p>
                 </div>
               </div>
-              <button onClick={() => setIsOpen(false)} className="text-parchment/50 hover:text-parchment">
+              <button aria-label="Close AI Quranic Guide" onClick={() => setIsOpen(false)} className="text-parchment/50 hover:text-parchment">
                 <X size={24} />
               </button>
             </div>
@@ -151,6 +144,7 @@ export default function AIAssistant() {
               <div className="relative">
                 <input
                   type="text"
+                  aria-label="Ask the AI Quranic Guide"
                   placeholder="Ask about a verse or concept..."
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
@@ -158,6 +152,7 @@ export default function AIAssistant() {
                   className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-parchment focus:outline-none focus:border-gold/50 transition-colors"
                 />
                 <button
+                  aria-label="Send question"
                   onClick={handleSend}
                   disabled={isLoading}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl gold-gradient flex items-center justify-center text-ink hover:scale-105 transition-transform disabled:opacity-50"

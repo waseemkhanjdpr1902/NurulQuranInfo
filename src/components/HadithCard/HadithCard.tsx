@@ -20,6 +20,15 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
 
+  const shareHadith = async () => {
+    const text = `${hadith.text} — ${hadith.collection} ${hadith.number}`;
+    if (navigator.share) {
+      await navigator.share({ title: "Hadith", text }).catch(() => undefined);
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+  };
+
   const fetchAiContext = async () => {
     if (aiInsight) {
       setShowAiContext(true);
@@ -29,16 +38,17 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
     setLoadingAi(true);
     setShowAiContext(true);
     try {
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY!);
-      
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        systemInstruction: "You are an Islamic scholar specializing in the relationship between Quran and Sunnah. Find related Quranic verses for this Hadith and explain the connection. Provide surah name and verse numbers clearly. Use a profound and wise tone."
+      const response = await fetch("/api/ai-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          intent: "hadith",
+          messages: [{ role: "user", content: `Hadith: "${hadith.text}". Source: ${hadith.collection} ${hadith.number}. Explain related Quranic themes and cite verses only when confident.` }],
+        }),
       });
-
-      const response = await model.generateContent(`Hadith: "${hadith.text}". Source: ${hadith.collection} ${hadith.number}. Provide related Quran verses, their meanings, and study insights.`);
-      setAiInsight(response.response.text() || "Insight unavailable.");
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Insight unavailable");
+      setAiInsight(data.text || "Insight unavailable.");
     } catch (error) {
       console.error("AI Context Error:", error);
       setAiInsight("Unable to load spiritual context at this time. Please check your connectivity.");
@@ -66,12 +76,13 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
         </div>
         <div className="flex items-center gap-2">
           <button 
+            aria-label="Save hadith"
             onClick={onSave}
             className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-parchment/30 hover:text-gold hover:bg-gold/10 transition-all"
           >
             <Bookmark size={18} />
           </button>
-          <button className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-parchment/30 hover:text-gold hover:bg-gold/10 transition-all">
+          <button onClick={shareHadith} aria-label="Share hadith" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-parchment/30 hover:text-gold hover:bg-gold/10 transition-all">
             <Share2 size={18} />
           </button>
         </div>

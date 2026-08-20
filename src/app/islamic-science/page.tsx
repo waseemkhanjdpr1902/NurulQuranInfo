@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { Atom, Compass, FlaskConical, Globe, BookOpen, Star, ArrowRight, Sparkles } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 
 export default function IslamicSciencePage() {
   const contributions = [
@@ -78,9 +79,9 @@ export default function IslamicSciencePage() {
                   </div>
                   <h3 className="text-3xl font-display text-parchment mb-4">{item.title}</h3>
                   <p className="text-parchment/60 leading-relaxed text-lg font-light mb-8">{item.desc}</p>
-                  <button className="flex items-center gap-2 text-gold text-xs font-bold uppercase tracking-widest hover:underline">
-                    Read Biography <ArrowRight size={14} />
-                  </button>
+                  <span className="flex items-center gap-2 text-gold text-xs font-bold uppercase tracking-widest">
+                    Historical contribution <ArrowRight size={14} />
+                  </span>
                 </div>
               </motion.div>
             ))}
@@ -102,9 +103,9 @@ export default function IslamicSciencePage() {
                   concepts mentioned in the revelation align with modern discoveries. 
                   Ancient wisdom meets today&apos;s technology.
                 </p>
-                <button className="px-10 py-5 gold-gradient text-ink font-bold rounded-2xl flex items-center gap-3 hover:scale-105 transition-transform shadow-xl shadow-gold/20">
+                <Link href="/quran" className="px-10 py-5 gold-gradient text-ink font-bold rounded-2xl inline-flex items-center gap-3 hover:scale-105 transition-transform shadow-xl shadow-gold/20">
                   Try AI Study Mode <ArrowRight size={20} />
-                </button>
+                </Link>
               </div>
               <div className="relative">
                 <div className="aspect-square glass rounded-[60px] border-white/5 flex items-center justify-center p-12">

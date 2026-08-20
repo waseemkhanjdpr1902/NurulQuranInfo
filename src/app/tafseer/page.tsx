@@ -51,12 +51,12 @@ export default function TafseerPage() {
                 historical context, and spiritual reflections for any verse you choose.
               </p>
               <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                <button className="w-full md:w-auto px-12 py-5 gold-gradient text-ink font-bold rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-3">
+                <Link href="/#ai" className="w-full md:w-auto px-12 py-5 gold-gradient text-ink font-bold rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-3">
                   Try AI Tafseer <MessageSquare size={20} />
-                </button>
-                <button className="w-full md:w-auto px-12 py-5 glass text-parchment font-bold rounded-full hover:bg-white/10 transition-colors flex items-center justify-center gap-3">
+                </Link>
+                <Link href="/quran" className="w-full md:w-auto px-12 py-5 glass text-parchment font-bold rounded-full hover:bg-gold/5 transition-colors flex items-center justify-center gap-3">
                   Browse Classical Tafseer <BookOpen size={20} />
-                </button>
+                </Link>
               </div>
             </motion.div>
           </div>
