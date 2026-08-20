@@ -230,9 +230,9 @@ export default function PrayerTimesPage() {
                 </div>
                 <h3 className="text-3xl font-display text-parchment mb-2">{name}</h3>
                 <p className="text-5xl font-mono text-gold mb-8">{time}</p>
-                <button className="w-full py-4 glass rounded-2xl text-parchment/40 text-[10px] font-bold uppercase tracking-widest hover:text-gold hover:bg-white/10 transition-all">
-                  Set Notification
-                </button>
+                <p className="w-full py-3 rounded-2xl bg-gold/5 text-gold/70 text-[10px] font-bold uppercase tracking-widest text-center">
+                  Local prayer time
+                </p>
               </motion.div>
             ))}
           </div>
