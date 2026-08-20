@@ -9,9 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        gold: "#D4AF37",
-        parchment: "#F5F5DC",
-        ink: "#0F172A",
+        gold: "#167C6B",
+        parchment: "#163B36",
+        ink: "#F6F7F1",
       },
       fontFamily: {
         display: ["var(--font-display)", "serif"],
