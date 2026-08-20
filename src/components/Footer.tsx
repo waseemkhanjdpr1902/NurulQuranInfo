@@ -1,6 +1,6 @@
 "use client";
 
-import { Sparkles, Mail, Twitter, Instagram, Heart, Globe, ArrowUpRight } from "lucide-react";
+import { Sparkles, Heart, Globe } from "lucide-react";
 import Link from "next/link";
 
 export default function Footer() {
@@ -15,22 +15,22 @@ export default function Footer() {
       { name: "Supplications", href: "/dua" },
       { name: "Tasbih Counter", href: "/tasbih" },
       { name: "Zakat Calculator", href: "/zakat" },
-      { name: "Hajj Guide", href: "/hajj" },
+      { name: "Prayer Times", href: "/prayer-times" },
     ],
-    community: [
-      { name: "Privacy Policy", href: "/privacy" },
-      { name: "Terms of Service", href: "/terms" },
-      { name: "Support Center", href: "/support" },
-      { name: "Feedback", href: "/feedback" },
+    learn: [
+      { name: "Names of Allah", href: "/names-of-allah" },
+      { name: "Spiritual Guide", href: "/spiritual-guide" },
+      { name: "AI Dawah", href: "/dawah" },
+      { name: "Dashboard", href: "/dashboard" },
     ]
   };
 
   return (
-    <footer className="bg-ink pt-32 pb-12 px-6 border-t border-white/5 relative overflow-hidden">
+    <footer className="bg-ink pt-20 md:pt-28 pb-10 px-6 border-t border-white/5 relative overflow-hidden">
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-gold/5 blur-[100px] rounded-full pointer-events-none" />
       
       <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-16 mb-24">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-16 mb-16 md:mb-20">
           
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-4 mb-8 group">
@@ -42,39 +42,16 @@ export default function Footer() {
             <p className="text-parchment/40 text-sm leading-relaxed mb-10 max-w-sm">
               Nurturing the modern spiritual journey with authentic wisdom and cutting-edge technology. Built for the global Ummah.
             </p>
-            <div className="flex items-center gap-4">
-              <SocialLink icon={<Twitter size={18} />} href="#" />
-              <SocialLink icon={<Instagram size={18} />} href="#" />
-            </div>
+            <Link href="/quran" className="inline-flex items-center rounded-xl border border-gold/20 px-5 py-3 text-xs font-bold uppercase tracking-widest text-gold hover:bg-gold/10 transition-colors">Begin reading</Link>
           </div>
 
           <FooterColumn title="Explore" links={links.explore} />
           <FooterColumn title="Tools" links={links.tools} />
-          <FooterColumn title="Community" links={links.community} />
-
-          <div className="lg:col-span-1">
-            <div className="glass-card p-8 rounded-[32px] border-gold/10">
-              <Mail size={24} className="text-gold mb-6" />
-              <h4 className="text-parchment font-bold mb-4 text-sm uppercase tracking-widest">Connect</h4>
-              <p className="text-parchment/40 text-[10px] uppercase tracking-widest font-bold leading-relaxed mb-6">
-                Receive weekly <br /> insights in your <br /> inbox.
-              </p>
-              <div className="relative group">
-                <input 
-                  type="email" 
-                  placeholder="Email" 
-                  className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-xs text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-all"
-                />
-                <button className="absolute right-2 top-2 p-1 text-gold hover:translate-x-1 transition-transform">
-                  <ArrowUpRight size={18} />
-                </button>
-              </div>
-            </div>
-          </div>
+          <FooterColumn title="Learn" links={links.learn} />
         </div>
 
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-8 text-[10px] uppercase tracking-[0.3em] font-bold text-parchment/20">
-          <p>© 2026 NurulQuran. Preserving the light of the faithful.</p>
+          <p>© 2026 NurulQuran. Read, reflect and remember.</p>
           <div className="flex items-center gap-2 text-gold/30">
             Made with <Heart size={10} className="fill-gold animate-pulse" /> for the Ummah
           </div>
@@ -85,17 +62,6 @@ export default function Footer() {
         </div>
       </div>
     </footer>
-  );
-}
-
-function SocialLink({ icon, href }: { icon: React.ReactNode, href: string }) {
-  return (
-    <Link 
-      href={href} 
-      className="w-12 h-12 glass rounded-xl flex items-center justify-center text-parchment/30 hover:text-gold hover:border-gold/20 transition-all duration-300"
-    >
-      {icon}
-    </Link>
   );
 }
 
