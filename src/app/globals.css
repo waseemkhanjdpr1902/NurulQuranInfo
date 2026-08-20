@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  --color-gold: #D4AF37;
-  --color-parchment: #F5F5DC;
-  --color-ink: #0F172A;
-  --color-gold-muted: rgba(212, 175, 55, 0.1);
+  --color-gold: #167C6B;
+  --color-parchment: #163B36;
+  --color-ink: #F6F7F1;
+  --color-gold-muted: rgba(22, 124, 107, 0.1);
   
   --font-sans: 'Inter', system-ui, sans-serif;
   --font-display: 'Playfair Display', serif;
@@ -19,9 +19,10 @@
 
 body {
   background:
-    radial-gradient(circle at 50% -10%, rgba(212, 175, 55, 0.08), transparent 32rem),
-    #0F172A;
-  color: #F5F5DC;
+    radial-gradient(circle at 12% 0%, rgba(159, 207, 187, 0.34), transparent 28rem),
+    radial-gradient(circle at 88% 8%, rgba(205, 229, 216, 0.48), transparent 30rem),
+    #F6F7F1;
+  color: #163B36;
   font-family: var(--font-sans);
   min-height: 100vh;
   overflow-x: hidden;
@@ -30,12 +31,12 @@ body {
 
 html { scroll-behavior: smooth; }
 
-::selection { background: rgba(212, 175, 55, 0.28); color: #fffbed; }
+::selection { background: rgba(22, 124, 107, 0.22); color: #0D4F45; }
 
 button, a { -webkit-tap-highlight-color: transparent; }
 
 :focus-visible {
-  outline: 2px solid #D4AF37;
+  outline: 2px solid #167C6B;
   outline-offset: 4px;
 }
 
@@ -43,26 +44,27 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .font-arabic { font-family: var(--font-arabic); }
 
 .glass {
-  background: rgba(255, 255, 255, 0.025);
+  background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(22, 124, 107, 0.13);
+  box-shadow: 0 12px 40px rgba(22, 59, 54, 0.06);
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.055) 0%, rgba(255, 255, 255, 0.018) 100%);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(235, 244, 237, 0.88) 100%);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  box-shadow: 0 20px 60px rgba(2, 6, 23, 0.22);
+  border: 1px solid rgba(22, 124, 107, 0.14);
+  box-shadow: 0 20px 60px rgba(22, 59, 54, 0.12);
 }
 
 .gold-gradient {
-  background: linear-gradient(135deg, #D4AF37 0%, #F5F5DC 100%);
+  background: linear-gradient(135deg, #0D6658 0%, #28947F 100%);
 }
 
 .text-gradient-gold {
-  background: linear-gradient(to right, #D4AF37, #F5F5DC);
+  background: linear-gradient(to right, #0D6658, #4E9F8B);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -76,12 +78,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(212, 175, 55, 0.1);
+  background: rgba(22, 124, 107, 0.18);
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(212, 175, 55, 0.2);
+  background: rgba(22, 124, 107, 0.32);
 }
 
 @keyframes float {
