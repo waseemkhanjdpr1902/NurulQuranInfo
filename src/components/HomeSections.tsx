@@ -35,6 +35,7 @@ export default function HomeSections() {
     { name: "Qibla Finder", href: "/prayer-times", icon: <Compass size={24} /> },
     { name: "Islamic Science", href: "/islamic-science", icon: <Atom size={24} /> },
     { name: "Names of Allah", href: "/names-of-allah", icon: <BookOpen size={24} /> },
+    { name: "Qur’an Reflection", href: "/quran-reflection", icon: <Sparkles size={24} /> },
     { name: "AI Dawah", href: "/dawah", icon: <MessageSquare size={24} /> },
     { name: "Tasbih Counter", href: "/tasbih", icon: <Zap size={24} /> },
   ];

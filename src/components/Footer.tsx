@@ -19,6 +19,7 @@ export default function Footer() {
     ],
     learn: [
       { name: "Names of Allah", href: "/names-of-allah" },
+      { name: "Qur’an Reflection", href: "/quran-reflection" },
       { name: "Spiritual Guide", href: "/spiritual-guide" },
       { name: "AI Dawah", href: "/dawah" },
       { name: "Dashboard", href: "/dashboard" },

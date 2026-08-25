@@ -29,6 +29,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Quran", href: "/quran", icon: Book },
+    { name: "Reflect", href: "/quran-reflection", icon: Sparkles },
     { name: "Hadith", href: "/hadith", icon: BookOpen },
     { name: "Science", href: "/islamic-science", icon: Atom },
     { name: "Features", href: "/#features", icon: Sparkles },
