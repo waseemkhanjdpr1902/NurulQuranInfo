@@ -1,32 +1,21 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Sparkles, Star, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-
-const NAMES = [
-  { ar: "ٱللَّٰه", en: "Allah", mean: "The God" },
-  { ar: "ٱلرَّحْمَٰنُ", en: "Ar-Rahman", mean: "The Most Merciful" },
-  { ar: "ٱلرَّحِيمُ", en: "Ar-Rahim", mean: "The Bestower of Mercy" },
-  { ar: "ٱلْمَلِكُ", en: "Al-Malik", mean: "The King" },
-  { ar: "ٱلْقُدُّوسُ", en: "Al-Quddus", mean: "The Most Holy" },
-  { ar: "ٱلسَّلَامُ", en: "As-Salam", mean: "The Perfection and Giver of Peace" },
-  { ar: "ٱلْمُؤْمِنُ", en: "Al-Mu'min", mean: "The Giver of Belief" },
-  { ar: "ٱلْمُهَيْمِنُ", en: "Al-Muhaymin", mean: "The Ever-Watching" },
-  { ar: "ٱلْعَزِيزُ", en: "Al-Aziz", mean: "The All-Mighty" },
-  { ar: "ٱلْجَبَّارُ", en: "Al-Jabbar", mean: "The Compeller" },
-  { ar: "ٱلْمُتَكَبِّرُ", en: "Al-Mutakabbir", mean: "The Supreme" },
-  { ar: "ٱلْخَالِقُ", en: "Al-Khaliq", mean: "The Creator" },
-];
+import { ALLAH_NAMES } from "@/data/names-of-allah";
 
 export default function NamesOfAllahPage() {
   const [search, setSearch] = useState("");
 
-  const filteredNames = NAMES.filter(n => 
-    n.en.toLowerCase().includes(search.toLowerCase()) || 
-    n.mean.toLowerCase().includes(search.toLowerCase())
+  const query = search.trim().toLowerCase();
+  const filteredNames = ALLAH_NAMES.filter(n =>
+    n.en.toLowerCase().includes(query) ||
+    n.mean.toLowerCase().includes(query) ||
+    n.ar.includes(search.trim()) ||
+    String(n.number) === query
   );
 
   return (
@@ -65,18 +54,24 @@ export default function NamesOfAllahPage() {
               className="w-full pl-16 pr-8 py-5 glass rounded-[32px] text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-colors shadow-2xl"
             />
           </div>
+          <p className="mt-4 text-center text-sm text-parchment/60">
+            Showing {filteredNames.length} of 99 names
+          </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredNames.map((name, i) => (
             <motion.div
-              key={name.en}
+              key={name.number}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ delay: i * 0.03 }}
               viewport={{ once: true }}
               className="glass p-10 rounded-[40px] border-white/5 hover:border-gold/30 hover:bg-white/5 transition-all group flex flex-col items-center text-center"
             >
+              <span className="mb-5 flex h-8 w-8 items-center justify-center rounded-full bg-gold/10 text-xs font-bold text-gold">
+                {name.number}
+              </span>
               <div className="text-4xl md:text-5xl font-arabic text-gold mb-6 group-hover:scale-110 transition-transform duration-500">
                 {name.ar}
               </div>
@@ -85,6 +80,11 @@ export default function NamesOfAllahPage() {
             </motion.div>
           ))}
         </div>
+        {filteredNames.length === 0 ? (
+          <div className="glass rounded-3xl p-10 text-center text-parchment/60">
+            No name matched your search. Try a name, meaning, Arabic text, or number.
+          </div>
+        ) : null}
       </div>
 
       <Footer />
