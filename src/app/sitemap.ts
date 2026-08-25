@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { QURAN_TOPICS } from "@/data/quran-topics";
 
 const routes = [
   "",
@@ -11,6 +12,9 @@ const routes = [
   "/zakat",
   "/names-of-allah",
   "/quran-reflection",
+  "/quran-topics",
+  ...QURAN_TOPICS.map(topic => `/quran-topics/${topic.slug}`),
+  "/sources",
   "/spiritual-guide",
   "/islamic-science",
   "/dawah",

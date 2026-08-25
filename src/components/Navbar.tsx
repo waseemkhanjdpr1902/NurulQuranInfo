@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { BookOpen, Sparkles, Menu, X, LogIn, Book, Landmark, Atom } from "lucide-react";
+import { BookOpen, Sparkles, Menu, X, LogIn, Book, Landmark, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { createClient, isSupabaseConfigured } from "@/services/supabase";
@@ -29,10 +29,10 @@ export default function Navbar() {
 
   const navLinks = [
     { name: "Quran", href: "/quran", icon: Book },
+    { name: "Topics", href: "/quran-topics", icon: Compass },
     { name: "Reflect", href: "/quran-reflection", icon: Sparkles },
+    { name: "Journey", href: "/my-quran-journey", icon: BookOpen },
     { name: "Hadith", href: "/hadith", icon: BookOpen },
-    { name: "Science", href: "/islamic-science", icon: Atom },
-    { name: "Features", href: "/#features", icon: Sparkles },
     { name: "Tools", href: "/#tools", icon: Landmark },
   ];
 
@@ -58,8 +58,8 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-10">
-          <div className="flex items-center gap-10">
+        <div className="hidden lg:flex items-center gap-7">
+          <div className="flex items-center gap-7">
             {navLinks.map((link) => (
               <Link 
                 key={link.name} 

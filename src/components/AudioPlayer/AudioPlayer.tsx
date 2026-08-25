@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, SkipForward, SkipBack, Volume2, Repeat, Settings, X } from "lucide-react";
+import { Play, Pause, SkipForward, SkipBack, Volume2, Repeat, Settings, X, ChevronDown, ChevronUp } from "lucide-react";
 import { motion } from "motion/react";
 
 interface AudioPlayerProps {
@@ -24,6 +24,7 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isRepeat, setIsRepeat] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -92,13 +93,33 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
     }
   };
 
+  useEffect(() => {
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      audioRef.current?.pause();
+      onPlayStateChange?.(false);
+      onClose?.();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [onClose, onPlayStateChange]);
+
   return (
-    <div className="pointer-events-none fixed bottom-3 left-3 right-3 z-[90] md:bottom-6 md:left-6 md:right-6">
+    <div className="pointer-events-none fixed left-3 right-3 z-[90] md:left-6 md:right-6" style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
       <motion.div 
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="pointer-events-auto relative mx-auto max-w-5xl rounded-[28px] border border-gold/40 bg-ink p-4 pr-14 shadow-2xl shadow-black/60 md:p-5 md:pr-16"
+        className={`pointer-events-auto relative mx-auto max-w-5xl border border-gold/40 bg-ink shadow-2xl shadow-black/60 ${collapsed ? "rounded-2xl p-3 pr-28" : "rounded-[28px] p-4 pr-14 md:p-5 md:pr-16"}`}
       >
+        <button
+          type="button"
+          onClick={() => setCollapsed(value => !value)}
+          className="absolute right-14 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-parchment hover:border-gold/50 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          aria-label={collapsed ? "Expand recitation player" : "Collapse recitation player"}
+          title={collapsed ? "Expand player" : "Collapse player"}
+        >
+          {collapsed ? <ChevronUp size={21} /> : <ChevronDown size={21} />}
+        </button>
         <button
           type="button"
           onClick={() => {
@@ -112,7 +133,17 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
         >
           <X size={22} strokeWidth={3} />
         </button>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        {collapsed ? (
+          <div className="flex min-h-10 items-center gap-3">
+            <button onClick={togglePlay} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gold text-ink" aria-label={playing ? "Pause recitation" : "Play recitation"}>
+              {playing ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
+            </button>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-parchment">{title}</p>
+              <p className="truncate text-[10px] uppercase tracking-wider text-gold/70">{subtitle}</p>
+            </div>
+          </div>
+        ) : <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Info */}
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="w-12 h-12 rounded-2xl gold-gradient flex items-center justify-center text-ink shadow-lg shrink-0">
@@ -212,7 +243,7 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
               />
             </div>
           </div>
-        </div>
+        </div>}
 
         <audio 
           key={audioUrl || 'no-audio'}

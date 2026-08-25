@@ -47,6 +47,15 @@ export default function RemembrancePopup() {
     fetchAndShow();
   }, []);
 
+  useEffect(() => {
+    if (!isVisible) return;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") handleDismiss();
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [isVisible]);
+
   const handleDismiss = () => {
     setIsVisible(false);
     const today = new Date();
@@ -70,7 +79,7 @@ export default function RemembrancePopup() {
                 onClick={handleDismiss}
                 className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/50 bg-gold text-ink shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment"
                 title="Dismiss for today"
-                aria-label="Close Today's Name of Allah card"
+                aria-label="Close"
               >
                 <X size={24} strokeWidth={3} />
               </button>

@@ -115,7 +115,16 @@ export default function QuranReflectionPlanner() {
         const { data: rows, error: syncError } = await supabase.from("quran_reflections").select("payload").order("updated_at", { ascending: false });
         if (syncError) throw syncError;
         const cloud = (rows || []).map(row => row.payload as Reflection);
-        if (cloud.length) { setReflections(cloud); localStorage.setItem(STORAGE_KEY, JSON.stringify(cloud)); }
+        if (cloud.length) {
+          const merged = new Map<string, Reflection>();
+          [...cloud, ...localReflections].forEach(item => {
+            const existing = merged.get(item.id);
+            if (!existing || new Date(item.updatedAt) >= new Date(existing.updatedAt)) merged.set(item.id, item);
+          });
+          const combined = [...merged.values()].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+          setReflections(combined); localStorage.setItem(STORAGE_KEY, JSON.stringify(combined));
+          for (const item of combined) await supabase.from("quran_reflections").upsert({ id: item.id, payload: item, updated_at: item.updatedAt });
+        }
         setSyncMode("account");
       } catch { setSyncMode("local"); }
     });
