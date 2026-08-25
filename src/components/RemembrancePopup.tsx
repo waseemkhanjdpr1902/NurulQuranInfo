@@ -60,16 +60,19 @@ export default function RemembrancePopup() {
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.2 } }}
-          className="fixed bottom-32 right-6 z-[100] w-full max-w-sm"
+          className="fixed left-4 right-4 top-24 z-[110] mx-auto w-auto max-w-sm md:bottom-8 md:left-auto md:right-8 md:top-auto md:mx-0"
+          role="dialog"
+          aria-label="Today's Name of Allah"
         >
-          <div className="glass rounded-[32px] p-6 shadow-2xl shadow-gold/20 border border-gold/20 overflow-hidden relative group">
-            <div className="absolute top-0 right-0 p-4">
+          <div className="relative overflow-hidden rounded-[32px] border border-gold/40 bg-ink p-6 shadow-2xl shadow-black/60 group">
+            <div className="absolute right-3 top-3 z-10">
               <button 
                 onClick={handleDismiss}
-                className="text-parchment/20 hover:text-gold transition-colors"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/50 bg-gold text-ink shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment"
                 title="Dismiss for today"
+                aria-label="Close Today's Name of Allah card"
               >
-                <X size={16} />
+                <X size={24} strokeWidth={3} />
               </button>
             </div>
 
@@ -83,7 +86,7 @@ export default function RemembrancePopup() {
               </div>
             </div>
 
-            <div className="bg-white/5 rounded-2xl p-4 mb-4 text-center">
+            <div className="mb-4 rounded-2xl border border-white/10 bg-[#102f27] p-4 text-center">
               <h3 className="text-4xl font-arabic text-parchment mb-2 group-hover:text-gold transition-colors">
                 {currentName.name}
               </h3>

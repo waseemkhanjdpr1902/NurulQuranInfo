@@ -11,6 +11,7 @@ interface Verse {
   verse_number: number;
   text_uthmani: string;
   translation: string;
+  hindi_translation: string;
   audio_url?: string;
 }
 
@@ -188,13 +189,14 @@ export default function QuranReader({
     const fetchVerses = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,${reciterId}`);
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,hi.hindi,${reciterId}`);
         if (!res.ok) throw new Error("Failed to fetch verses");
         const data = await res.json();
         
         const arabicVerses = data.data[0].ayahs;
         const englishVerses = data.data[1].ayahs;
-        const audioVerses = data.data[2].ayahs;
+        const hindiVerses = data.data[2].ayahs;
+        const audioVerses = data.data[3].ayahs;
         
         const combinedVerses = arabicVerses.map((v: any, i: number) => {
           let audio = audioVerses[i].audio;
@@ -206,6 +208,7 @@ export default function QuranReader({
             verse_number: v.numberInSurah,
             text_uthmani: v.text,
             translation: englishVerses[i].text,
+            hindi_translation: hindiVerses[i].text,
             audio_url: audio,
           };
         });
@@ -270,7 +273,7 @@ export default function QuranReader({
   }, [playingVerseId, verses, playVerse, prevSlug, router]);
 
   const copyVerse = (verse: Verse) => {
-    const text = `${verse.text_uthmani}\n\n${verse.translation}\n\n(Quran ${surah.number}:${verse.verse_number})`;
+    const text = `${verse.text_uthmani}\n\nEnglish: ${verse.translation}\n\nHindi: ${verse.hindi_translation}\n\n(Quran ${surah.number}:${verse.verse_number})`;
     navigator.clipboard.writeText(text);
     setShowCopyToast(true);
     setTimeout(() => setShowCopyToast(false), 2000);
@@ -363,9 +366,14 @@ export default function QuranReader({
               </p>
             </div>
             <div className="pl-6 md:pl-8 border-l-2 border-gold/10 group-hover:border-gold/30 transition-colors">
+              <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gold/60">English — Saheeh International</p>
               <p className="text-parchment/70 text-lg md:text-xl leading-relaxed font-light">
                 {verse.translation}
               </p>
+              <div className="mt-5 border-t border-white/5 pt-5">
+                <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gold/60">हिंदी अनुवाद</p>
+                <p lang="hi" className="text-base leading-relaxed text-parchment/70 md:text-lg">{verse.hindi_translation}</p>
+              </div>
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
               <button 
@@ -393,20 +401,27 @@ export default function QuranReader({
       </div>
 
       {/* Persistent Audio Player */}
-      <AudioPlayer 
-        audioUrl={audioUrl}
-        title={surah.englishName}
-        subtitle={RECITERS.find(r => r.id === reciterId)?.name || ""}
-        autoPlay={autoplay}
-        onPlayRequest={() => {
-          if (verses.length > 0) {
-            playVerse(verses[0]);
-          }
-        }}
-        onNext={playNextVerse}
-        onPrev={playPrevVerse}
-        onPlayStateChange={setIsAudioPlaying}
-      />
+      {audioUrl ? (
+        <AudioPlayer 
+          audioUrl={audioUrl}
+          title={surah.englishName}
+          subtitle={RECITERS.find(r => r.id === reciterId)?.name || ""}
+          autoPlay={autoplay}
+          onPlayRequest={() => {
+            if (verses.length > 0) {
+              playVerse(verses[0]);
+            }
+          }}
+          onNext={playNextVerse}
+          onPrev={playPrevVerse}
+          onPlayStateChange={setIsAudioPlaying}
+          onClose={() => {
+            setAudioUrl(null);
+            setPlayingVerseId(null);
+            setIsAudioPlaying(false);
+          }}
+        />
+      ) : null}
 
       {/* Copy Toast */}
       <AnimatePresence>
@@ -483,6 +498,11 @@ export default function QuranReader({
                   <div>
                     <h4 className="text-gold/60 text-[10px] uppercase tracking-widest mb-2 font-bold">English Sahih Translation</h4>
                     <p className="text-parchment/70 leading-relaxed italic border-l-2 border-gold/20 pl-4">&quot;{selectedTafsir.translation}&quot;</p>
+                  </div>
+
+                  <div lang="hi">
+                    <h4 className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gold/60">हिंदी अनुवाद</h4>
+                    <p className="border-l-2 border-gold/20 pl-4 leading-relaxed text-parchment/70">{selectedTafsir.hindi_translation}</p>
                   </div>
                   
                   <div className="pt-8 border-t border-white/5">

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, SkipForward, SkipBack, Volume2, Repeat, Settings, ChevronUp } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { Play, Pause, SkipForward, SkipBack, Volume2, Repeat, Settings, X } from "lucide-react";
+import { motion } from "motion/react";
 
 interface AudioPlayerProps {
   audioUrl: string | null;
@@ -10,12 +10,13 @@ interface AudioPlayerProps {
   onPrev?: () => void;
   onPlayRequest?: () => void;
   onPlayStateChange?: (playing: boolean) => void;
+  onClose?: () => void;
   title: string;
   subtitle: string;
   autoPlay?: boolean;
 }
 
-export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, onPlayStateChange, title, subtitle, autoPlay }: AudioPlayerProps) {
+export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, onPlayStateChange, onClose, title, subtitle }: AudioPlayerProps) {
   const [playing, setPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -92,12 +93,25 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
   };
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-[60] px-6 pb-6 pointer-events-none">
+    <div className="pointer-events-none fixed bottom-3 left-3 right-3 z-[90] md:bottom-6 md:left-6 md:right-6">
       <motion.div 
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className="max-w-5xl mx-auto glass p-4 md:p-6 rounded-[32px] border-gold/20 shadow-2xl pointer-events-auto"
+        className="pointer-events-auto relative mx-auto max-w-5xl rounded-[28px] border border-gold/40 bg-ink p-4 pr-14 shadow-2xl shadow-black/60 md:p-5 md:pr-16"
       >
+        <button
+          type="button"
+          onClick={() => {
+            audioRef.current?.pause();
+            onPlayStateChange?.(false);
+            onClose?.();
+          }}
+          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-gold/50 bg-gold text-ink shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment"
+          aria-label="Close recitation player"
+          title="Close player"
+        >
+          <X size={22} strokeWidth={3} />
+        </button>
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Info */}
           <div className="flex items-center gap-4 w-full md:w-auto">
