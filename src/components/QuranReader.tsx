@@ -382,16 +382,16 @@ export default function QuranReader({
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="mx-auto max-w-5xl">
       {/* Reciter Selection & Info */}
-      <div className="glass p-6 rounded-[32px] border-gold/20 mb-12 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <label className="text-[10px] font-bold uppercase tracking-wider text-parchment/50">Translation
-            <select value={translationLanguage} onChange={event => { const value = event.target.value as "en" | "hi" | "ur"; setTranslationLanguage(value); localStorage.setItem("nurulquran.translation-language", value); }} className="ml-2 min-h-11 rounded-xl border border-gold/20 bg-ink px-3 text-sm normal-case tracking-normal text-parchment">
+      <div className="glass mb-10 flex flex-col items-stretch justify-between gap-5 rounded-3xl border-gold/20 p-4 sm:p-6 md:mb-12 lg:flex-row lg:items-center">
+        <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+          <label className="flex min-w-0 flex-col gap-2 text-[10px] font-bold uppercase tracking-wider text-parchment/70 sm:flex-row sm:items-center">Translation
+            <select value={translationLanguage} onChange={event => { const value = event.target.value as "en" | "hi" | "ur"; setTranslationLanguage(value); localStorage.setItem("nurulquran.translation-language", value); }} className="min-h-11 w-full min-w-0 rounded-xl border border-gold/30 bg-white px-3 text-sm normal-case tracking-normal text-parchment shadow-sm sm:w-auto">
               <option value="en">English — Saheeh International</option><option value="hi">हिंदी — Farooq Khan & Nadwi</option><option value="ur">اردو — Fateh Muhammad Jalandhry</option>
             </select>
           </label>
-          <div className="flex items-center rounded-xl border border-gold/15 p-1" aria-label="Arabic reading controls">
+          <div className="flex w-full items-center rounded-xl border border-gold/20 bg-white/80 p-1 shadow-sm sm:w-auto" aria-label="Arabic reading controls">
             <button onClick={() => { const next = arabicSize === "normal" ? "large" : "normal"; setArabicSize(next); localStorage.setItem("nurulquran.arabic-size", next); }} className="min-h-10 rounded-lg px-3 text-xs font-bold text-gold hover:bg-gold/10" aria-pressed={arabicSize === "large"}>Arabic A+</button>
             <button onClick={() => { const next = !relaxedArabic; setRelaxedArabic(next); localStorage.setItem("nurulquran.arabic-spacing", next ? "relaxed" : "compact"); }} className="min-h-10 rounded-lg px-3 text-xs font-bold text-gold hover:bg-gold/10" aria-pressed={relaxedArabic}>Line spacing</button>
           </div>
@@ -412,7 +412,7 @@ export default function QuranReader({
           </div>
         </div>
         
-        <div className="flex items-center gap-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:flex lg:items-center lg:gap-3">
           <button 
             onClick={() => {
               if (verses.length > 0) {
@@ -424,7 +424,7 @@ export default function QuranReader({
                 }
               }
             }}
-            className={`px-6 py-3 rounded-2xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${isAudioPlaying ? 'bg-gold text-ink shadow-lg shadow-gold/20' : 'glass text-parchment/60 hover:text-gold'}`}
+            className={`flex min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition-all ${isAudioPlaying ? 'bg-gold text-white shadow-lg shadow-gold/20' : 'border border-gold/25 bg-white text-parchment hover:border-gold/50 hover:text-gold'}`}
           >
             {isAudioPlaying ? <Pause size={14} /> : <Play size={14} />} 
             {isAudioPlaying ? 'Stop Recitation' : 'Play All'}
@@ -435,13 +435,13 @@ export default function QuranReader({
               completedSurahs: current.completedSurahs.includes(surah.number) ? current.completedSurahs.filter(number => number !== surah.number) : [...current.completedSurahs, surah.number],
               completedAyahs: current.completedSurahs.includes(surah.number) ? current.completedAyahs.filter(id => !verses.some(verse => verse.id === id)) : [...new Set([...current.completedAyahs, ...verses.map(verse => verse.id)])],
             }))}
-            className="min-h-11 rounded-2xl border border-gold/20 px-5 text-[10px] font-bold uppercase tracking-widest text-parchment/60 hover:text-gold"
+            className="min-h-11 rounded-2xl border border-gold/25 bg-white px-4 text-[10px] font-bold uppercase tracking-widest text-parchment hover:border-gold/50 hover:text-gold"
           >
             {journey.completedSurahs.includes(surah.number) ? "Undo completed" : "Mark surah completed"}
           </button>
           <button 
             onClick={shareSurah}
-            className="px-6 py-3 glass rounded-2xl text-parchment/60 text-[10px] font-bold uppercase tracking-widest hover:text-gold transition-all flex items-center gap-2"
+            className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-gold/25 bg-white px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-parchment transition-all hover:border-gold/50 hover:text-gold"
           >
             <Share2 size={14} /> Share Surah
           </button>
@@ -457,7 +457,7 @@ export default function QuranReader({
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className={`group relative scroll-mt-32 p-8 rounded-[32px] transition-all duration-700 ${playingVerseId === verse.id ? 'glass bg-gold/5 border-gold/10' : 'hover:bg-white/5'}`}
+            className={`group relative scroll-mt-32 rounded-3xl p-4 transition-all duration-700 sm:p-6 md:p-8 ${playingVerseId === verse.id ? 'glass bg-gold/5 border-gold/10' : 'hover:bg-gold/5'}`}
             onClick={() => recordMeaningfulRead(verse)}
             onFocusCapture={() => recordMeaningfulRead(verse)}
           >
@@ -475,10 +475,10 @@ export default function QuranReader({
                 {translationLanguage === "hi" ? verse.hindi_translation : translationLanguage === "ur" ? verse.urdu_translation : verse.translation}
               </p>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-6 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all">
+            <div className="mt-8 grid grid-cols-2 gap-2 opacity-100 transition-all sm:flex sm:flex-wrap sm:gap-3 md:opacity-100">
               <button 
                 onClick={() => playVerse(verse)}
-                className={`flex items-center gap-2 transition-colors text-[10px] uppercase tracking-widest ${playingVerseId === verse.id && isAudioPlaying ? 'text-gold' : 'text-parchment/30 hover:text-gold'}`}
+                className={`min-h-11 rounded-xl border px-3 flex items-center justify-center gap-2 transition-colors text-[10px] uppercase tracking-widest ${playingVerseId === verse.id && isAudioPlaying ? 'border-gold bg-gold/10 text-gold' : 'border-gold/20 bg-white text-parchment hover:text-gold'}`}
               >
                 {playingVerseId === verse.id && isAudioPlaying ? <Pause size={14} /> : <Play size={14} />} 
                 {playingVerseId === verse.id && isAudioPlaying ? 'Playing' : 'Play Verse'}
