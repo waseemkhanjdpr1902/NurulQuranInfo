@@ -61,7 +61,7 @@ export default async function SurahPage({
       <Navbar />
       
       {/* Surah Header */}
-      <section className="pt-40 pb-20 px-6 border-b border-white/5 relative overflow-hidden">
+      <section className="relative overflow-hidden border-b border-gold/10 px-4 pb-12 pt-28 sm:px-6 sm:pb-16 sm:pt-36 md:pb-20 md:pt-40">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gold/5 blur-[100px] rounded-full pointer-events-none" />
         
         <div className="max-w-5xl mx-auto text-center relative z-10">
@@ -91,10 +91,10 @@ export default async function SurahPage({
             )}
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-display text-parchment mb-4">{surah.englishName}</h1>
-          <p className="text-gold font-arabic text-4xl mb-8">{surah.name}</p>
+          <h1 className="mb-4 break-words font-display text-4xl text-parchment sm:text-6xl md:text-8xl">{surah.englishName}</h1>
+          <p className="mb-8 font-arabic text-3xl text-gold sm:text-4xl">{surah.name}</p>
           
-          <div className="flex flex-wrap items-center justify-center gap-8 text-parchment/40 text-xs uppercase tracking-[0.2em]">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-center text-[10px] uppercase tracking-[0.15em] text-parchment/65 sm:gap-8 sm:text-xs sm:tracking-[0.2em]">
             <span>{surah.englishNameTranslation}</span>
             <span>•</span>
             <span>{surah.numberOfAyahs} Verses</span>
@@ -105,7 +105,7 @@ export default async function SurahPage({
       </section>
 
       {/* Quran Reader Section */}
-      <section className="py-20 px-6">
+      <section className="px-3 py-10 sm:px-6 sm:py-16 md:py-20">
         <QuranReader 
           surah={surah} 
           nextSlug={surah.nextSlug} 
