@@ -32,6 +32,13 @@ export default function RemembrancePopup() {
   }, []);
 
   useEffect(() => {
+    if (!("serviceWorker" in navigator) || !window.isSecureContext) return;
+    navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch((error) => {
+      console.error("Notification service worker registration failed:", error);
+    });
+  }, []);
+
+  useEffect(() => {
     if (!isVisible) return;
     const hideTimer = window.setTimeout(dismiss, 5000);
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") dismiss(); };
@@ -45,15 +52,29 @@ export default function RemembrancePopup() {
     const permission = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
     if (permission !== "granted") { setReminderStatus("denied"); return; }
     try {
-      const notification = new Notification(`${currentName.ar} · ${currentName.en}`, {
+      const title = `${currentName.ar} · ${currentName.en}`;
+      const options: NotificationOptions = {
         body: `${currentName.mean}\nRepeat the name three times to help memorise it.`,
         lang: "en",
         tag: `nurulquran-name-${currentName.number}`,
         requireInteraction: false,
-      });
-      window.setTimeout(() => notification.close(), 5000);
+        data: { url: "/names-of-allah" },
+      };
+
+      if ("serviceWorker" in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification(title, options);
+        window.setTimeout(async () => {
+          const notifications = await registration.getNotifications({ tag: options.tag });
+          notifications.forEach(notification => notification.close());
+        }, 5000);
+      } else {
+        const notification = new Notification(title, options);
+        window.setTimeout(() => notification.close(), 5000);
+      }
       setReminderStatus("shown");
-    } catch {
+    } catch (error) {
+      console.error("Unable to show Allah's Name notification:", error);
       setReminderStatus("unsupported");
     }
   }
