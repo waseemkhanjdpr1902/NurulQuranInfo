@@ -105,16 +105,16 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
   }, [onClose, onPlayStateChange]);
 
   return (
-    <div className="pointer-events-none fixed left-3 right-3 z-[90] md:left-6 md:right-6" style={{ bottom: "max(0.75rem, env(safe-area-inset-bottom))" }}>
+    <div className="pointer-events-none fixed left-2 right-2 z-[90] sm:left-3 sm:right-3 md:left-6 md:right-6" style={{ bottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
       <motion.div 
         initial={{ y: 100 }}
         animate={{ y: 0 }}
-        className={`pointer-events-auto relative mx-auto max-w-5xl border border-gold/40 bg-ink shadow-2xl shadow-black/60 ${collapsed ? "rounded-2xl p-3 pr-28" : "rounded-[28px] p-4 pr-14 md:p-5 md:pr-16"}`}
+        className={`pointer-events-auto relative mx-auto max-w-5xl border border-emerald-300/30 bg-[#0b332d] text-white shadow-2xl shadow-black/40 ${collapsed ? "rounded-2xl p-3 pr-28" : "rounded-2xl p-3 pr-12 sm:rounded-[28px] sm:p-4 sm:pr-14 md:p-5 md:pr-16"}`}
       >
         <button
           type="button"
           onClick={() => setCollapsed(value => !value)}
-          className="absolute right-14 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-white/5 text-parchment hover:border-gold/50 hover:text-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
+          className="absolute right-14 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white hover:border-emerald-300 hover:text-emerald-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
           aria-label={collapsed ? "Expand recitation player" : "Collapse recitation player"}
           title={collapsed ? "Expand player" : "Collapse player"}
         >
@@ -127,7 +127,7 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
             onPlayStateChange?.(false);
             onClose?.();
           }}
-          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-gold/50 bg-gold text-ink shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-parchment"
+          className="absolute right-2 top-2 z-20 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-[#e8b94f] text-[#0b332d] shadow-lg transition-transform hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-3 sm:top-3"
           aria-label="Close recitation player"
           title="Close player"
         >
@@ -139,27 +139,27 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
               {playing ? <Pause size={20} /> : <Play size={20} className="ml-0.5" />}
             </button>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold text-parchment">{title}</p>
-              <p className="truncate text-[10px] uppercase tracking-wider text-gold/70">{subtitle}</p>
+              <p className="truncate text-sm font-bold text-white">{title}</p>
+              <p className="truncate text-[10px] uppercase tracking-wider text-emerald-200">{subtitle}</p>
             </div>
           </div>
-        ) : <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+        ) : <div className="flex flex-col items-stretch justify-between gap-4 pt-12 sm:pt-10 md:flex-row md:items-center md:gap-6 md:pt-0">
           {/* Info */}
           <div className="flex items-center gap-4 w-full md:w-auto">
             <div className="w-12 h-12 rounded-2xl gold-gradient flex items-center justify-center text-ink shadow-lg shrink-0">
               <Settings size={20} className={playing ? "animate-spin" : ""} />
             </div>
             <div className="overflow-hidden">
-              <h4 className="text-parchment font-bold truncate text-sm md:text-base">{title}</h4>
-              <p className="text-gold/60 text-[10px] uppercase tracking-widest truncate">{subtitle}</p>
+              <h4 className="truncate text-sm font-bold text-white md:text-base">{title}</h4>
+              <p className="truncate text-[10px] uppercase tracking-widest text-emerald-200">{subtitle}</p>
             </div>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center justify-center gap-8">
             <button 
               onClick={onPrev}
-              className="text-parchment/30 hover:text-gold transition-colors"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-white/75 hover:bg-white/10 hover:text-emerald-200 transition-colors"
             >
               <SkipBack size={24} />
             </button>
@@ -173,7 +173,7 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
 
             <button 
               onClick={onNext}
-              className="text-parchment/30 hover:text-gold transition-colors"
+              className="flex h-11 w-11 items-center justify-center rounded-full text-white/75 hover:bg-white/10 hover:text-emerald-200 transition-colors"
             >
               <SkipForward size={24} />
             </button>
@@ -181,7 +181,7 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
 
           {/* Progress & Volume */}
           <div className="flex-1 w-full md:w-auto flex items-center gap-4">
-            <span className="text-[10px] text-parchment/30 font-mono w-10">
+            <span className="w-9 text-[10px] font-mono text-white/70 sm:w-10">
               {formatTime(audioRef.current?.currentTime || 0)}
             </span>
             <input 
@@ -190,18 +190,18 @@ export default function AudioPlayer({ audioUrl, onNext, onPrev, onPlayRequest, o
               max="100" 
               value={progress || 0}
               onChange={handleSeek}
-              className="flex-1 h-1 bg-white/10 rounded-full appearance-none cursor-pointer accent-gold"
+              className="h-2 min-w-0 flex-1 cursor-pointer appearance-none rounded-full bg-white/25 accent-[#e8b94f]"
             />
-            <span className="text-[10px] text-parchment/30 font-mono w-10">
+            <span className="w-9 text-right text-[10px] font-mono text-white/70 sm:w-10">
               {formatTime(duration || 0)}
             </span>
           </div>
 
           {/* Settings */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center justify-center gap-6">
             <button 
               onClick={() => setIsRepeat(!isRepeat)}
-              className={`transition-colors ${isRepeat ? "text-gold" : "text-parchment/30 hover:text-gold"}`}
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-colors ${isRepeat ? "bg-white/10 text-emerald-200" : "text-white/70 hover:bg-white/10 hover:text-emerald-200"}`}
             >
               <Repeat size={20} />
             </button>
