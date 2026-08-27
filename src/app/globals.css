@@ -35,6 +35,13 @@ html { scroll-behavior: smooth; }
 
 button, a { -webkit-tap-highlight-color: transparent; }
 
+button, select, input, textarea { font: inherit; }
+
+@media (max-width: 767px) {
+  button, a, select, input[type="range"] { touch-action: manipulation; }
+  select { max-width: 100%; }
+}
+
 :focus-visible {
   outline: 2px solid #167C6B;
   outline-offset: 4px;
