@@ -174,6 +174,19 @@ export default function QuranReader({
     }
   };
 
+  const recordMeaningfulRead = useCallback((verse: Verse) => {
+    const now = new Date().toISOString();
+    updateJourney(current => ({
+      ...current,
+      lastRead: { surahNumber: surah.number, surahName: surah.englishName, surahSlug: currentSlug, ayahNumber: verse.verse_number, globalAyahNumber: verse.id, reciterId, updatedAt: now },
+      recentSurahs: [
+        { number: surah.number, name: surah.englishName, slug: currentSlug, openedAt: now },
+        ...current.recentSurahs.filter(item => item.number !== surah.number),
+      ].slice(0, 8),
+      completedAyahs: current.completedAyahs.includes(verse.id) ? current.completedAyahs : [...current.completedAyahs, verse.id],
+    }));
+  }, [currentSlug, reciterId, surah.englishName, surah.number, updateJourney]);
+
   const playVerse = useCallback((verse: Verse) => {
     recordMeaningfulRead(verse);
     setPlayingVerseId(prevId => {
@@ -197,26 +210,13 @@ export default function QuranReader({
         const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
         let finalAudio = verse.audio_url || fallbackAudio;
         if (finalAudio.startsWith("//")) finalAudio = `https:${finalAudio}`;
-        
+
         setAudioUrl(finalAudio);
         setIsAudioPlaying(true);
         return verse.id;
       }
     });
-  }, [reciterId]);
-
-  const recordMeaningfulRead = useCallback((verse: Verse) => {
-    const now = new Date().toISOString();
-    updateJourney(current => ({
-      ...current,
-      lastRead: { surahNumber: surah.number, surahName: surah.englishName, surahSlug: currentSlug, ayahNumber: verse.verse_number, globalAyahNumber: verse.id, reciterId, updatedAt: now },
-      recentSurahs: [
-        { number: surah.number, name: surah.englishName, slug: currentSlug, openedAt: now },
-        ...current.recentSurahs.filter(item => item.number !== surah.number),
-      ].slice(0, 8),
-      completedAyahs: current.completedAyahs.includes(verse.id) ? current.completedAyahs : [...current.completedAyahs, verse.id],
-    }));
-  }, [currentSlug, reciterId, surah.englishName, surah.number, updateJourney]);
+  }, [reciterId, recordMeaningfulRead]);
 
   const openNote = (verse: Verse) => {
     const existing = journey.bookmarks.find(item => item.id === `${surah.number}:${verse.verse_number}`);
