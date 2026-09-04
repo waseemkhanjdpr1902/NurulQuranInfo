@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { rateLimit, rejectOversizedRequest } from "@/lib/api-security";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,9 @@ function fallback(intent: keyof typeof instructions) {
 }
 
 export async function POST(request: Request) {
+  const blocked = rejectOversizedRequest(request) || rateLimit(request, "ai-chat", 15, 60_000);
+  if (blocked) return blocked;
+
   try {
     const body = (await request.json()) as {
       intent?: keyof typeof instructions;
@@ -51,7 +55,7 @@ export async function POST(request: Request) {
     }
 
     const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
       systemInstruction: instructions[intent],
     });
     const response = await model.generateContent({

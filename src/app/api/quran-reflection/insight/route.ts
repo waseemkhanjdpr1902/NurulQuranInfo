@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rateLimit, rejectOversizedRequest } from "@/lib/api-security";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,9 @@ function validInsight(value: unknown): value is Insight {
 }
 
 export async function POST(request: Request) {
+  const blocked = rejectOversizedRequest(request, 8_000) || rateLimit(request, "reflection-insight", 12, 60_000);
+  if (blocked) return blocked;
+
   let body: { surah?: number; ayah?: number };
   try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid request." }, { status: 400 }); }
   const surah = Number(body.surah);
