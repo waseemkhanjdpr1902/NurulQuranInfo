@@ -21,7 +21,7 @@ const routes = [
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nurrulquran.info";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://nurulquran.info";
 
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,

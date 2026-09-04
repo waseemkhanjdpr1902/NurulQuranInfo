@@ -6,6 +6,7 @@ coverage/
 error.txt
 .DS_Store
 *.log
+*.tsbuildinfo
 .env*
 !.env.example
 

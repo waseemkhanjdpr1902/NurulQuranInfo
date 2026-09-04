@@ -7,7 +7,7 @@ const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-displa
 const amiri = Amiri({ subsets: ["arabic"], weight: ["400", "700"], variable: "--font-arabic" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://nurrulquran.info"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://nurulquran.info"),
   title: {
     default: "NurulQuran — Read, Reflect and Remember",
     template: "%s | NurulQuran",

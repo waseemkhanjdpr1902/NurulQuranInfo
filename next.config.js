@@ -9,9 +9,6 @@ const nextConfig = {
       { protocol: "https", hostname: "api.alquran.cloud" },
     ],
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 module.exports = nextConfig;
