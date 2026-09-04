@@ -5,18 +5,18 @@ NurulQuran is a production-ready, full-stack application dedicated to the preser
 ## 🚀 Features
 
 - **Quran Reader**: High-quality audio recitation, verse-by-verse playback, and multi-reciter selection.
-- **AI Spiritual Guide**: Advanced AI-powered Tafseer and spiritual assistance using Google Gemini.
+- **AI Study Guide**: Guardrailed educational reflections using Google Gemini, clearly separated from formal tafsir and fatwa.
 - **Hadith Library**: Searchable authentic traditions from major collections.
-- **Arabic Academy**: Structured courses for learning Quranic Arabic.
-- **Halal Stocks**: Shariah-compliance screening for ethical investing.
+- **Reflection Planner**: Private tadabbur notes, practical actions, and export tools.
+- **Islamic Tools**: Prayer times, duas, tasbih, zakat, Names of Allah, and topic-based Qur’an study.
 - **User Dashboard**: Personalized experience with bookmarks, progress tracking, and activity logs.
-- **Secure Auth**: Full authentication system with Google and GitHub integration via Supabase.
+- **Authentication**: Email and configured social sign-in through Supabase.
 
 ## 🛠️ Tech Stack
 
 - **Frontend**: Next.js 15 (App Router), Tailwind CSS, Framer Motion, Lucide Icons.
 - **Backend**: Supabase (Auth, PostgreSQL, Real-time).
-- **AI**: Google Gemini Pro (via @google/genai).
+- **AI**: Configurable Google Gemini model through `GEMINI_MODEL`.
 - **Payments**: Razorpay (Subscription model).
 
 ## 📂 Folder Structure

@@ -637,10 +637,9 @@ export default function QuranReader({
                       ) : (
                         <div className="prose prose-invert prose-gold max-w-none">
                           <p className="text-gold/40 text-[10px] uppercase tracking-widest mb-6">Authoritative Commentary: Ibn Kathir</p>
-                          <div 
-                            className="text-parchment/70 leading-relaxed space-y-4 tafsir-content text-sm md:text-base"
-                            dangerouslySetInnerHTML={{ __html: tafsirContent || "" }}
-                          />
+                          <div className="whitespace-pre-line text-sm leading-relaxed text-parchment/70 md:text-base">
+                            {tafsirContent || "Tafsir is unavailable at the moment."}
+                          </div>
                         </div>
                       )
                     )}

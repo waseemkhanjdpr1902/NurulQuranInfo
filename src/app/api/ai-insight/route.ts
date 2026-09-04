@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { rateLimit, rejectOversizedRequest } from "@/lib/api-security";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +31,9 @@ When an authenticated hadith connection is not certain, it is better to avoid un
 }
 
 export async function POST(request: Request) {
+  const blocked = rejectOversizedRequest(request) || rateLimit(request, "ai-insight", 12, 60_000);
+  if (blocked) return blocked;
+
   let verseDetails: {
     surahName: string;
     surahNumber: number;
@@ -49,7 +53,13 @@ export async function POST(request: Request) {
 
   const { surahName, surahNumber, verseNumber, arabic, translation } = verseDetails;
 
-  if (!surahName || !surahNumber || !verseNumber || !arabic || !translation) {
+  if (
+    typeof surahName !== "string" || !surahName.trim() || surahName.length > 100 ||
+    !Number.isInteger(surahNumber) || surahNumber < 1 || surahNumber > 114 ||
+    !Number.isInteger(verseNumber) || verseNumber < 1 || verseNumber > 286 ||
+    typeof arabic !== "string" || !arabic.trim() || arabic.length > 4000 ||
+    typeof translation !== "string" || !translation.trim() || translation.length > 8000
+  ) {
     return NextResponse.json(
       { error: "Verse details are required for AI insight." },
       { status: 400 }
@@ -71,7 +81,7 @@ export async function POST(request: Request) {
 
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
       systemInstruction:
         "You are a careful Islamic study assistant. Explain Quranic verses respectfully, avoid unsupported rulings, and include relevant context in clear English.",
     });
