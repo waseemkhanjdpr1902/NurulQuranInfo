@@ -1,10 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { Noto_Nastaliq_Urdu } from "next/font/google";
 import { BookOpen, ChevronDown, Loader2 } from "lucide-react";
 import { TAFSIR_EDITIONS, type TafsirLanguage } from "@/lib/tafsir-editions";
 
 type Tafsir = { text: string; language: TafsirLanguage; resourceName: string; author: string; sourceUrl: string };
+
+const urduTafsirFont = Noto_Nastaliq_Urdu({
+  subsets: ["arabic"],
+  weight: "400",
+  display: "swap",
+  preload: false,
+});
 
 export default function InlineTafsir({ verseKey, language }: { verseKey: string; language: TafsirLanguage }) {
   const [open, setOpen] = useState(false);
@@ -57,7 +65,7 @@ export default function InlineTafsir({ verseKey, language }: { verseKey: string;
             <p className="mb-4 text-sm text-gold">{currentContent.resourceName} · {currentContent.author}
               <a href={currentContent.sourceUrl} target="_blank" rel="noopener noreferrer" className="ml-2 inline-flex min-h-11 items-center underline">View source</a>
             </p>
-            <div lang={language} dir={language === "ur" ? "rtl" : "ltr"} className={`whitespace-pre-line text-parchment ${language === "ur" ? "text-xl leading-loose" : "text-base leading-relaxed"}`}>{currentContent.text}</div>
+            <div lang={language} dir={language === "ur" ? "rtl" : "ltr"} className={`whitespace-pre-line text-parchment ${language === "ur" ? `${urduTafsirFont.className} urdu-tafsir` : "text-base leading-relaxed"}`}>{currentContent.text}</div>
           </> : null}
       </div>}
     </details>
