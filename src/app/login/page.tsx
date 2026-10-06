@@ -18,7 +18,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const authError = params.get("error");
+    const messages: Record<string, string> = {
+      provider: "Google sign-in was cancelled or could not be completed. Please try again.",
+      missing_code: "This sign-in link is incomplete. Please start sign-in again.",
+      session: "Your sign-in session expired or could not be restored. Please try again in the same browser with cookies enabled.",
+      unavailable: "Sign-in is temporarily unavailable. Please try again shortly.",
+    };
+    const authError = messages[params.get("auth_error") || ""] || params.get("error");
 
     if (authError) {
       setError(authError);
@@ -61,7 +67,7 @@ export default function LoginPage() {
     }
 
     const supabase = createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const siteUrl = window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
@@ -148,7 +154,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <p className="text-red-500 text-xs text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20">
+              <p role="alert" className="text-red-500 text-xs text-center bg-red-500/10 py-2 rounded-lg border border-red-500/20">
                 {error}
               </p>
             )}

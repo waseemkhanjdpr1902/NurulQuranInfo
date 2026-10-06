@@ -20,42 +20,18 @@ export async function middleware(request: NextRequest) {
     supabaseAnonKey,
     {
       cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+        getAll() {
+          return request.cookies.getAll()
         },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
+        setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          const previousCookies = response.cookies.getAll()
+          response = NextResponse.next({ request })
+          previousCookies.forEach(cookie => response.cookies.set(cookie))
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options)
           })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
+          response.headers.set('Cache-Control', 'private, no-store')
         },
       },
     }
