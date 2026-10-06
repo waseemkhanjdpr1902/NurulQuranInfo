@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Play, Pause, SkipForward, SkipBack, BookOpen, Info, Loader2, CheckCircle2, Copy, Share2, X, Heart, Sparkles, Bookmark, StickyNote, FolderPlus, Flag, Download } from "lucide-react";
+import { ArrowDown, ArrowRight, Headphones, MoreHorizontal, BookOpen, Info, Loader2, CheckCircle2, Copy, Share2, X, Heart, Sparkles, Bookmark, StickyNote, FolderPlus, Flag, Download } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -63,6 +63,8 @@ export default function QuranReader({
   const router = useRouter();
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const [reciterId, setReciterId] = useState("ar.alafasy");
   const [playingVerseId, setPlayingVerseId] = useState<number | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -72,6 +74,7 @@ export default function QuranReader({
   const [showCopyToast, setShowCopyToast] = useState(false);
 
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+  const [playbackRequest, setPlaybackRequest] = useState(0);
 
   const [activeTab, setActiveTab] = useState<"tafsir" | "hadith" | "ai">("tafsir");
   const [hadithContent, setHadithContent] = useState<{ text: string, source: string }[]>([]);
@@ -189,33 +192,11 @@ export default function QuranReader({
 
   const playVerse = useCallback((verse: Verse) => {
     recordMeaningfulRead(verse);
-    setPlayingVerseId(prevId => {
-      // Toggle if already playing this verse
-      if (prevId === verse.id) {
-        setIsAudioPlaying(currentPlaying => {
-          if (currentPlaying) {
-            setAudioUrl(null);
-            return false;
-          } else {
-            const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
-            let finalAudio = verse.audio_url || fallbackAudio;
-            if (finalAudio.startsWith("//")) finalAudio = `https:${finalAudio}`;
-            setAudioUrl(finalAudio);
-            return true;
-          }
-        });
-        return prevId;
-      } else {
-        // Switch to new verse
-        const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
-        let finalAudio = verse.audio_url || fallbackAudio;
-        if (finalAudio.startsWith("//")) finalAudio = `https:${finalAudio}`;
-
-        setAudioUrl(finalAudio);
-        setIsAudioPlaying(true);
-        return verse.id;
-      }
-    });
+    const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
+    const audio = verse.audio_url || fallbackAudio;
+    setAudioUrl(audio.startsWith("//") ? `https:${audio}` : audio);
+    setPlayingVerseId(verse.id);
+    setPlaybackRequest(request => request + 1);
   }, [reciterId, recordMeaningfulRead]);
 
   const openNote = (verse: Verse) => {
@@ -259,10 +240,12 @@ export default function QuranReader({
   };
 
   useEffect(() => {
+    const controller = new AbortController();
     const fetchVerses = async () => {
       setLoading(true);
+      setLoadError(false);
       try {
-        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,hi.hindi,ur.jalandhry,${reciterId}`);
+        const res = await fetch(`https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,hi.hindi,ur.jalandhry,${reciterId}`, { signal: controller.signal });
         if (!res.ok) throw new Error("Failed to fetch verses");
         const data = await res.json();
         
@@ -288,16 +271,19 @@ export default function QuranReader({
           };
         });
         
-        setVerses(combinedVerses);
+        if (!controller.signal.aborted) setVerses(combinedVerses);
       } catch (error) {
+        if (controller.signal.aborted) return;
+        setLoadError(true);
         console.error("Error fetching verses:", error);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     fetchVerses();
-  }, [surah.number, reciterId]);
+    return () => controller.abort();
+  }, [surah.number, reciterId, retryCount]);
 
   useEffect(() => {
     setAudioUrl(null);
@@ -381,6 +367,13 @@ export default function QuranReader({
     );
   }
 
+  if (loadError) {
+    return <div role="alert" className="rounded-3xl border border-gold/20 bg-white p-8 text-center">
+      <p className="text-lg text-parchment">We couldn’t load the ayahs. Please check your connection and try again.</p>
+      <button onClick={() => setRetryCount(count => count + 1)} className="mt-4 min-h-12 rounded-xl bg-gold px-6 font-semibold text-white">Try again</button>
+    </div>;
+  }
+
   return (
     <div className="mx-auto max-w-5xl">
       {/* Reciter Selection & Info */}
@@ -403,7 +396,8 @@ export default function QuranReader({
             <select 
               value={reciterId}
               onChange={(e) => setReciterId(e.target.value)}
-              className="bg-transparent text-gold/60 text-[10px] uppercase tracking-widest outline-none cursor-pointer hover:text-gold transition-colors"
+              aria-label="Reciter"
+              className="min-h-11 max-w-full rounded-xl border border-gold/30 bg-white px-3 text-sm text-parchment"
             >
               {RECITERS.map(r => (
                 <option key={r.id} value={r.id} className="bg-ink text-parchment">{r.name}</option>
@@ -412,23 +406,7 @@ export default function QuranReader({
           </div>
         </div>
         
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:flex lg:items-center lg:gap-3">
-          <button 
-            onClick={() => {
-              if (verses.length > 0) {
-                if (isAudioPlaying && playingVerseId !== null) {
-                  setIsAudioPlaying(false);
-                  setAudioUrl(null);
-                } else {
-                  playVerse(verses[0]);
-                }
-              }
-            }}
-            className={`flex min-h-12 items-center justify-center gap-2 rounded-2xl border-2 px-4 py-3 text-[11px] font-bold uppercase tracking-wider shadow-sm transition-all ${isAudioPlaying ? 'border-gold bg-gold text-white shadow-lg shadow-gold/20' : 'border-gold/35 bg-white text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]'}`}
-          >
-            {isAudioPlaying ? <Pause size={14} /> : <Play size={14} />} 
-            {isAudioPlaying ? 'Stop Recitation' : 'Play All'}
-          </button>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:items-center lg:gap-3">
           <button
             onClick={() => updateJourney(current => ({
               ...current,
@@ -449,11 +427,14 @@ export default function QuranReader({
       </div>
 
       {/* Verses List */}
-      <div className="mb-72 space-y-16 md:mb-40">
-        {verses.map((verse) => (
+      <div className="mb-80 space-y-8 md:mb-64">
+        {verses.map((verse, index) => (
           <motion.div 
             key={verse.id} 
             id={`verse-${verse.verse_number}`}
+            role="article"
+            aria-label={`Ayah ${surah.number}:${verse.verse_number}`}
+            tabIndex={-1}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -461,11 +442,13 @@ export default function QuranReader({
             onClick={() => recordMeaningfulRead(verse)}
             onFocusCapture={() => recordMeaningfulRead(verse)}
           >
-            <div className={`hidden md:block absolute -left-12 top-10 font-display text-4xl transition-colors ${playingVerseId === verse.id ? 'text-gold' : 'text-gold/20 group-hover:text-gold/40'}`}>
-              {verse.verse_number}
+            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#0d6658]">
+              Ayah {surah.number}:{verse.verse_number}
+              {playingVerseId === verse.id && isAudioPlaying && <span className="rounded-full bg-gold/10 px-2 py-1 text-xs">Reciting</span>}
+              {journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) && <Bookmark size={16} aria-label="Bookmarked" fill="currentColor" />}
             </div>
             <div className="text-right mb-8">
-              <p className={`${arabicSize === "large" ? "text-4xl md:text-7xl" : "text-3xl md:text-6xl"} font-arabic text-parchment ${relaxedArabic ? "leading-[2.2]" : "leading-[1.65]"} text-right selection:bg-gold/40`}>
+              <p dir="rtl" lang="ar" className={`${arabicSize === "large" ? "text-4xl md:text-7xl" : "text-3xl md:text-6xl"} font-arabic text-parchment ${relaxedArabic ? "leading-[2.2]" : "leading-[1.65]"} text-right selection:bg-gold/40`}>
                 {verse.text_uthmani}
               </p>
             </div>
@@ -475,61 +458,73 @@ export default function QuranReader({
                 {translationLanguage === "hi" ? verse.hindi_translation : translationLanguage === "ur" ? verse.urdu_translation : verse.translation}
               </p>
             </div>
-            <div className="mt-8 grid grid-cols-2 gap-2 rounded-2xl border border-gold/15 bg-[#edf7f3] p-3 opacity-100 shadow-sm transition-all sm:flex sm:flex-wrap sm:gap-3 md:opacity-100">
-              <button 
-                onClick={() => playVerse(verse)}
-                className={`min-h-11 rounded-xl border-2 px-3 flex items-center justify-center gap-2 font-bold transition-colors text-[10px] uppercase tracking-wider ${playingVerseId === verse.id && isAudioPlaying ? 'border-gold bg-gold text-white' : 'border-gold/30 bg-white text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]'}`}
-              >
-                {playingVerseId === verse.id && isAudioPlaying ? <Pause size={14} /> : <Play size={14} />} 
-                {playingVerseId === verse.id && isAudioPlaying ? 'Playing' : 'Play Verse'}
+            <div className="mt-6 flex flex-wrap items-start gap-3">
+            <details name="ayah-options" className="min-w-0 flex-1 rounded-2xl open:basis-full border border-gold/20 bg-white/70" onClickCapture={event => {
+              if ((event.target as HTMLElement).closest("button, a")) {
+                event.currentTarget.open = false;
+                event.currentTarget.querySelector("summary")?.focus();
+              }
+            }}>
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 text-sm font-semibold text-[#0d6658] [&::-webkit-details-marker]:hidden" aria-label={`Options for ayah ${surah.number}:${verse.verse_number}`}>
+                Ayah options <MoreHorizontal size={22} aria-hidden="true" />
+              </summary>
+              <div className="grid grid-cols-2 gap-2 border-t border-gold/15 p-3 sm:grid-cols-3">
+              <button onClick={() => playVerse(verse)} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:bg-[#d9eee6]">
+                <Headphones size={16} /> Listen from here
               </button>
               <button 
                 onClick={() => copyVerse(verse)}
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] transition-colors hover:border-gold hover:bg-[#d9eee6]"
+                className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] transition-colors hover:border-gold hover:bg-[#d9eee6]"
               >
-                <Copy size={14} /> Copy
+                <Copy size={16} /> Copy
               </button>
-              <button onClick={(event) => { event.stopPropagation(); shareVerse(verse); }} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><Share2 size={14}/> Share</button>
-              <button onClick={(event) => { event.stopPropagation(); const selected = translationLanguage === "hi" ? verse.hindi_translation : translationLanguage === "ur" ? verse.urdu_translation : verse.translation; downloadAyahCard({ arabic: verse.text_uthmani, translation: selected, reference: `${surah.englishName} · ${surah.number}:${verse.verse_number}`, filename: `quran-${surah.number}-${verse.verse_number}.png` }); }} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><Download size={14}/> Ayah card</button>
+              <button onClick={(event) => { event.stopPropagation(); shareVerse(verse); }} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><Share2 size={16}/> Share</button>
+              <button onClick={(event) => { event.stopPropagation(); const selected = translationLanguage === "hi" ? verse.hindi_translation : translationLanguage === "ur" ? verse.urdu_translation : verse.translation; downloadAyahCard({ arabic: verse.text_uthmani, translation: selected, reference: `${surah.englishName} · ${surah.number}:${verse.verse_number}`, filename: `quran-${surah.number}-${verse.verse_number}.png` }); }} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><Download size={16}/> Ayah card</button>
               <button 
                 onClick={() => fetchTafsir(verse)}
-                className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] transition-colors hover:border-gold hover:bg-[#d9eee6]"
+                className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] transition-colors hover:border-gold hover:bg-[#d9eee6]"
               >
-                <Info size={14} /> Tafsir
+                <Info size={16} /> Tafsir
               </button>
-              <button onClick={(event) => { event.stopPropagation(); toggleBookmark(verse); }} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]" aria-label={`${journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "Remove bookmark from" : "Bookmark"} Quran ${surah.number}:${verse.verse_number}`}>
-                <Bookmark size={14} fill={journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "currentColor" : "none"}/> {journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "Saved" : "Bookmark"}
+              <button onClick={(event) => { event.stopPropagation(); toggleBookmark(verse); }} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]" aria-label={`${journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "Remove bookmark from" : "Bookmark"} Quran ${surah.number}:${verse.verse_number}`}>
+                <Bookmark size={16} fill={journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "currentColor" : "none"}/> {journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "Saved" : "Bookmark"}
               </button>
-              <button onClick={(event) => { event.stopPropagation(); openNote(verse); }} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><StickyNote size={14}/> Note / collection</button>
-              <a href={`/quran/${currentSlug}#verse-${verse.verse_number}`} onClick={event => event.stopPropagation()} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><BookOpen size={14}/> Context</a>
-              <a href={`mailto:contact@nurulquran.info?subject=${encodeURIComponent(`Quran display issue ${surah.number}:${verse.verse_number}`)}`} onClick={event => event.stopPropagation()} className="flex min-h-11 items-center justify-center gap-2 rounded-xl border-2 border-gold/30 bg-white px-3 text-[10px] font-bold uppercase tracking-wider text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><Flag size={14}/> Report issue</a>
+              <button onClick={(event) => { event.stopPropagation(); openNote(verse); }} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><StickyNote size={16}/> Note / collection</button>
+              <a href={`/quran/${currentSlug}#verse-${verse.verse_number}`} onClick={event => event.stopPropagation()} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><BookOpen size={16}/> Context</a>
+              <a href={`mailto:contact@nurulquran.info?subject=${encodeURIComponent(`Quran display issue ${surah.number}:${verse.verse_number}`)}`} onClick={event => event.stopPropagation()} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><Flag size={16}/> Report issue</a>
+            </div>
+            </details>
+            {index < verses.length - 1 ? (
+              <button type="button" aria-label={`Go to ayah ${surah.number}:${verses[index + 1].verse_number}`} onClick={event => {
+                event.stopPropagation();
+                const nextAyah = document.getElementById(`verse-${verses[index + 1].verse_number}`);
+                nextAyah?.focus({ preventScroll: true });
+                nextAyah?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+              }} className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658] hover:bg-[#d9eee6]">
+                Next ayah <ArrowDown size={18} aria-hidden="true" />
+              </button>
+            ) : (
+              <Link href={nextSlug ? `/quran/${nextSlug}` : "/quran"} className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658] hover:bg-[#d9eee6]">
+                {nextSlug ? "Next surah" : "All surahs"} <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            )}
             </div>
           </motion.div>
         ))}
       </div>
 
-      {/* Persistent Audio Player */}
-      {audioUrl ? (
-        <AudioPlayer
-          audioUrl={audioUrl}
-          title={surah.englishName}
-          subtitle={RECITERS.find(r => r.id === reciterId)?.name || ""}
-          autoPlay={autoplay}
-          onPlayRequest={() => {
-            if (verses.length > 0) {
-              playVerse(verses[0]);
-            }
-          }}
-          onNext={playNextVerse}
-          onPrev={playPrevVerse}
-          onPlayStateChange={setIsAudioPlaying}
-          onClose={() => {
-            setAudioUrl(null);
-            setPlayingVerseId(null);
-            setIsAudioPlaying(false);
-          }}
-        />
-      ) : null}
+      {/* One recitation control, available before playback starts. */}
+      <AudioPlayer
+        audioUrl={audioUrl}
+        playbackRequest={playbackRequest}
+        title={surah.englishName}
+        subtitle={`${playingVerseId ? `Ayah ${verses.find(verse => verse.id === playingVerseId)?.verse_number} · ` : ""}${RECITERS.find(reciter => reciter.id === reciterId)?.name || ""}`}
+        onPlayRequest={() => { if (verses[0]) playVerse(verses[0]); }}
+        onNext={playNextVerse}
+        onPrev={playPrevVerse}
+        onPlayStateChange={setIsAudioPlaying}
+        onStop={() => { setAudioUrl(null); setPlayingVerseId(null); setIsAudioPlaying(false); }}
+      />
 
       {/* Copy Toast */}
       <AnimatePresence>
