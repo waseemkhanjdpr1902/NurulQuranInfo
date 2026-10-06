@@ -48,6 +48,7 @@ import AudioPlayer from "@/components/AudioPlayer/AudioPlayer";
 import { useQuranJourney } from "@/hooks/useQuranJourney";
 import { surahSlug } from "@/lib/quran-journey";
 import { downloadAyahCard } from "@/lib/ayah-card";
+import { TAFSIR_EDITIONS, isTafsirLanguage, type TafsirLanguage } from "@/lib/tafsir-editions";
 
 export default function QuranReader({ 
   surah, 
@@ -71,6 +72,10 @@ export default function QuranReader({
   const [selectedTafsir, setSelectedTafsir] = useState<Verse | null>(null);
   const [tafsirContent, setTafsirContent] = useState<string | null>(null);
   const [loadingTafsir, setLoadingTafsir] = useState(false);
+  const [tafsirLanguage, setTafsirLanguage] = useState<TafsirLanguage>("en");
+  const [tafsirSource, setTafsirSource] = useState<{ resourceName: string; author: string; sourceUrl: string } | null>(null);
+  const [tafsirError, setTafsirError] = useState("");
+  const tafsirRequest = useRef<AbortController | null>(null);
   const [showCopyToast, setShowCopyToast] = useState(false);
 
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -92,36 +97,39 @@ export default function QuranReader({
 
   useEffect(() => {
     const saved = localStorage.getItem("nurulquran.translation-language");
+    const savedTafsir = localStorage.getItem("nurulquran.tafsir-language");
+    if (isTafsirLanguage(savedTafsir)) setTafsirLanguage(savedTafsir);
+    else if (isTafsirLanguage(saved)) setTafsirLanguage(saved);
     if (saved === "en" || saved === "hi" || saved === "ur") setTranslationLanguage(saved);
     if (localStorage.getItem("nurulquran.arabic-size") === "large") setArabicSize("large");
     if (localStorage.getItem("nurulquran.arabic-spacing") === "compact") setRelaxedArabic(false);
   }, []);
 
-  const fetchTafsir = async (verse: Verse) => {
+  useEffect(() => () => tafsirRequest.current?.abort(), []);
+
+  const fetchTafsir = async (verse: Verse, language: TafsirLanguage = tafsirLanguage) => {
+    tafsirRequest.current?.abort();
+    const controller = new AbortController();
+    tafsirRequest.current = controller;
     setLoadingTafsir(true);
     setTafsirContent(null);
+    setTafsirSource(null);
+    setTafsirError("");
     setSelectedTafsir(verse);
     setActiveTab("tafsir");
     try {
       const verseKey = `${surah.number}:${verse.verse_number}`;
-      const res = await fetch(`/api/tafsir?verse_key=${encodeURIComponent(verseKey)}`);
-      if (!res.ok) {
-        throw new Error(`Tafsir request failed with status ${res.status}`);
-      }
-
+      const res = await fetch(`/api/tafsir?verse_key=${encodeURIComponent(verseKey)}&language=${language}`, { signal: controller.signal });
       const data = await res.json();
-      const tafsirText = data?.text;
-
-      if (tafsirText) {
-        setTafsirContent(tafsirText);
-      } else {
-        setTafsirContent("Tafsir Ibn Kathir not found for this verse.");
-      }
+      if (!res.ok || !data?.text) throw new Error(data?.error || "Failed to load tafsir. Please try again.");
+      if (controller.signal.aborted) return;
+      setTafsirContent(data.text);
+      setTafsirSource({ resourceName: data.resourceName, author: data.author, sourceUrl: data.sourceUrl });
     } catch (error) {
-      console.error("Error fetching tafsir:", error);
-      setTafsirContent("Failed to load tafsir. Please try again in a moment.");
+      if (controller.signal.aborted) return;
+      setTafsirError(error instanceof Error ? error.message : "Failed to load tafsir. Please try again.");
     } finally {
-      setLoadingTafsir(false);
+      if (!controller.signal.aborted) setLoadingTafsir(false);
     }
   };
 
@@ -581,16 +589,18 @@ export default function QuranReader({
             >
               <button 
                 onClick={() => {
+                  tafsirRequest.current?.abort();
                   setSelectedTafsir(null);
                   setTafsirContent(null);
                 }}
-                className="absolute top-8 right-8 text-parchment/30 hover:text-gold transition-colors z-10"
+                aria-label="Close tafsir study"
+                className="absolute top-4 right-4 flex h-11 w-11 items-center justify-center text-parchment/70 hover:text-gold transition-colors z-10"
               >
                 <X size={24} />
               </button>
               
               <div className="overflow-y-auto pr-4 custom-scrollbar">
-                <div className="flex items-center justify-between mb-8">
+                <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
                   <h3 className="text-2xl font-display text-gold">Verse {selectedTafsir.verse_number} Study</h3>
                   <div className="flex gap-2 p-1 glass rounded-2xl">
                     {[
@@ -624,19 +634,40 @@ export default function QuranReader({
                   
                   <div className="pt-8 border-t border-white/5">
                     {activeTab === 'tafsir' && (
-                      loadingTafsir ? (
-                        <div className="flex flex-col items-center py-12 gap-4">
-                          <Loader2 className="text-gold animate-spin" size={32} />
-                          <p className="text-parchment/30 text-xs animate-pulse">Fetching Ibn Kathir&apos;s Wisdom...</p>
-                        </div>
-                      ) : (
-                        <div className="prose prose-invert prose-gold max-w-none">
-                          <p className="text-gold/40 text-[10px] uppercase tracking-widest mb-6">Authoritative Commentary: Ibn Kathir</p>
-                          <div className="whitespace-pre-line text-sm leading-relaxed text-parchment/70 md:text-base">
-                            {tafsirContent || "Tafsir is unavailable at the moment."}
+                      <div>
+                        <label className="mb-5 flex flex-wrap items-center gap-3 text-sm font-semibold text-parchment">Tafsir language
+                          <select aria-label="Tafsir language" value={tafsirLanguage} onChange={event => {
+                            const language = event.target.value;
+                            if (!isTafsirLanguage(language)) return;
+                            setTafsirLanguage(language);
+                            localStorage.setItem("nurulquran.tafsir-language", language);
+                            void fetchTafsir(selectedTafsir, language);
+                          }} className="min-h-12 max-w-full rounded-xl border border-gold/30 bg-white px-4 text-parchment">
+                            {(Object.keys(TAFSIR_EDITIONS) as TafsirLanguage[]).map(language => <option key={language} value={language}>{TAFSIR_EDITIONS[language].label}</option>)}
+                          </select>
+                        </label>
+                        {loadingTafsir ? (
+                          <div role="status" className="flex flex-col items-center py-12 gap-4">
+                            <Loader2 className="text-gold animate-spin" size={32} />
+                            <p className="text-parchment/70 text-sm">Loading {TAFSIR_EDITIONS[tafsirLanguage].name}…</p>
                           </div>
-                        </div>
-                      )
+                        ) : tafsirError ? (
+                          <div role="alert" className="space-y-4 text-sm text-parchment">
+                            <p>{tafsirError}</p>
+                            <button onClick={() => fetchTafsir(selectedTafsir)} className="min-h-11 rounded-xl bg-gold px-4 font-semibold text-white">Retry tafsir</button>
+                          </div>
+                        ) : (
+                          <div>
+                            {tafsirSource && <p className="mb-5 text-sm text-gold">
+                              {tafsirSource.resourceName} · {tafsirSource.author}
+                              {tafsirSource.sourceUrl && <a href={tafsirSource.sourceUrl} target="_blank" rel="noopener noreferrer" className="ml-2 inline-flex min-h-11 items-center underline">View source</a>}
+                            </p>}
+                            <div lang={tafsirLanguage} dir={tafsirLanguage === "ur" ? "rtl" : "ltr"} className={`whitespace-pre-line text-parchment ${tafsirLanguage === "ur" ? "text-xl leading-loose" : "text-base leading-relaxed"}`}>
+                              {tafsirContent || "Tafsir is unavailable at the moment."}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )}
 
                     {activeTab === 'hadith' && (
