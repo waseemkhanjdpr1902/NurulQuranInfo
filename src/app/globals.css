@@ -50,6 +50,19 @@ button, select, input, textarea { font: inherit; }
 .font-display { font-family: var(--font-display); }
 .font-arabic { font-family: var(--font-arabic); }
 
+.urdu-tafsir {
+  font-size: 1.375rem;
+  line-height: 2.7;
+  text-align: right;
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+  padding-block: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .urdu-tafsir { font-size: 1.5rem; }
+}
+
 .glass {
   background: rgba(255, 255, 255, 0.62);
   backdrop-filter: blur(12px);
