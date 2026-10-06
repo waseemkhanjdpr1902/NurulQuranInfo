@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Headphones, MoreHorizontal, BookOpen, Info, Loader2, CheckCircle2, Copy, Share2, X, Heart, Sparkles, Bookmark, StickyNote, FolderPlus, Flag, Download } from "lucide-react";
+import { ArrowDown, ArrowRight, Headphones, MoreHorizontal, BookOpen, Info, Loader2, CheckCircle2, Copy, Share2, X, Heart, Sparkles, Bookmark, StickyNote, FolderPlus, Flag, Download } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -428,10 +428,13 @@ export default function QuranReader({
 
       {/* Verses List */}
       <div className="mb-80 space-y-8 md:mb-64">
-        {verses.map((verse) => (
+        {verses.map((verse, index) => (
           <motion.div 
             key={verse.id} 
             id={`verse-${verse.verse_number}`}
+            role="article"
+            aria-label={`Ayah ${surah.number}:${verse.verse_number}`}
+            tabIndex={-1}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -455,7 +458,8 @@ export default function QuranReader({
                 {translationLanguage === "hi" ? verse.hindi_translation : translationLanguage === "ur" ? verse.urdu_translation : verse.translation}
               </p>
             </div>
-            <details name="ayah-options" className="mt-6 rounded-2xl border border-gold/20 bg-white/70" onClickCapture={event => {
+            <div className="mt-6 flex flex-wrap items-start gap-3">
+            <details name="ayah-options" className="min-w-0 flex-1 rounded-2xl open:basis-full border border-gold/20 bg-white/70" onClickCapture={event => {
               if ((event.target as HTMLElement).closest("button, a")) {
                 event.currentTarget.open = false;
                 event.currentTarget.querySelector("summary")?.focus();
@@ -486,9 +490,25 @@ export default function QuranReader({
                 <Bookmark size={16} fill={journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "currentColor" : "none"}/> {journey.bookmarks.some(item => item.id === `${surah.number}:${verse.verse_number}`) ? "Saved" : "Bookmark"}
               </button>
               <button onClick={(event) => { event.stopPropagation(); openNote(verse); }} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><StickyNote size={16}/> Note / collection</button>
+              <a href={`/quran/${currentSlug}#verse-${verse.verse_number}`} onClick={event => event.stopPropagation()} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><BookOpen size={16}/> Context</a>
               <a href={`mailto:contact@nurulquran.info?subject=${encodeURIComponent(`Quran display issue ${surah.number}:${verse.verse_number}`)}`} onClick={event => event.stopPropagation()} className="flex min-h-12 items-center justify-center gap-2 rounded-xl border border-gold/30 bg-white px-3 text-sm font-semibold text-[#0d6658] hover:border-gold hover:bg-[#d9eee6]"><Flag size={16}/> Report issue</a>
             </div>
             </details>
+            {index < verses.length - 1 ? (
+              <button type="button" aria-label={`Go to ayah ${surah.number}:${verses[index + 1].verse_number}`} onClick={event => {
+                event.stopPropagation();
+                const nextAyah = document.getElementById(`verse-${verses[index + 1].verse_number}`);
+                nextAyah?.focus({ preventScroll: true });
+                nextAyah?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+              }} className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658] hover:bg-[#d9eee6]">
+                Next ayah <ArrowDown size={18} aria-hidden="true" />
+              </button>
+            ) : (
+              <Link href={nextSlug ? `/quran/${nextSlug}` : "/quran"} className="flex min-h-12 items-center justify-center gap-2 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658] hover:bg-[#d9eee6]">
+                {nextSlug ? "Next surah" : "All surahs"} <ArrowRight size={18} aria-hidden="true" />
+              </Link>
+            )}
+            </div>
           </motion.div>
         ))}
       </div>
@@ -503,6 +523,7 @@ export default function QuranReader({
         onNext={playNextVerse}
         onPrev={playPrevVerse}
         onPlayStateChange={setIsAudioPlaying}
+        onStop={() => { setAudioUrl(null); setPlayingVerseId(null); setIsAudioPlaying(false); }}
       />
 
       {/* Copy Toast */}

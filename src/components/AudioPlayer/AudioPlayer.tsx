@@ -10,11 +10,12 @@ interface AudioPlayerProps {
   onPrev?: () => void;
   onPlayRequest?: () => void;
   onPlayStateChange?: (playing: boolean) => void;
+  onStop?: () => void;
   title: string;
   subtitle: string;
 }
 
-export default function AudioPlayer({ audioUrl, playbackRequest = 0, onNext, onPrev, onPlayRequest, onPlayStateChange, title, subtitle }: AudioPlayerProps) {
+export default function AudioPlayer({ audioUrl, playbackRequest = 0, onNext, onPrev, onPlayRequest, onPlayStateChange, onStop, title, subtitle }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
@@ -98,6 +99,12 @@ export default function AudioPlayer({ audioUrl, playbackRequest = 0, onNext, onP
               <button type="button" onClick={onPrev} disabled={!audioUrl || !onPrev} aria-label="Previous ayah" className="flex min-h-11 items-center gap-2 rounded-xl border border-white/30 px-3 text-sm disabled:opacity-40"><SkipBack size={18} /> Previous</button>
               <button type="button" onClick={onNext} disabled={!audioUrl || !onNext} aria-label="Next ayah" className="flex min-h-11 items-center gap-2 rounded-xl border border-white/30 px-3 text-sm disabled:opacity-40">Next <SkipForward size={18} /></button>
               <button type="button" onClick={() => setRepeat(value => !value)} aria-pressed={repeat} className={`min-h-11 rounded-xl border border-white/30 px-3 text-sm ${repeat ? "bg-emerald-700" : ""}`}>Repeat ayah {repeat ? "on" : "off"}</button>
+              <button type="button" disabled={!audioUrl} onClick={() => {
+                audioRef.current?.pause();
+                if (audioRef.current) audioRef.current.currentTime = 0;
+                onStop?.();
+                setShowSettings(false);
+              }} className="min-h-11 rounded-xl border border-white/30 px-3 text-sm disabled:opacity-40">Stop recitation</button>
               <label className="flex min-h-11 items-center gap-2 text-sm">Speed
                 <select value={rate} onChange={event => setRate(Number(event.target.value))} className="min-h-11 rounded-xl bg-[#174c42] px-3 text-white">
                   {[0.5, 1, 1.25, 1.5, 2].map(value => <option key={value} value={value}>{value}×</option>)}
