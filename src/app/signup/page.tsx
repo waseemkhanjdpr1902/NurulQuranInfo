@@ -30,7 +30,7 @@ export default function SignupPage() {
     }
 
     const supabase = createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const siteUrl = window.location.origin;
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -62,7 +62,7 @@ export default function SignupPage() {
     }
 
     const supabase = createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const siteUrl = window.location.origin;
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
