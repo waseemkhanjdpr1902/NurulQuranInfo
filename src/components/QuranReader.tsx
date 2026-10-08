@@ -44,6 +44,7 @@ interface Surah {
   revelationType: string;
 }
 
+import { URDU_AUDIO_PILOT, urduAudioUrl, type AudioPhase } from "@/lib/quran-audio";
 import AudioPlayer from "@/components/AudioPlayer/AudioPlayer";
 import { useQuranJourney } from "@/hooks/useQuranJourney";
 import { surahSlug } from "@/lib/quran-journey";
@@ -70,6 +71,10 @@ export default function QuranReader({
   const [playingVerseId, setPlayingVerseId] = useState<number | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [tafsirLanguage, setTafsirLanguage] = useState<TafsirLanguage>("en");
+
+  const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu">("arabic");
+  const [audioPhase, setAudioPhase] = useState<AudioPhase>("arabic");
+  const urduPilotAvailable = Boolean(URDU_AUDIO_PILOT[surah.number]);
 
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [playbackRequest, setPlaybackRequest] = useState(0);
@@ -191,10 +196,15 @@ export default function QuranReader({
     const currentIndex = verses.findIndex(v => v.id === playingVerseId);
     if (currentIndex !== -1 && currentIndex < verses.length - 1) {
       playVerse(verses[currentIndex + 1]);
+    } else if (audioMode === "arabic-urdu") {
+      // End the pilot here instead of silently continuing without Urdu.
+      setAudioUrl(null);
+      setPlayingVerseId(null);
+      setIsAudioPlaying(false);
     } else if (nextSlug) {
       router.push(`/quran/${nextSlug}?autoplay=true`);
     }
-  }, [playingVerseId, verses, playVerse, nextSlug, router]);
+  }, [playingVerseId, verses, playVerse, nextSlug, router, audioMode]);
 
   const playPrevVerse = useCallback(() => {
     if (playingVerseId === null) return;
@@ -228,6 +238,21 @@ export default function QuranReader({
       {/* Reciter Selection & Info */}
       <div className="mb-10 flex flex-col items-stretch justify-between gap-5 rounded-3xl border-2 border-gold/25 bg-[#e7f3ee] p-4 shadow-[0_16px_40px_rgba(13,102,88,0.12)] sm:p-6 md:mb-12 lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="w-full">
+            <label className="flex flex-col gap-2 text-sm font-semibold text-[#0d6658]">Listening mode
+              <select aria-label="Listening mode" value={audioMode} onChange={event => {
+                const next = event.target.value === "arabic-urdu" && urduPilotAvailable ? "arabic-urdu" : "arabic";
+                setAudioMode(next);
+                // Mode changes stop playback so a paused ayah never starts unexpectedly.
+                setAudioUrl(null); setPlayingVerseId(null); setIsAudioPlaying(false); setAudioPhase("arabic");
+                if (next === "arabic-urdu") { setTranslationLanguage("ur"); localStorage.setItem("nurulquran.translation-language", "ur"); }
+              }} className="min-h-11 max-w-full rounded-xl border-2 border-gold/40 bg-white px-3 text-sm text-parchment">
+                <option value="arabic">Arabic only</option>
+                <option value="arabic-urdu" disabled={!urduPilotAvailable}>Arabic tilawat + Urdu tarjuma{!urduPilotAvailable ? " — pilot surahs only" : ""}</option>
+              </select>
+            </label>
+            <p className="mt-2 text-xs text-parchment/70">Urdu audio pilot: Al-Fatihah, Al-Ikhlas, Al-Falaq and An-Nas. Narration: Shamshad Ali Khan, via <a href="https://everyayah.com/recitations_ayat.html" target="_blank" rel="noreferrer" className="underline">EveryAyah</a>. Written Urdu: Fateh Muhammad Jalandhry.</p>
+          </div>
           <label className="flex min-w-0 flex-col gap-2 text-[10px] font-bold uppercase tracking-wider text-parchment/70 sm:flex-row sm:items-center">Translation
             <select value={translationLanguage} onChange={event => { const value = event.target.value as "en" | "hi" | "ur"; setTranslationLanguage(value); localStorage.setItem("nurulquran.translation-language", value); }} className="min-h-11 w-full min-w-0 rounded-xl border-2 border-gold/40 bg-white px-3 text-sm font-semibold normal-case tracking-normal text-parchment shadow-sm sm:w-auto">
               <option value="en">English — Saheeh International</option><option value="hi">हिंदी — Farooq Khan & Nadwi</option><option value="ur">اردو — Fateh Muhammad Jalandhry</option>
@@ -286,17 +311,18 @@ export default function QuranReader({
             id={`verse-${verse.verse_number}`}
             role="article"
             aria-label={`Ayah ${surah.number}:${verse.verse_number}`}
+            aria-current={playingVerseId === verse.id ? "true" : undefined}
             tabIndex={-1}
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className={`group relative scroll-mt-32 rounded-3xl p-4 transition-all duration-700 sm:p-6 md:p-8 ${playingVerseId === verse.id ? 'glass bg-gold/5 border-gold/10' : 'hover:bg-gold/5'}`}
+            className={`group relative scroll-mt-32 rounded-3xl p-4 transition-all duration-700 sm:p-6 md:p-8 ${playingVerseId === verse.id ? 'border-2 border-[#0d6658] bg-[#d9eee6] shadow-md' : 'hover:bg-gold/5'}`}
             onClick={() => recordMeaningfulRead(verse)}
             onFocusCapture={() => recordMeaningfulRead(verse)}
           >
             <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-[#0d6658]">
               Ayah {surah.number}:{verse.verse_number}
-              {playingVerseId === verse.id && isAudioPlaying && <span className="rounded-full bg-gold/10 px-2 py-1 text-xs">Reciting</span>}
+              {playingVerseId === verse.id && isAudioPlaying && <span className="rounded-full bg-gold/10 px-2 py-1 text-xs">{audioPhase === "urdu" ? "Urdu translation" : "Arabic tilawat"}</span>}
 
             </div>
             <div className="text-right mb-8">
@@ -335,6 +361,8 @@ export default function QuranReader({
       {/* One recitation control, available before playback starts. */}
       <AudioPlayer
         audioUrl={audioUrl}
+        translationAudioUrl={audioMode === "arabic-urdu" && playingVerseId ? urduAudioUrl(surah.number, verses.find(verse => verse.id === playingVerseId)?.verse_number || 0) : null}
+        onPhaseChange={setAudioPhase}
         playbackRequest={playbackRequest}
         title={surah.englishName}
         subtitle={`${playingVerseId ? `Ayah ${verses.find(verse => verse.id === playingVerseId)?.verse_number} · ` : ""}${RECITERS.find(reciter => reciter.id === reciterId)?.name || ""}`}
