@@ -52,13 +52,13 @@ export async function POST(request: Request) {
     // The greeting is UI text, not conversation history. Gemini history starts with a user.
     const firstUser = cleanMessages.findIndex((message) => message.role === "user");
     const conversation = cleanMessages.slice(firstUser);
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = process.env.GEMINI_API_KEY?.trim();
     if (!apiKey) {
       return NextResponse.json({ text: fallback(intent), source: "fallback" });
     }
 
     const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: process.env.GEMINI_MODEL || "gemini-2.5-flash",
+      model: process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
       systemInstruction: instructions[intent],
     });
     const response = await model.generateContent({
@@ -74,7 +74,25 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     const providerStatus = typeof error === "object" && error !== null && "status" in error ? Number(error.status) : 0;
-    console.error("AI chat failed", { providerStatus });
+    const details = error instanceof Error ? error.message.toLowerCase() : "";
+    // Classify provider failures without exposing its raw message or credentials.
+    const reason = /leaked|reported as leaked/.test(details) ? "blocked_key"
+      : /api key not valid|api_key_invalid|invalid api key|expired/.test(details) ? "invalid_key"
+      : /api.*not.*enabled|has not been used|service_disabled/.test(details) ? "disabled_api"
+      : /quota|resource_exhausted/.test(details) ? "quota"
+      : /not found|not supported.*generatecontent/.test(details) ? "model"
+      : providerStatus === 403 ? "access_denied"
+      : providerStatus === 400 ? "invalid_request" : "unavailable";
+    console.error("AI chat failed", { providerStatus, reason });
+    const configurationErrors: Record<string, string> = {
+      blocked_key: "Google has blocked the website's Gemini API key. The administrator must replace it.",
+      invalid_key: "The website's Gemini API key is invalid or expired. The administrator must replace it.",
+      disabled_api: "The Gemini API is not enabled for the website's Google project.",
+      access_denied: "Google is denying access to the website's Gemini service.",
+      model: "The website's configured Gemini model is unavailable.",
+      quota: "The website's Gemini usage quota has been reached. Please try again later.",
+    };
+    if (configurationErrors[reason]) return NextResponse.json({ error: configurationErrors[reason], code: reason }, { status: 503 });
     const message = providerStatus === 429
       ? "The AI provider has reached its usage limit. Please try again later."
       : providerStatus === 400 || providerStatus === 401 || providerStatus === 403
