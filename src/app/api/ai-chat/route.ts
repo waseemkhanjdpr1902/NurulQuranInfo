@@ -49,6 +49,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "A user message is required." }, { status: 400 });
     }
 
+    // The greeting is UI text, not conversation history. Gemini history starts with a user.
+    const firstUser = cleanMessages.findIndex((message) => message.role === "user");
+    const conversation = cleanMessages.slice(firstUser);
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return NextResponse.json({ text: fallback(intent), source: "fallback" });
@@ -59,7 +62,7 @@ export async function POST(request: Request) {
       systemInstruction: instructions[intent],
     });
     const response = await model.generateContent({
-      contents: cleanMessages.map((message) => ({
+      contents: conversation.map((message) => ({
         role: message.role,
         parts: [{ text: message.content }],
       })),
@@ -70,7 +73,15 @@ export async function POST(request: Request) {
       source: "gemini",
     });
   } catch (error) {
-    console.error("AI chat failed:", error);
-    return NextResponse.json({ error: "The AI study guide is temporarily unavailable." }, { status: 503 });
+    const providerStatus = typeof error === "object" && error !== null && "status" in error ? Number(error.status) : 0;
+    console.error("AI chat failed", { providerStatus });
+    const message = providerStatus === 429
+      ? "The AI provider has reached its usage limit. Please try again later."
+      : providerStatus === 400 || providerStatus === 401 || providerStatus === 403
+        ? "The AI service needs its provider configuration checked. Please contact the website administrator."
+        : providerStatus === 404
+          ? "The configured AI model is unavailable. Please contact the website administrator."
+          : "The AI study guide is temporarily unavailable. Please try again shortly.";
+    return NextResponse.json({ error: message }, { status: 503 });
   }
 }

@@ -50,7 +50,7 @@ export default function AIAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           intent: "quran",
-          messages: newMessages.slice(-8),
+          messages: newMessages.filter((message, index) => index > 0).slice(-8),
         }),
       });
       const data = await response.json();
@@ -63,8 +63,8 @@ export default function AIAssistant() {
         throw new Error("Empty response from AI");
       }
     } catch (error) {
-      console.error("AI Error:", error);
-      setMessages((prev) => [...prev, { role: "model", content: "I apologize, but the study guide is temporarily unavailable. Please try again later." }]);
+      const message = error instanceof Error ? error.message : "The AI guide could not connect. Please try again.";
+      setMessages((prev) => [...prev, { role: "model", content: message }]);
     } finally {
       setIsLoading(false);
     }
@@ -77,9 +77,9 @@ export default function AIAssistant() {
         id="ai"
         aria-label="Open AI Quranic Guide"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-8 right-8 w-16 h-16 rounded-full gold-gradient flex items-center justify-center shadow-2xl shadow-gold/30 hover:scale-110 transition-transform z-40"
+        className="fixed bottom-6 right-4 sm:right-8 h-14 px-5 rounded-full bg-[#d4af37] text-[#101b18] flex items-center gap-2 shadow-2xl hover:scale-105 transition-transform z-[120]"
       >
-        <Sparkles className="text-ink" size={28} />
+        <Sparkles className="text-ink" size={24} /><span className="font-bold text-sm">AI Guide</span>
       </button>
 
       {/* Chat Window */}
@@ -89,10 +89,12 @@ export default function AIAssistant() {
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed bottom-28 right-8 w-[90vw] md:w-[400px] h-[600px] glass rounded-[32px] overflow-hidden flex flex-col z-50 shadow-2xl"
+            role="dialog"
+            aria-label="AI Quranic Guide"
+            className="fixed bottom-24 right-4 sm:right-8 w-[calc(100vw-32px)] md:w-[400px] h-[min(600px,calc(100dvh-120px))] bg-[#101b18] border border-[#d4af37] text-[#faf7ef] rounded-3xl overflow-hidden flex flex-col z-[130] shadow-2xl"
           >
             {/* Header */}
-            <div className="p-6 border-b border-white/10 flex items-center justify-between bg-white/5">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between bg-[#20312a]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center">
                   <Bot size={20} className="text-ink" />
@@ -108,14 +110,14 @@ export default function AIAssistant() {
             </div>
 
             {/* Messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div ref={scrollRef} className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6">
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-white/10" : "gold-gradient"}`}>
                       {msg.role === "user" ? <User size={14} /> : <Bot size={14} className="text-ink" />}
                     </div>
-                    <div className={`p-4 rounded-2xl text-sm leading-relaxed ${msg.role === "user" ? "bg-gold/20 text-parchment rounded-tr-none" : "bg-white/5 text-parchment/90 rounded-tl-none"}`}>
+                    <div className={`p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${msg.role === "user" ? "bg-[#3b3420] text-parchment rounded-tr-none" : "bg-white/5 text-parchment/90 rounded-tl-none"}`}>
                       {msg.content}
                     </div>
                   </div>
