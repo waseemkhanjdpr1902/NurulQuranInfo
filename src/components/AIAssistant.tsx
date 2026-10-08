@@ -101,7 +101,7 @@ export default function AIAssistant() {
                 </div>
                 <div>
                   <h3 className="text-[#faf7ef] font-sans text-lg font-bold">AI Quranic Guide</h3>
-                  <p className="text-xs text-[#e8cf78] uppercase tracking-widest">Powered by Gemini</p>
+                  <p className="text-xs text-[#e8cf78] uppercase tracking-widest">Quran study assistant</p>
                 </div>
               </div>
               <button aria-label="Close AI Quranic Guide" onClick={() => setIsOpen(false)} className="text-[#d6e4dd] hover:text-white">
