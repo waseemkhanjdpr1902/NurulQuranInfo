@@ -44,7 +44,7 @@ interface Surah {
   revelationType: string;
 }
 
-import { URDU_AUDIO_PILOT, urduAudioUrl, type AudioPhase } from "@/lib/quran-audio";
+import { URDU_AUDIO_SURAHS, urduAudioUrl, type AudioPhase } from "@/lib/quran-audio";
 import AudioPlayer from "@/components/AudioPlayer/AudioPlayer";
 import { useQuranJourney } from "@/hooks/useQuranJourney";
 import { surahSlug } from "@/lib/quran-journey";
@@ -74,7 +74,7 @@ export default function QuranReader({
 
   const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu">("arabic");
   const [audioPhase, setAudioPhase] = useState<AudioPhase>("arabic");
-  const urduPilotAvailable = Boolean(URDU_AUDIO_PILOT[surah.number]);
+  const urduAudioAvailable = Boolean(URDU_AUDIO_SURAHS[surah.number]);
 
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [playbackRequest, setPlaybackRequest] = useState(0);
@@ -197,7 +197,7 @@ export default function QuranReader({
     if (currentIndex !== -1 && currentIndex < verses.length - 1) {
       playVerse(verses[currentIndex + 1]);
     } else if (audioMode === "arabic-urdu") {
-      // End the pilot here instead of silently continuing without Urdu.
+      // Complete the surah before the reader chooses the next one.
       setAudioUrl(null);
       setPlayingVerseId(null);
       setIsAudioPlaying(false);
@@ -241,17 +241,17 @@ export default function QuranReader({
           <div className="w-full">
             <label className="flex flex-col gap-2 text-sm font-semibold text-[#0d6658]">Listening mode
               <select aria-label="Listening mode" value={audioMode} onChange={event => {
-                const next = event.target.value === "arabic-urdu" && urduPilotAvailable ? "arabic-urdu" : "arabic";
+                const next = event.target.value === "arabic-urdu" && urduAudioAvailable ? "arabic-urdu" : "arabic";
                 setAudioMode(next);
                 // Mode changes stop playback so a paused ayah never starts unexpectedly.
                 setAudioUrl(null); setPlayingVerseId(null); setIsAudioPlaying(false); setAudioPhase("arabic");
                 if (next === "arabic-urdu") { setTranslationLanguage("ur"); localStorage.setItem("nurulquran.translation-language", "ur"); }
               }} className="min-h-11 max-w-full rounded-xl border-2 border-gold/40 bg-white px-3 text-sm text-parchment">
                 <option value="arabic">Arabic only</option>
-                <option value="arabic-urdu" disabled={!urduPilotAvailable}>Arabic tilawat + Urdu tarjuma{!urduPilotAvailable ? " — pilot surahs only" : ""}</option>
+                <option value="arabic-urdu" disabled={!urduAudioAvailable}>Arabic tilawat + Urdu tarjuma{!urduAudioAvailable ? " — unavailable" : ""}</option>
               </select>
             </label>
-            <p className="mt-2 text-xs text-parchment/70">Urdu audio pilot: Al-Fatihah, Al-Ikhlas, Al-Falaq and An-Nas. Narration: Shamshad Ali Khan, via <a href="https://everyayah.com/recitations_ayat.html" target="_blank" rel="noreferrer" className="underline">EveryAyah</a>. Written Urdu: Fateh Muhammad Jalandhry.</p>
+            <p className="mt-2 text-xs text-parchment/70">Urdu translation audio available for all 114 surahs. Narration: Shamshad Ali Khan, via <a href="https://everyayah.com/recitations_ayat.html" target="_blank" rel="noreferrer" className="underline">EveryAyah</a>. Written Urdu: Fateh Muhammad Jalandhry.</p>
           </div>
           <label className="flex min-w-0 flex-col gap-2 text-[10px] font-bold uppercase tracking-wider text-parchment/70 sm:flex-row sm:items-center">Translation
             <select value={translationLanguage} onChange={event => { const value = event.target.value as "en" | "hi" | "ur"; setTranslationLanguage(value); localStorage.setItem("nurulquran.translation-language", value); }} className="min-h-11 w-full min-w-0 rounded-xl border-2 border-gold/40 bg-white px-3 text-sm font-semibold normal-case tracking-normal text-parchment shadow-sm sm:w-auto">
