@@ -79,7 +79,7 @@ export default function AIAssistant() {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-4 sm:right-8 h-14 px-5 rounded-full bg-[#d4af37] text-[#101b18] flex items-center gap-2 shadow-2xl hover:scale-105 transition-transform z-[120]"
       >
-        <Sparkles className="text-ink" size={24} /><span className="font-bold text-sm">AI Guide</span>
+        <Sparkles className="text-[#101b18]" size={24} /><span className="font-bold text-sm">AI Guide</span>
       </button>
 
       {/* Chat Window */}
@@ -96,15 +96,15 @@ export default function AIAssistant() {
             {/* Header */}
             <div className="p-6 border-b border-white/10 flex items-center justify-between bg-[#20312a]">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full gold-gradient flex items-center justify-center">
-                  <Bot size={20} className="text-ink" />
+                <div className="w-10 h-10 rounded-full bg-[#d4af37] flex items-center justify-center">
+                  <Bot size={20} className="text-[#101b18]" />
                 </div>
                 <div>
-                  <h3 className="text-parchment font-display font-bold">AI Quranic Guide</h3>
-                  <p className="text-[10px] text-gold uppercase tracking-widest">Powered by Gemini</p>
+                  <h3 className="text-[#faf7ef] font-sans text-lg font-bold">AI Quranic Guide</h3>
+                  <p className="text-xs text-[#e8cf78] uppercase tracking-widest">Powered by Gemini</p>
                 </div>
               </div>
-              <button aria-label="Close AI Quranic Guide" onClick={() => setIsOpen(false)} className="text-parchment/50 hover:text-parchment">
+              <button aria-label="Close AI Quranic Guide" onClick={() => setIsOpen(false)} className="text-[#d6e4dd] hover:text-white">
                 <X size={24} />
               </button>
             </div>
@@ -114,10 +114,10 @@ export default function AIAssistant() {
               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`flex gap-3 max-w-[85%] ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-white/10" : "gold-gradient"}`}>
-                      {msg.role === "user" ? <User size={14} /> : <Bot size={14} className="text-ink" />}
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === "user" ? "bg-white/10" : "bg-[#d4af37]"}`}>
+                      {msg.role === "user" ? <User size={14} /> : <Bot size={14} className="text-[#101b18]" />}
                     </div>
-                    <div className={`p-4 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap break-words ${msg.role === "user" ? "bg-[#3b3420] text-parchment rounded-tr-none" : "bg-white/5 text-parchment/90 rounded-tl-none"}`}>
+                    <div dir="auto" style={{ fontFamily: "var(--font-sans), var(--font-arabic), system-ui, sans-serif" }} className={`p-4 rounded-2xl text-base leading-7 whitespace-pre-wrap break-words ${msg.role === "user" ? "bg-[#3b3420] text-[#faf7ef] rounded-tr-none" : "bg-[#20312a] text-[#faf7ef] rounded-tl-none"}`}>
                       {msg.content}
                     </div>
                   </div>
@@ -126,14 +126,14 @@ export default function AIAssistant() {
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 rounded-full gold-gradient flex items-center justify-center">
-                      <Loader2 size={14} className="text-ink animate-spin" />
+                    <div className="w-8 h-8 rounded-full bg-[#d4af37] flex items-center justify-center">
+                      <Loader2 size={14} className="text-[#101b18] animate-spin" />
                     </div>
                     <div className="p-4 bg-white/5 rounded-2xl rounded-tl-none">
                       <div className="flex gap-1">
-                        <div className="w-1.5 h-1.5 bg-gold rounded-full animate-bounce" />
-                        <div className="w-1.5 h-1.5 bg-gold rounded-full animate-bounce delay-100" />
-                        <div className="w-1.5 h-1.5 bg-gold rounded-full animate-bounce delay-200" />
+                        <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full animate-bounce" />
+                        <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full animate-bounce delay-100" />
+                        <div className="w-1.5 h-1.5 bg-[#d4af37] rounded-full animate-bounce delay-200" />
                       </div>
                     </div>
                   </div>
@@ -151,13 +151,13 @@ export default function AIAssistant() {
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-parchment focus:outline-none focus:border-gold/50 transition-colors"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-6 pr-14 text-[#faf7ef] focus:outline-none focus:border-gold/50 transition-colors"
                 />
                 <button
                   aria-label="Send question"
                   onClick={handleSend}
                   disabled={isLoading}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl gold-gradient flex items-center justify-center text-ink hover:scale-105 transition-transform disabled:opacity-50"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-[#d4af37] flex items-center justify-center text-[#101b18] hover:scale-105 transition-transform disabled:opacity-50"
                 >
                   <Send size={18} />
                 </button>
