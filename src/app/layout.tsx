@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, Amiri } from "next/font/google";
 import "./globals.css";
+import AppInstall from "@/components/AppInstall";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-display" });
@@ -14,6 +15,9 @@ export const metadata: Metadata = {
   },
   description: "Read the Holy Quran, explore tafseer and authentic Islamic resources, and use practical tools for prayer, duas, tasbih and zakat.",
   applicationName: "NurulQuran",
+  manifest: "/manifest.json",
+  appleWebApp: { capable: true, title: "NurulQuran", statusBarStyle: "default" },
+  icons: { icon: "/icons/nurulquran-192.png", apple: "/icons/nurulquran-180.png" },
   keywords: ["Quran", "Holy Quran", "Tafseer", "Islamic tools", "Dua", "Prayer times"],
   robots: { index: true, follow: true },
   openGraph: {
@@ -38,6 +42,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} ${amiri.variable}`}>
         {children}
+        <AppInstall />
       </body>
     </html>
   );

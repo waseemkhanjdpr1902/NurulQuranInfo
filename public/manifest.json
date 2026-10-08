@@ -1,21 +1,25 @@
 {
+  "id": "/",
   "name": "NurulQuran",
   "short_name": "NurulQuran",
-  "description": "A beautiful, modern Islamic platform with Quran reading, prayer times, zakat calculator, and spiritual tools.",
+  "description": "Read the Quran, listen to recitation and explore tafseer.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#030712",
-  "theme_color": "#D4AF37",
+  "theme_color": "#075c3a",
   "icons": [
     {
-      "src": "https://picsum.photos/seed/islamic-icon/192/192",
+      "src": "/icons/nurulquran-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://picsum.photos/seed/islamic-icon/512/512",
+      "src": "/icons/nurulquran-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
