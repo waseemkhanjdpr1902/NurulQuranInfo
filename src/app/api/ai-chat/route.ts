@@ -76,9 +76,9 @@ export async function POST(request: Request) {
         headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
         signal: AbortSignal.timeout(20_000),
         body: JSON.stringify({
-          model: process.env.GROQ_MODEL?.trim() || "llama-3.3-70b-versatile",
+          model: process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-120b",
           temperature: 0.2,
-          max_completion_tokens: 1200,
+          max_completion_tokens: 2400,
           messages: [
             { role: "system", content: instructions[intent] + " Reply in the user's language. Do not generate Arabic Quran verse text from memory; give surah and ayah references and encourage checking the original." },
             ...conversation.map(message => ({ role: message.role === "model" ? "assistant" : "user", content: message.content })),
