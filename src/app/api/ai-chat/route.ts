@@ -53,25 +53,50 @@ export async function POST(request: Request) {
     const firstUser = cleanMessages.findIndex((message) => message.role === "user");
     const conversation = cleanMessages.slice(firstUser);
     const apiKey = process.env.GEMINI_API_KEY?.trim();
-    if (!apiKey) {
-      return NextResponse.json({ text: fallback(intent), source: "fallback" });
+    if (apiKey) {
+      try {
+        const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
+          model: process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
+          systemInstruction: instructions[intent],
+        });
+        const response = await model.generateContent({
+          contents: conversation.map(message => ({ role: message.role, parts: [{ text: message.content }] })),
+        }, { timeout: 8000 });
+        const text = response.response.text()?.trim();
+        if (text) return NextResponse.json({ text, source: "gemini" });
+      } catch {
+        console.warn("Gemini unavailable; trying alternate study provider.");
+      }
     }
 
-    const model = new GoogleGenerativeAI(apiKey).getGenerativeModel({
-      model: process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash",
-      systemInstruction: instructions[intent],
-    });
-    const response = await model.generateContent({
-      contents: conversation.map((message) => ({
-        role: message.role,
-        parts: [{ text: message.content }],
-      })),
-    });
-
-    return NextResponse.json({
-      text: response.response.text() || fallback(intent),
-      source: "gemini",
-    });
+    const groqKey = process.env.GROQ_API_KEY?.trim();
+    if (groqKey) {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${groqKey}`, "Content-Type": "application/json" },
+        signal: AbortSignal.timeout(20_000),
+        body: JSON.stringify({
+          model: process.env.GROQ_MODEL?.trim() || "llama-3.3-70b-versatile",
+          temperature: 0.2,
+          max_completion_tokens: 1200,
+          messages: [
+            { role: "system", content: instructions[intent] + " Reply in the user's language. Do not generate Arabic Quran verse text from memory; give surah and ayah references and encourage checking the original." },
+            ...conversation.map(message => ({ role: message.role === "model" ? "assistant" : "user", content: message.content })),
+          ],
+        }),
+      });
+      if (!response.ok) {
+        const error = response.status === 429 ? "The AI service is busy. Please try again shortly."
+          : response.status === 401 || response.status === 403 ? "The alternate AI provider needs its API key or permissions checked."
+          : "The AI study guide is temporarily unavailable. Please try again shortly.";
+        console.warn("Alternate study provider failed", { status: response.status });
+        return NextResponse.json({ error }, { status: 503 });
+      }
+      const data = await response.json();
+      const text = data.choices?.[0]?.message?.content?.trim();
+      if (text) return NextResponse.json({ text, source: "groq" });
+    }
+    return NextResponse.json({ error: fallback(intent) }, { status: 503 });
   } catch (error) {
     const providerStatus = typeof error === "object" && error !== null && "status" in error ? Number(error.status) : 0;
     const details = error instanceof Error ? error.message.toLowerCase() : "";
