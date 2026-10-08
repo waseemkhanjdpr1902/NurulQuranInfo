@@ -72,7 +72,7 @@ export default function QuranReader({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [tafsirLanguage, setTafsirLanguage] = useState<TafsirLanguage>("en");
 
-  const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu">("arabic");
+  const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu">("arabic-urdu");
   const [audioPhase, setAudioPhase] = useState<AudioPhase>("arabic");
   const urduAudioAvailable = Boolean(URDU_AUDIO_SURAHS[surah.number]);
 
