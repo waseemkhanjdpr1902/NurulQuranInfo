@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { BookOpen, Sparkles, Menu, X, LogIn, Book, Landmark, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Link from "next/link";
+import Image from "next/image";
 import { createClient, isSupabaseConfigured } from "@/services/supabase";
 
 export default function Navbar() {
@@ -41,20 +42,16 @@ export default function Navbar() {
       isScrolled ? "py-3 bg-ink/90 backdrop-blur-2xl border-b border-white/10 shadow-xl shadow-black/10" : "py-5"
     }`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-4 group">
-          <div className="relative">
-            <div className={`absolute inset-0 gold-gradient blur-lg opacity-20 group-hover:opacity-100 transition-opacity duration-500`} />
-            <div className="relative w-11 h-11 rounded-2xl gold-gradient flex items-center justify-center text-ink shadow-2xl shadow-gold/30 group-hover:scale-105 transition-transform duration-500 overflow-hidden">
-              <Sparkles size={22} />
-              <div className="absolute inset-x-0 bottom-0 h-1 bg-ink/20" />
-            </div>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-2xl font-display font-bold text-parchment leading-none tracking-tight">
-              Nurul<span className="text-gold">Quran</span>
-            </span>
-            <span className="text-[8px] uppercase tracking-[0.4em] text-gold/40 font-bold mt-1">Light for the soul</span>
-          </div>
+        <Link href="/" aria-label="NurulQuran home" className="group flex shrink-0 items-center rounded-xl bg-white px-3 py-2 shadow-sm transition-transform hover:scale-[1.02]">
+          <Image
+            src="/nurulquran-logo.png"
+            alt="NurulQuran — nurulquran.info"
+            width={2172}
+            height={724}
+            priority
+            sizes="(max-width: 640px) 180px, 216px"
+            className="h-auto w-[180px] sm:w-[216px]"
+          />
         </Link>
 
         {/* Desktop Nav */}
