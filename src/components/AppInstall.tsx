@@ -18,7 +18,14 @@ export default function AppInstall() {
 
   useEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)");
-    const isInstalled = () => standalone.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+    const inApp = () => standalone.matches || Boolean((navigator as Navigator & { standalone?: boolean }).standalone);
+    const rememberInstalled = () => {
+      try { localStorage.setItem("nurulquran-app-installed", "1"); } catch { /* Storage may be unavailable. */ }
+    };
+    const isInstalled = () => {
+      if (inApp()) { rememberInstalled(); return true; }
+      try { return localStorage.getItem("nurulquran-app-installed") === "1"; } catch { return false; }
+    };
     setInstalled(isInstalled());
     setIos(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
     try { if (!isInstalled() && !sessionStorage.getItem("nurulquran-install-dismissed")) setOpen(true); } catch { if (!isInstalled()) setOpen(true); }
@@ -26,10 +33,18 @@ export default function AppInstall() {
       event.preventDefault();
       setPromptEvent(event as InstallPromptEvent);
     };
-    const onInstalled = () => { setInstalled(true); setOpen(false); setPromptEvent(null); };
-    const onDisplayChange = () => setInstalled(isInstalled());
+    const onInstalled = () => { rememberInstalled(); setInstalled(true); setOpen(false); setPromptEvent(null); };
+    const onDisplayChange = () => {
+      const value = isInstalled();
+      setInstalled(value);
+      if (value) setOpen(false);
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "nurulquran-app-installed") onDisplayChange();
+    };
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
+    window.addEventListener("storage", onStorage);
     standalone.addEventListener("change", onDisplayChange);
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js").catch(() => { /* Reading remains available if registration fails. */ });
@@ -37,6 +52,7 @@ export default function AppInstall() {
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
+      window.removeEventListener("storage", onStorage);
       standalone.removeEventListener("change", onDisplayChange);
     };
   }, []);
