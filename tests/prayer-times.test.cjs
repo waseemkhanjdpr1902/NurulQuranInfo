@@ -1,0 +1,12 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { localDate, addDay, nightMidpoint, schedule, nextPrayer, alertDue, timestamp } = require(process.env.PRAYER_TEST_MODULE);
+const day = { timings: { Fajr:'2026-10-13T05:08:00+05:30',Sunrise:'2026-10-13T06:25:00+05:30',Dhuhr:'2026-10-13T12:13:00+05:30',Asr:'2026-10-13T16:23:00+05:30',Sunset:'2026-10-13T18:01:00+05:30',Maghrib:'2026-10-13T18:01:00+05:30',Isha:'2026-10-13T19:18:00+05:30' } };
+const tomorrow = { timings: { Fajr:'2026-10-14T05:09:00+05:30' } };
+test('selected location date differs from UTC and device date',()=>{const n=Date.parse('2026-10-13T20:00:00Z');assert.equal(localDate(n,'Asia/Kolkata'),'2026-10-14');assert.equal(localDate(n,'America/New_York'),'2026-10-13');});
+test('calendar next day handles month and year rollover',()=>{assert.equal(addDay('2026-12-31'),'2027-01-01');assert.equal(addDay('2028-02-28'),'2028-02-29');});
+test('night midpoint uses sunset to next actual Fajr',()=>assert.equal(nightMidpoint(day,tomorrow),Date.parse('2026-10-13T23:35:00+05:30')));
+test('prayer boundaries use sunrise, selected Asr, sunset, Isha and next-day Fajr',()=>assert.deepEqual(schedule(day,tomorrow).map(p=>p.end),['2026-10-13T06:25:00+05:30','2026-10-13T16:23:00+05:30','2026-10-13T18:01:00+05:30','2026-10-13T19:18:00+05:30','2026-10-14T05:09:00+05:30'].map(Date.parse)));
+test('after Isha, next prayer is tomorrow Fajr',()=>{const p=nextPrayer(day,tomorrow,Date.parse('2026-10-13T23:00:00+05:30'));assert.equal(p.name,'Fajr');assert.equal(p.start,Date.parse(tomorrow.timings.Fajr));});
+test('alerts trigger at start, never early or for stale prayers',()=>{assert.equal(alertDue(100000,99999),false);assert.equal(alertDue(100000,100000),true);assert.equal(alertDue(100000,159999),true);assert.equal(alertDue(100000,160000),false);});
+test('ambiguous timestamps rejected, explicit DST offsets preserved',()=>{assert.throws(()=>timestamp('2026-10-13T05:00:00'));assert.equal(timestamp('2026-11-01T01:30:00-05:00')-timestamp('2026-11-01T01:30:00-04:00'),3600000);});

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Playfair_Display, Amiri } from "next/font/google";
 import "./globals.css";
+import { PrayerTimesProvider } from "@/components/PrayerTimesProvider";
 import AppInstall from "@/components/AppInstall";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -41,8 +42,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${playfair.variable} ${amiri.variable}`}>
-        {children}
-        <AppInstall />
+        <PrayerTimesProvider>
+          {children}
+          <AppInstall />
+        </PrayerTimesProvider>
       </body>
     </html>
   );

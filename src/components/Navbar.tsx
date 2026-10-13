@@ -1,5 +1,6 @@
 "use client";
 
+import { PrayerBanner } from "@/components/PrayerTimesProvider";
 import { useState, useEffect } from "react";
 import { BookOpen, Sparkles, Menu, X, LogIn, Book, Landmark, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
@@ -39,9 +40,10 @@ export default function Navbar() {
 
   return (
     <nav aria-label="Main navigation" className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
-      isScrolled ? "py-3 bg-ink/90 backdrop-blur-2xl border-b border-white/10 shadow-xl shadow-black/10" : "py-5"
+      isScrolled ? "pb-3 bg-ink/90 backdrop-blur-2xl border-b border-white/10 shadow-xl shadow-black/10" : "pb-5 bg-ink/95"
     }`}>
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+      <PrayerBanner />
+      <div className="max-w-7xl mx-auto px-6 pt-3 flex items-center justify-between">
         <Link href="/" aria-label="NurulQuran home" className="group flex shrink-0 items-center rounded-xl bg-white px-3 py-2 shadow-sm transition-transform hover:scale-[1.02]">
           <Image
             src="/nurulquran-logo.png"
