@@ -105,8 +105,12 @@ export async function POST(request: Request) {
           { timeout: 8000 },
         );
         const text = response.response.text()?.trim();
-        if (acceptableStudyAnswer(text, context.references))
-          return NextResponse.json({ text, source: "gemini" });
+        if (acceptableStudyAnswer(text, []))
+          return NextResponse.json({
+            text,
+            source: "gemini",
+            references: context.references,
+          });
         console.warn("Rejected malformed or unverified study answer");
       } catch {
         console.warn("Gemini unavailable; trying alternate study provider.");
@@ -152,8 +156,12 @@ export async function POST(request: Request) {
       }
       const data = await response.json();
       const text = data.choices?.[0]?.message?.content?.trim();
-      if (acceptableStudyAnswer(text, context.references))
-        return NextResponse.json({ text, source: "groq" });
+      if (acceptableStudyAnswer(text, []))
+        return NextResponse.json({
+          text,
+          source: "groq",
+          references: context.references,
+        });
       console.warn("Rejected malformed or unverified study answer");
     }
     return NextResponse.json({ error: fallback(intent) }, { status: 503 });

@@ -9,6 +9,7 @@ import { Sparkles, Send, User, Bot, X, Loader2 } from "lucide-react";
 interface Message {
   role: "user" | "model";
   content: string;
+  references?: string[];
 }
 
 export default function AIAssistant() {
@@ -72,7 +73,19 @@ export default function AIAssistant() {
       if (typeof data.text !== "string" || !data.text.trim())
         throw new Error("Empty response");
       if (!controller.signal.aborted)
-        setMessages([...conversation, { role: "model", content: data.text }]);
+        setMessages([
+          ...conversation,
+          {
+            role: "model",
+            content: data.text,
+            references: Array.isArray(data.references)
+              ? data.references.filter(
+                  (ref: unknown) =>
+                    typeof ref === "string" && /^\d{1,3}:\d{1,3}$/.test(ref),
+                )
+              : [],
+          },
+        ]);
     } catch {
       if (!controller.signal.aborted) {
         setError("unavailable");
@@ -222,6 +235,30 @@ export default function AIAssistant() {
                       className={`p-4 rounded-2xl text-base leading-7 whitespace-pre-wrap break-words ${msg.role === "user" ? "bg-[#3b3420] text-[#faf7ef] rounded-tr-none" : "bg-[#20312a] text-[#faf7ef] rounded-tl-none"}`}
                     >
                       {msg.content}
+                      {msg.references && msg.references.length > 0 && (
+                        <div className="mt-3 border-t border-white/20 pt-3 text-sm">
+                          <p>
+                            {t(
+                              "Related verses for further study (selected by the website)",
+                              "आगे पढ़ने के लिए संबंधित आयतें (वेबसाइट द्वारा चुनी गई)",
+                              "مزید مطالعے کے لیے متعلقہ آیات (ویب سائٹ کی منتخب کردہ)",
+                            )}
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {msg.references.map((ref) => (
+                              <a
+                                key={ref}
+                                href={`https://quran.com/${ref.replace(":", "/")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="rounded-lg border border-amber-200 px-3 py-2 text-amber-100 underline"
+                              >
+                                {ref}
+                              </a>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

@@ -121,7 +121,10 @@ globalThis.fetch = async () => {
   aiCalls++;
   return aiCalls === 1
     ? Response.json({ error: "internal API key failure" }, { status: 503 })
-    : Response.json({ text: "A successful study answer." });
+    : Response.json({
+        text: "A successful study answer.",
+        references: ["2:153"],
+      });
 };
 await render(React.createElement(AI));
 await act(async () => document.querySelector("#ai").click());
@@ -148,6 +151,7 @@ await act(async () =>
 assert.equal(aiCalls, 2);
 assert.equal(document.querySelector('[role="alert"]'), null);
 assert.ok(document.body.textContent.includes("A successful study answer."));
+assert.ok(document.querySelector('a[href="https://quran.com/2/153"]'));
 assert.equal(document.body.textContent.split("Explain patience").length - 1, 1);
 await act(async () => root.unmount());
 const { fetchWithTimeout } = unwrap(

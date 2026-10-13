@@ -59,6 +59,6 @@ export function acceptableStudyAnswer(
   }
   return true;
 }
-export function studyInstructions(summary: string, references: string[]) {
-  return `Reply in the user's language. Keep the answer under 180 words and avoid repeating phrases. Use plain text. Explain only general educational guidance, not a fatwa. Never quote Arabic Quran or hadith text, or purported verbatim translations, from memory. Never invent a reference. Do not name chapters from memory. ${references.length ? `The ONLY allowed Quran references are ${references.join(", ")}. Cite exact numbers only if relevant. Reviewed topic context: ${summary}` : "No verified references are supplied for this question: give a general explanation without numeric Quran or hadith citations and suggest checking the Quran reader or a qualified scholar."}`;
+export function studyInstructions(summary: string, _references: string[]) {
+  return `Reply in the user's language. Keep the answer under 120 words and avoid repeating phrases. Use plain text. Explain only general educational guidance, not a fatwa. Never quote Arabic Quran or hadith text, or purported verbatim translations, from memory. Do not supply any numeric Quran or hadith citations or chapter names from memory. Do not attribute your paraphrases to a specific verse or say a particular verse states them. The website separately supplies reviewed related-verse links; do not generate those links or references yourself. ${summary ? `Reviewed general topic context: ${summary}` : "Give only a general explanation and suggest checking the Quran reader or a qualified scholar."}`;
 }

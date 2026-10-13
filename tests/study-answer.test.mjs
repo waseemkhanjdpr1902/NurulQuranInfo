@@ -45,3 +45,8 @@ assert.equal(
 console.log(
   "PASS: reviewed topic references accepted; wrong Urdu-numbered citations, ungrounded references, repetition and generated vowel-marked scripture rejected.",
 );
+
+assert.equal(
+  acceptableStudyAnswer("The verse says to be thankful (94:5-6).", []),
+  false,
+);
