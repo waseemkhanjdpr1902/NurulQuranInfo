@@ -210,3 +210,37 @@ html[data-ui-language="ur"] .tracking-widest,
 html[data-ui-language="hi"] .tracking-widest {
   letter-spacing: normal;
 }
+
+/* Urdu glyphs need more room than Latin text at the same nominal size. */
+html[data-ui-language="ur"] body {
+  font-size: 1.25rem;
+  line-height: 1.9;
+}
+html[data-ui-language="ur"] :is(.text-xs, .text-sm) {
+  font-size: 1.125rem;
+  line-height: 1.85;
+}
+html[data-ui-language="ur"] .text-base {
+  font-size: 1.25rem;
+  line-height: 1.9;
+}
+html[data-ui-language="ur"] :is(button, a, label, select, input, textarea) {
+  letter-spacing: normal;
+}
+html[data-ui-language="ur"] :is(button, select) {
+  min-height: 2.75rem;
+}
+p[lang="ur"] {
+  font-family: var(--font-arabic), serif;
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 2.1;
+  color: var(--color-parchment, #163b36);
+  letter-spacing: normal;
+  overflow-wrap: anywhere;
+}
+@media (min-width: 640px) {
+  p[lang="ur"] {
+    font-size: 1.625rem;
+  }
+}
