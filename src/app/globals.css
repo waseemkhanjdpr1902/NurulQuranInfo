@@ -1,54 +1,86 @@
 @import "tailwindcss";
 
 @theme {
-  --color-gold: #167C6B;
-  --color-parchment: #163B36;
-  --color-ink: #F6F7F1;
+  --color-gold: #167c6b;
+  --color-parchment: #163b36;
+  --color-ink: #f6f7f1;
   --color-gold-muted: rgba(22, 124, 107, 0.1);
-  
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Playfair Display', serif;
-  --font-arabic: 'Amiri', serif;
+
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Playfair Display", serif;
+  --font-arabic: "Amiri", serif;
 }
 
 :root {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --font-display: 'Playfair Display', serif;
-  --font-arabic: 'Amiri', serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Playfair Display", serif;
+  --font-arabic: "Amiri", serif;
 }
 
 body {
   background:
-    radial-gradient(circle at 12% 0%, rgba(159, 207, 187, 0.34), transparent 28rem),
-    radial-gradient(circle at 88% 8%, rgba(205, 229, 216, 0.48), transparent 30rem),
-    #F6F7F1;
-  color: #163B36;
+    radial-gradient(
+      circle at 12% 0%,
+      rgba(159, 207, 187, 0.34),
+      transparent 28rem
+    ),
+    radial-gradient(
+      circle at 88% 8%,
+      rgba(205, 229, 216, 0.48),
+      transparent 30rem
+    ),
+    #f6f7f1;
+  color: #163b36;
   font-family: var(--font-sans);
   min-height: 100vh;
   overflow-x: hidden;
   text-rendering: optimizeLegibility;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
-::selection { background: rgba(22, 124, 107, 0.22); color: #0D4F45; }
+::selection {
+  background: rgba(22, 124, 107, 0.22);
+  color: #0d4f45;
+}
 
-button, a { -webkit-tap-highlight-color: transparent; }
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
 
-button, select, input, textarea { font: inherit; }
+button,
+select,
+input,
+textarea {
+  font: inherit;
+}
 
 @media (max-width: 767px) {
-  button, a, select, input[type="range"] { touch-action: manipulation; }
-  select { max-width: 100%; }
+  button,
+  a,
+  select,
+  input[type="range"] {
+    touch-action: manipulation;
+  }
+  select {
+    max-width: 100%;
+  }
 }
 
 :focus-visible {
-  outline: 2px solid #167C6B;
+  outline: 2px solid #167c6b;
   outline-offset: 4px;
 }
 
-.font-display { font-family: var(--font-display); }
-.font-arabic { font-family: var(--font-arabic); }
+.font-display {
+  font-family: var(--font-display);
+}
+.font-arabic {
+  font-family: var(--font-arabic);
+}
 
 .urdu-tafsir {
   font-size: 1.375rem;
@@ -60,7 +92,9 @@ button, select, input, textarea { font: inherit; }
 }
 
 @media (min-width: 640px) {
-  .urdu-tafsir { font-size: 1.5rem; }
+  .urdu-tafsir {
+    font-size: 1.5rem;
+  }
 }
 
 .glass {
@@ -72,7 +106,11 @@ button, select, input, textarea { font: inherit; }
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(235, 244, 237, 0.88) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.94) 0%,
+    rgba(235, 244, 237, 0.88) 100%
+  );
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(22, 124, 107, 0.14);
@@ -80,11 +118,11 @@ button, select, input, textarea { font: inherit; }
 }
 
 .gold-gradient {
-  background: linear-gradient(135deg, #0D6658 0%, #28947F 100%);
+  background: linear-gradient(135deg, #0d6658 0%, #28947f 100%);
 }
 
 .text-gradient-gold {
-  background: linear-gradient(to right, #0D6658, #4E9F8B);
+  background: linear-gradient(to right, #0d6658, #4e9f8b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -107,8 +145,13 @@ button, select, input, textarea { font: inherit; }
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
@@ -116,24 +159,54 @@ button, select, input, textarea { font: inherit; }
 }
 
 .reflection-dark {
-  --color-gold: #63CDB4;
-  --color-parchment: #EDF8F4;
-  --color-ink: #071B18;
+  --color-gold: #63cdb4;
+  --color-parchment: #edf8f4;
+  --color-ink: #071b18;
   color-scheme: dark;
 }
 
 .reflection-pattern {
   background-color: var(--color-ink);
   background-image:
-    linear-gradient(30deg, rgba(22, 124, 107, 0.045) 12%, transparent 12.5%, transparent 87%, rgba(22, 124, 107, 0.045) 87.5%),
-    linear-gradient(150deg, rgba(22, 124, 107, 0.045) 12%, transparent 12.5%, transparent 87%, rgba(22, 124, 107, 0.045) 87.5%);
+    linear-gradient(
+      30deg,
+      rgba(22, 124, 107, 0.045) 12%,
+      transparent 12.5%,
+      transparent 87%,
+      rgba(22, 124, 107, 0.045) 87.5%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(22, 124, 107, 0.045) 12%,
+      transparent 12.5%,
+      transparent 87%,
+      rgba(22, 124, 107, 0.045) 87.5%
+    );
   background-size: 64px 112px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .reflection-pattern *, .reflection-pattern *::before, .reflection-pattern *::after {
+  .reflection-pattern *,
+  .reflection-pattern *::before,
+  .reflection-pattern *::after {
     scroll-behavior: auto !important;
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Interface fonts do not alter the Arabic Quran or published translations. */
+html[data-ui-language="hi"] body {
+  font-family: var(--font-hindi), var(--font-sans), sans-serif;
+}
+html[data-ui-language="hi"] .font-display {
+  font-family: var(--font-hindi), sans-serif;
+}
+html[data-ui-language="ur"] body,
+html[data-ui-language="ur"] .font-display {
+  font-family: var(--font-arabic), var(--font-sans), serif;
+}
+html[data-ui-language="ur"] .tracking-widest,
+html[data-ui-language="hi"] .tracking-widest {
+  letter-spacing: normal;
 }

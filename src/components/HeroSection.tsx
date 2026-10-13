@@ -1,65 +1,100 @@
 "use client";
-
-import { motion } from "motion/react";
-import { ArrowRight, BookOpen, ChevronDown, Sparkles } from "lucide-react";
+import { BookOpen, Headphones, Clock, Heart, Sparkles } from "lucide-react";
 import Link from "next/link";
-
+import { useUILanguage } from "@/components/UILanguageProvider";
 export default function HeroSection() {
+  const { t, rtl } = useUILanguage();
+  const actions = [
+    {
+      href: "/quran",
+      icon: BookOpen,
+      label: t("Read Qur’an", "क़ुरआन पढ़ें", "قرآن پڑھیں"),
+      help: t(
+        "Choose a surah and translation",
+        "सूरह और अनुवाद चुनें",
+        "سورت اور ترجمہ منتخب کریں",
+      ),
+    },
+    {
+      href: "/quran/al-faatiha?autoplay=true",
+      icon: Headphones,
+      label: t("Listen", "तिलावत सुनें", "تلاوت سنیں"),
+      help: t(
+        "Arabic + Urdu, or Arabic only",
+        "अरबी + उर्दू, या केवल अरबी",
+        "عربی + اردو، یا صرف عربی",
+      ),
+    },
+    {
+      href: "/prayer-times",
+      icon: Clock,
+      label: t("Prayer times", "नमाज़ का समय", "نماز کے اوقات"),
+      help: t(
+        "Times for your city",
+        "आपके शहर के अनुसार समय",
+        "آپ کے شہر کے مطابق اوقات",
+      ),
+    },
+    {
+      href: "/dua",
+      icon: Heart,
+      label: t("Daily duas", "रोज़मर्रा की दुआएँ", "روزمرہ کی دعائیں"),
+      help: t(
+        "Browse the dua library",
+        "दुआओं का संग्रह देखें",
+        "دعاؤں کا مجموعہ دیکھیں",
+      ),
+    },
+  ];
   return (
-    <section className="relative min-h-[92svh] flex flex-col items-center justify-center pt-28 pb-20 overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gold/10 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-emerald/5 rounded-full blur-[120px] animate-pulse delay-1000" />
+    <section
+      dir={rtl ? "rtl" : "ltr"}
+      className="relative overflow-hidden px-4 pb-10 pt-44 sm:px-6 sm:pb-14 sm:pt-48"
+    >
+      <div className="mx-auto max-w-6xl text-center">
+        <span className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-2 text-sm text-gold">
+          <Sparkles size={16} />
+          {t(
+            "Read · Reflect · Remember",
+            "पढ़ें · समझें · याद करें",
+            "پڑھیں · غور کریں · یاد کریں",
+          )}
+        </span>
+        <h1 className="mt-5 text-5xl font-display text-parchment sm:text-7xl">
+          Nurul<span className="text-gold">Quran</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-parchment/80 sm:text-lg">
+          {t(
+            "Read the Qur’an, listen with Urdu translation, and find prayer times for your location.",
+            "क़ुरआन पढ़ें, उर्दू तर्जुमे के साथ तिलावत सुनें और अपने स्थान के अनुसार नमाज़ का समय देखें।",
+            "قرآن پڑھیں، اردو ترجمے کے ساتھ تلاوت سنیں اور اپنے مقام کے مطابق نماز کے اوقات دیکھیں۔",
+          )}
+        </p>
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+          {actions.map((a) => (
+            <Link
+              key={a.href}
+              href={a.href}
+              className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl border border-gold/25 bg-white p-4 text-parchment shadow-sm transition-colors hover:bg-gold/10"
+            >
+              <a.icon size={26} className="text-gold" />
+              <span className="text-base font-semibold sm:text-lg">
+                {a.label}
+              </span>
+              <span className="text-xs leading-relaxed text-parchment/75 sm:text-sm">
+                {a.help}
+              </span>
+            </Link>
+          ))}
+        </div>
+        <p className="mt-5 text-sm text-parchment/75">
+          {t(
+            "Free reading and listening · No sign-in needed · Tap Play to start audio",
+            "पढ़ना और सुनना मुफ़्त · लॉगिन ज़रूरी नहीं · ऑडियो के लिए प्ले दबाएँ",
+            "پڑھنا اور سننا مفت · لاگ اِن ضروری نہیں · آڈیو کے لیے پلے دبائیں",
+          )}
+        </p>
       </div>
-
-      <div className="relative z-10 text-center px-5 max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-          className="mb-9"
-        >
-          <span className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/5 px-4 py-2 text-gold font-semibold tracking-[0.2em] uppercase text-[10px] sm:text-xs mb-7">
-            <Sparkles size={14} aria-hidden="true" /> Read · Reflect · Remember
-          </span>
-          <h1 className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-display text-parchment leading-[0.94] mb-7 tracking-tight">
-            Nurul<span className="text-gold">Quran</span>
-          </h1>
-          <p className="text-parchment/65 text-base sm:text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light">
-            A calm, accessible space to read the Holy Quran, explore tafseer,
-            remember Allah, and use practical Islamic tools in everyday life.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 1 }}
-          className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-4 max-w-md sm:max-w-none mx-auto"
-        >
-          <Link
-            href="/quran"
-            className="min-h-14 px-8 py-4 gold-gradient text-ink font-bold rounded-2xl hover:-translate-y-0.5 transition-transform shadow-xl shadow-gold/20 inline-flex items-center justify-center gap-3"
-          >
-            <BookOpen size={19} aria-hidden="true" /> Start Reading <ArrowRight size={17} aria-hidden="true" />
-          </Link>
-          <Link
-            href="/tafseer"
-            className="min-h-14 px-8 py-4 glass text-parchment font-semibold rounded-2xl hover:bg-white/10 transition-colors inline-flex items-center justify-center"
-          >
-            Explore Tafseer
-          </Link>
-        </motion.div>
-      </div>
-
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-gold/50"
-      >
-        <ChevronDown size={32} />
-      </motion.div>
     </section>
   );
 }

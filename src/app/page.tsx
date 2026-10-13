@@ -14,21 +14,21 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-ink">
       <Navbar />
-      
+
       {/* Hero Section */}
       <HeroSection />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-5 py-10 sm:px-6">
-        <JourneyDashboard compact />
-      </div>
-
       {/* Main Content Areas */}
       <div className="relative z-10">
-        <SurahGrid />
-        
-        <MuraqbaSection />
+        <SurahGrid limit={6} />
 
         <HomeSections />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-5 py-10 sm:px-6">
+          <JourneyDashboard compact />
+        </div>
+
+        <MuraqbaSection />
       </div>
 
       <AIAssistant />

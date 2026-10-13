@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "check": "npm run lint && npm run typecheck && npm run build"
+    "check": "npm run lint && npm run typecheck && npm run build",
+    "test:audio": "node --import tsx tests/audio-player.integration.mjs",
+    "test:interface": "node --import tsx tests/website-interface.integration.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.0.1",
@@ -34,8 +36,10 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.0",
+    "jsdom": "^30.1.2",
     "postcss": "^8",
     "tailwindcss": "4.0.0-beta.4",
+    "tsx": "^4.23.15",
     "typescript": "^5"
   }
 }

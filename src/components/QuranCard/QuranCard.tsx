@@ -1,5 +1,7 @@
 "use client";
 
+import { useUILanguage } from "@/components/UILanguageProvider";
+import Link from "next/link";
 import { motion } from "motion/react";
 import { Play, ArrowRight, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -17,6 +19,7 @@ interface QuranCardProps {
 }
 
 export default function QuranCard({ surah }: QuranCardProps) {
+  const { t } = useUILanguage();
   const router = useRouter();
 
   const handleCardClick = () => {
@@ -41,10 +44,11 @@ export default function QuranCard({ surah }: QuranCardProps) {
           <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gold font-bold group-hover:bg-gold group-hover:text-ink transition-colors">
             {surah.number}
           </div>
-          <button 
+          <button
             onClick={handlePlayClick}
             className="w-10 h-10 rounded-full bg-gold/10 flex items-center justify-center text-gold hover:bg-gold hover:text-ink transition-all"
-            title="Listen Now"
+            title={t("Listen now", "अभी सुनें", "ابھی سنیں")}
+            aria-label={`${t("Listen to", "सुनें", "سنیں")} ${surah.englishName}`}
           >
             <Play size={16} className="ml-0.5" />
           </button>
@@ -54,7 +58,12 @@ export default function QuranCard({ surah }: QuranCardProps) {
 
       <div className="mb-6">
         <h3 className="text-xl font-display text-parchment group-hover:text-gold transition-colors">
-          {surah.englishName}
+          <Link
+            href={`/quran/${surah.slug}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {surah.englishName}
+          </Link>
         </h3>
         <p className="text-parchment/40 text-sm uppercase tracking-widest">
           {surah.englishNameTranslation}
@@ -63,11 +72,16 @@ export default function QuranCard({ surah }: QuranCardProps) {
 
       <div className="flex items-center justify-between pt-6 border-t border-white/5">
         <div className="flex gap-4 text-[10px] uppercase tracking-widest text-parchment/30">
-          <span>{surah.numberOfAyahs} Ayahs</span>
+          <span>
+            {surah.numberOfAyahs} {t("Ayahs", "आयतें", "آیات")}
+          </span>
           <span>•</span>
           <span>{surah.revelationType}</span>
         </div>
-        <ArrowRight size={18} className="text-gold opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0" />
+        <ArrowRight
+          size={18}
+          className="text-gold opacity-0 group-hover:opacity-100 transition-all -translate-x-4 group-hover:translate-x-0"
+        />
       </div>
     </motion.div>
   );

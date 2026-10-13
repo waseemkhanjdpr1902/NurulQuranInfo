@@ -1,11 +1,19 @@
 "use client";
 
+import { useUILanguage } from "@/components/UILanguageProvider";
+import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { useEffect, useRef, useState } from "react";
 import { Noto_Nastaliq_Urdu } from "next/font/google";
 import { BookOpen, ChevronDown, Loader2 } from "lucide-react";
 import { TAFSIR_EDITIONS, type TafsirLanguage } from "@/lib/tafsir-editions";
 
-type Tafsir = { text: string; language: TafsirLanguage; resourceName: string; author: string; sourceUrl: string };
+type Tafsir = {
+  text: string;
+  language: TafsirLanguage;
+  resourceName: string;
+  author: string;
+  sourceUrl: string;
+};
 
 const urduTafsirFont = Noto_Nastaliq_Urdu({
   subsets: ["arabic"],
@@ -14,7 +22,14 @@ const urduTafsirFont = Noto_Nastaliq_Urdu({
   preload: false,
 });
 
-export default function InlineTafsir({ verseKey, language }: { verseKey: string; language: TafsirLanguage }) {
+export default function InlineTafsir({
+  verseKey,
+  language,
+}: {
+  verseKey: string;
+  language: TafsirLanguage;
+}) {
+  const { t } = useUILanguage();
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState<Tafsir | null>(null);
   const [error, setError] = useState("");
@@ -33,14 +48,25 @@ export default function InlineTafsir({ verseKey, language }: { verseKey: string;
     const controller = new AbortController();
     const load = async () => {
       try {
-        const response = await fetch(`/api/tafsir?verse_key=${encodeURIComponent(verseKey)}&language=${language}`, { signal: controller.signal });
+        const response = await fetchWithTimeout(
+          `/api/tafsir?verse_key=${encodeURIComponent(verseKey)}&language=${language}`,
+          { signal: controller.signal },
+        );
         const data = await response.json();
-        if (!response.ok || !data?.text || data.language !== language) throw new Error(data?.error || "Tafsir could not be loaded. Please try again.");
+        if (!response.ok || !data?.text || data.language !== language)
+          throw new Error(
+            data?.error || "Tafsir could not be loaded. Please try again.",
+          );
         if (controller.signal.aborted) return;
         cache.current[contentKey] = data;
         setContent(data);
       } catch (cause) {
-        if (!controller.signal.aborted) setError(cause instanceof Error ? cause.message : "Tafsir could not be loaded. Please try again.");
+        if (!controller.signal.aborted)
+          setError(
+            cause instanceof Error
+              ? cause.message
+              : "Tafsir could not be loaded. Please try again.",
+          );
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -52,22 +78,84 @@ export default function InlineTafsir({ verseKey, language }: { verseKey: string;
   // Hide the old edition immediately when the reader changes language.
   const currentContent = content?.language === language ? content : null;
   return (
-    <details name="ayah-tafsir" className="group/tafsir mt-6 rounded-2xl border border-gold/25 bg-white/70" onToggle={event => setOpen(event.currentTarget.open)}>
-      <summary aria-label={`Tafsir for ayah ${verseKey}`} className="flex min-h-12 cursor-pointer list-none flex-wrap items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-[#0d6658] [&::-webkit-details-marker]:hidden">
-        <BookOpen size={18} aria-hidden="true" /> Tafsir
-        <span className="ml-auto text-xs font-normal">{TAFSIR_EDITIONS[language].label}</span>
-        <ChevronDown size={18} aria-hidden="true" className="transition-transform group-open/tafsir:rotate-180" />
+    <details
+      name="ayah-tafsir"
+      className="group/tafsir mt-6 rounded-2xl border border-gold/25 bg-white/70"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary
+        aria-label={`Tafsir for ayah ${verseKey}`}
+        className="flex min-h-12 cursor-pointer list-none flex-wrap items-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-[#0d6658] [&::-webkit-details-marker]:hidden"
+      >
+        <BookOpen size={18} aria-hidden="true" />{" "}
+        {t("Tafsir", "तफ़सीर", "تفسیر")}
+        <span className="ml-auto text-xs font-normal">
+          {TAFSIR_EDITIONS[language].label}
+        </span>
+        <ChevronDown
+          size={18}
+          aria-hidden="true"
+          className="transition-transform group-open/tafsir:rotate-180"
+        />
       </summary>
-      {open && <div className="border-t border-gold/20 p-4 sm:p-6">
-        {loading ? <p role="status" className="flex items-center gap-2 text-sm text-parchment"><Loader2 size={18} className="animate-spin" /> Loading {TAFSIR_EDITIONS[language].name}…</p>
-          : error ? <div role="alert" className="space-y-3 text-sm text-parchment"><p>{error}</p><button onClick={() => setRetry(value => value + 1)} className="min-h-11 rounded-xl bg-gold px-4 font-semibold text-white">Retry tafsir</button></div>
-          : currentContent ? <>
-            <p className="mb-4 text-sm text-gold">{currentContent.resourceName} · {currentContent.author}
-              <a href={currentContent.sourceUrl} target="_blank" rel="noopener noreferrer" className="ml-2 inline-flex min-h-11 items-center underline">View source</a>
+      {open && (
+        <div className="border-t border-gold/20 p-4 sm:p-6">
+          {loading ? (
+            <p
+              role="status"
+              className="flex items-center gap-2 text-sm text-parchment"
+            >
+              <Loader2 size={18} className="animate-spin" />{" "}
+              {t(
+                "Loading tafsir…",
+                "तफ़सीर लोड हो रही है…",
+                "تفسیر لوڈ ہو رہی ہے…",
+              )}
             </p>
-            <div lang={language} dir={language === "ur" ? "rtl" : "ltr"} className={`whitespace-pre-line text-parchment ${language === "ur" ? `${urduTafsirFont.className} urdu-tafsir` : "text-base leading-relaxed"}`}>{currentContent.text}</div>
-          </> : null}
-      </div>}
+          ) : error ? (
+            <div role="alert" className="space-y-3 text-sm text-parchment">
+              <p>
+                {t(
+                  "Tafsir could not load. Check your connection and retry.",
+                  "तफ़सीर लोड नहीं हुई। इंटरनेट जाँचें और फिर कोशिश करें।",
+                  "تفسیر لوڈ نہیں ہوئی۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔",
+                )}
+              </p>
+              <button
+                onClick={() => setRetry((value) => value + 1)}
+                className="min-h-11 rounded-xl bg-gold px-4 font-semibold text-white"
+              >
+                {t(
+                  "Retry tafsir",
+                  "तफ़सीर फिर लोड करें",
+                  "تفسیر دوبارہ لوڈ کریں",
+                )}
+              </button>
+            </div>
+          ) : currentContent ? (
+            <>
+              <p className="mb-4 text-sm text-gold">
+                {currentContent.resourceName} · {currentContent.author}
+                <a
+                  href={currentContent.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="ml-2 inline-flex min-h-11 items-center underline"
+                >
+                  {t("View source", "स्रोत देखें", "ماخذ دیکھیں")}
+                </a>
+              </p>
+              <div
+                lang={language}
+                dir={language === "ur" ? "rtl" : "ltr"}
+                className={`whitespace-pre-line text-parchment ${language === "ur" ? `${urduTafsirFont.className} urdu-tafsir` : "text-base leading-relaxed"}`}
+              >
+                {currentContent.text}
+              </div>
+            </>
+          ) : null}
+        </div>
+      )}
     </details>
   );
 }
