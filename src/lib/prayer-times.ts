@@ -2,7 +2,7 @@ export const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const;
 export type PrayerName = typeof prayers[number];
 export interface PrayerLocation { city: string; country: string; lat?: number; lng?: number }
 export interface PrayerDay { timings: Record<string, string>; meta: { timezone: string; latitude: number; longitude: number; method: { name: string } } }
-export const methods = [{ id: 1, name: 'Karachi (India / Pakistan)' }, { id: 3, name: 'Muslim World League' }, { id: 4, name: 'Umm al-Qura (Saudi Arabia)' }, { id: 8, name: 'Gulf Region' }, { id: 2, name: 'ISNA (North America)' }, { id: 5, name: 'Egyptian General Authority' }];
+export const methods = [{ id: 1, name: 'Delhi / India' }, { id: 3, name: 'Muslim World League' }, { id: 4, name: 'Umm al-Qura (Saudi Arabia)' }, { id: 8, name: 'Gulf Region' }, { id: 2, name: 'ISNA (North America)' }, { id: 5, name: 'Egyptian General Authority' }];
 export function localDate(now: number, zone: string) { const p = new Intl.DateTimeFormat('en-CA', { timeZone: zone, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now); return ['year','month','day'].map(k => p.find(v => v.type === k)!.value).join('-'); }
 export function addDay(date: string, offset = 1) { const d = new Date(date + 'T12:00:00Z'); d.setUTCDate(d.getUTCDate() + offset); return d.toISOString().slice(0,10); }
 export function timestamp(value: string) { if (!/^\d{4}-\d{2}-\d{2}T.*(?:Z|[+-]\d{2}:\d{2})$/.test(value)) throw new Error('Prayer times must include a timezone'); const n = Date.parse(value); if (!Number.isFinite(n)) throw new Error('Invalid prayer time'); return n; }
