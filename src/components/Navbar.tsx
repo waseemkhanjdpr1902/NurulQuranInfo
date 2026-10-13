@@ -106,7 +106,7 @@ export default function Navbar() {
                 href={link.href}
                 className="group flex flex-col items-center gap-1"
               >
-                <span className="text-parchment/60 group-hover:text-gold transition-colors text-[10px] font-bold uppercase tracking-widest">
+                <span className="text-parchment/60 group-hover:text-gold transition-colors text-xs font-bold uppercase tracking-widest">
                   {link.name}
                 </span>
                 <div className="h-0.5 w-0 bg-gold group-hover:w-full transition-all duration-300 rounded-full" />

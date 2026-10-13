@@ -125,6 +125,8 @@ export default function QuranReader({
     try {
       if (!localStorage.getItem("nurulquran.translation-language"))
         setTranslationLanguage(language);
+      if (!localStorage.getItem("nurulquran.tafsir-language"))
+        setTafsirLanguage(language);
     } catch {
       setTranslationLanguage(language);
     }
@@ -428,7 +430,11 @@ export default function QuranReader({
           <label className="flex min-w-0 flex-col gap-2 text-[10px] font-bold uppercase tracking-wider text-parchment/70 sm:flex-row sm:items-center">
             {t("Tafsir language", "तफ़सीर की भाषा", "تفسیر کی زبان")}
             <select
-              aria-label="Tafsir language"
+              aria-label={t(
+                "Tafsir language",
+                "तफ़सीर की भाषा",
+                "تفسیر کی زبان",
+              )}
               value={tafsirLanguage}
               onChange={(event) => {
                 if (!isTafsirLanguage(event.target.value)) return;
@@ -487,7 +493,7 @@ export default function QuranReader({
             <select
               value={reciterId}
               onChange={(e) => setReciterId(e.target.value)}
-              aria-label="Reciter"
+              aria-label={t("Reciter", "क़ारी", "قاری")}
               className="min-h-11 max-w-full rounded-xl border border-gold/30 bg-white px-3 text-sm text-parchment"
             >
               {RECITERS.map((r) => (
@@ -612,7 +618,8 @@ export default function QuranReader({
                 className="flex min-h-12 items-center gap-2 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658] hover:bg-[#d9eee6]"
                 aria-label={`Listen from ayah ${surah.number}:${verse.verse_number}`}
               >
-                <Headphones size={18} aria-hidden="true" /> Listen from here
+                <Headphones size={18} aria-hidden="true" />{" "}
+                {t("Listen from here", "यहाँ से सुनें", "یہاں سے سنیں")}
               </button>
               {index < verses.length - 1 ? (
                 <button
@@ -672,7 +679,7 @@ export default function QuranReader({
         onPhaseChange={setAudioPhase}
         playbackRequest={playbackRequest}
         title={surah.englishName}
-        subtitle={`${playingVerseId ? `Ayah ${verses.find((verse) => verse.id === playingVerseId)?.verse_number} · ` : ""}${RECITERS.find((reciter) => reciter.id === reciterId)?.name || ""}`}
+        subtitle={`${playingVerseId ? `${t("Ayah", "आयत", "آیت")} ${verses.find((verse) => verse.id === playingVerseId)?.verse_number} · ` : ""}${RECITERS.find((reciter) => reciter.id === reciterId)?.name || ""}`}
         onPlayRequest={() => {
           if (verses[0]) playVerse(verses[0]);
         }}
