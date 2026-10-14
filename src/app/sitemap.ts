@@ -4,6 +4,7 @@ import { QURAN_TOPICS } from "@/data/quran-topics";
 const routes = [
   "",
   "/quran",
+  "/mushaf",
   "/tafseer",
   "/hadith",
   "/dua",

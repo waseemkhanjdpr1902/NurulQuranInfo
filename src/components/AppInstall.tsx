@@ -13,7 +13,7 @@ interface InstallPromptEvent extends Event {
 export default function AppInstall() {
   const { t } = useUILanguage();
   const pathname = usePathname();
-  const reading = pathname.startsWith("/quran/");
+  const reading = pathname.startsWith("/quran/") || pathname === "/mushaf";
   const [promptEvent, setPromptEvent] = useState<InstallPromptEvent | null>(
     null,
   );
