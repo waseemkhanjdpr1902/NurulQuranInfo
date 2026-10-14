@@ -8,7 +8,7 @@ export default function HeroSection() {
     {
       href: "/mushaf",
       icon: BookOpen,
-      label: t("Arabic Mushaf", "अरबी मुशहफ़", "عربی مصحف"),
+      label: t("Indo-Pak Mushaf", "इंडो-पाक मुशहफ़", "انڈو پاک مصحف"),
       help: t("Read like a printed Quran · Zoom", "कुरआन के पन्ने पढ़ें • ज़ूम करें", "مطبوعہ قرآن کی طرح پڑھیں • زوم"),
     },
     {

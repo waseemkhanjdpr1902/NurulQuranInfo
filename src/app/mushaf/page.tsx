@@ -3,8 +3,8 @@ import Navbar from "@/components/Navbar";
 import MushafReader from "@/components/MushafReader";
 
 export const metadata: Metadata = {
-  title: "Arabic Mushaf — Read Page by Page",
-  description: "Read the 604-page Hafs Mushaf in Arabic, with zoom, surah selection and a saved reading position. Page images from King Saud University.",
+  title: "Indo-Pak Mushaf — Read Page by Page",
+  description: "Read the Indo-Pak Hafs Mushaf in Arabic with 610 reading pages, zoom, the original surah index and a saved reading position. King Fahd Complex Nasta’liq edition.",
   alternates: { canonical: "/mushaf" },
 };
 export default function MushafPage() {
