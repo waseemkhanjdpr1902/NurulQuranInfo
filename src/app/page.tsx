@@ -1,5 +1,6 @@
 "use client";
 
+import QuickGuide from "@/components/QuickGuide";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
@@ -20,6 +21,7 @@ export default function Home() {
 
       {/* Main Content Areas */}
       <div className="relative z-10">
+        <QuickGuide />
         <SurahGrid limit={6} />
 
         <HomeSections />

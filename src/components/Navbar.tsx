@@ -46,6 +46,7 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
+    { name: t("Quick guide", "रहनुमाई", "رہنمائی"), href: "/#quick-guide", icon: Compass },
     { name: t("Quran", "क़ुरआन", "قرآن"), href: "/quran", icon: Book },
     {
       name: t("Topics", "विषय", "موضوعات"),
