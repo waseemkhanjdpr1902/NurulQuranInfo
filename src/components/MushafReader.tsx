@@ -19,7 +19,6 @@ export default function MushafReader() {
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
   const [invalid, setInvalid] = useState(false);
   const [full, setFull] = useState(false);
-  const [fullError, setFullError] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const image = useRef<HTMLImageElement>(null);
@@ -75,17 +74,20 @@ export default function MushafReader() {
     viewport.current?.scrollTo({ top: 0, left: 0 });
   }
   async function toggleFull() {
-    setFullError(false);
+    if (full && !document.fullscreenElement) { setFull(false); return; }
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
       else if (container.current?.requestFullscreen) await container.current.requestFullscreen();
-      else setFullError(true);
-    } catch { setFullError(true); }
+      else setFull(true);
+    } catch {
+      // iPhone and embedded browsers may reject native fullscreen; provide a clean in-page reading view.
+      setFull(true);
+    }
   }
 
   return (
-    <div ref={container} dir={rtl ? "rtl" : "ltr"} className="mx-auto max-w-5xl bg-[#f6f7f1] text-[#12352a]" style={full ? {height:"100dvh", overflowY:"auto"} : undefined}>
-      <div className="rounded-2xl border border-[#c8ded4] bg-white p-4 sm:p-6">
+    <div ref={container} dir={rtl ? "rtl" : "ltr"} className="mx-auto max-w-5xl bg-[#f6f7f1] text-[#12352a]" style={full ? {position:"fixed", inset:0, zIndex:200, maxWidth:"none", height:"100dvh", overflowY:"auto", padding:8} : undefined}>
+      <div hidden={full} className="rounded-2xl border border-[#c8ded4] bg-white p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-bold sm:text-3xl">{t("Arabic Mushaf", "अरबी मुशहफ़", "عربی مصحف")}</h1>
           <Link href="/quran" className={button}>{t("Translation & listening", "तर्जुमा और तिलावत", "ترجمہ اور تلاوت")}</Link>
@@ -125,7 +127,7 @@ export default function MushafReader() {
           <button type="button" onClick={() => setZoom(100)} className={button}>{t("Fit page", "पूरा पन्ना", "پورا صفحہ")}</button>
           <button type="button" onClick={toggleFull} className={button}>{full ? t("Exit full screen", "पूरी स्क्रीन बंद करें", "پوری اسکرین بند کریں") : t("Full screen", "पूरी स्क्रीन", "پوری اسکرین")}</button>
         </div>
-        {fullError && <p role="status" className="mt-2 text-sm">{t("Full screen is unavailable in this browser. Use zoom or turn your phone sideways.", "इस ब्राउज़र में पूरी स्क्रीन दस्तयाब नहीं है। ज़ूम करें या मोबाइल को आड़ा करें।", "اس براؤزر میں پوری اسکرین دستیاب نہیں۔ زوم کریں یا موبائل کو افقی کریں۔")}</p>}
+
       </div>
 
       <nav aria-label={t("Mushaf page navigation", "मुशहफ़ पन्नों की नेविगेशन", "مصحف صفحات کی رہنمائی")} className="my-3 flex items-center justify-between gap-2">

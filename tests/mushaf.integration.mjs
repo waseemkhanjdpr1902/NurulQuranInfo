@@ -52,6 +52,11 @@ await act(async()=>{
  const select=document.querySelector('select[aria-label="Choose surah"]'); select.value="112"; select.dispatchEvent(new dom.window.Event("change",{bubbles:true}));
 });
 assert.equal(document.querySelector('select[aria-label="Choose surah"]').value,"112");
+await act(async()=>find("Full screen").click());
+assert.ok(find("Exit full screen"), "in-page full-screen fallback works without native browser support");
+assert.ok(document.querySelector('div[style*="position: fixed"]'));
+await act(async()=>find("Exit full screen").click());
+assert.ok(find("Full screen"));
 assert.ok(new URL(document.querySelector("img").getAttribute("src"),window.location.href).pathname.startsWith("/api/mushaf/604"));
 await act(async()=>root.unmount());
 window.history.replaceState(null,"","/mushaf");
