@@ -99,7 +99,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Nav */}
-        <div className="hidden lg:flex items-center gap-4">
+        <div className="hidden xl:flex items-center gap-4">
           <div className="flex items-center gap-4">
             {navLinks.map((link) => (
               <Link
@@ -147,7 +147,7 @@ export default function Navbar() {
                 : t("Open menu", "मेनू खोलें", "مینو کھولیں")
             }
             aria-expanded={isMobileMenuOpen}
-            className="lg:hidden w-11 h-11 glass rounded-2xl flex items-center justify-center text-parchment hover:text-gold transition-colors"
+            className="xl:hidden w-11 h-11 glass rounded-2xl flex items-center justify-center text-parchment hover:text-gold transition-colors"
           >
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
@@ -161,7 +161,7 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            className="lg:hidden absolute top-full left-0 right-0 mx-4 mt-2 glass-card rounded-3xl overflow-hidden shadow-2xl"
+            className="xl:hidden absolute top-full left-0 right-0 mx-4 mt-2 glass-card rounded-3xl overflow-hidden shadow-2xl"
           >
             <div className="p-5 sm:p-7 space-y-5 max-h-[calc(100svh-7rem)] overflow-y-auto">
               <div className="grid grid-cols-2 gap-3">
