@@ -2,6 +2,7 @@
 import { useUILanguage } from "@/components/UILanguageProvider";
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -174,9 +175,9 @@ export function PrayerTimesProvider({ children }: { children: ReactNode }) {
     date,
     refresh,
   ]);
-  const update = (values: Partial<Settings>) =>
-    setSettings((s) => ({ ...s, ...values }));
-  const detect = () => {
+  const update = useCallback((values: Partial<Settings>) =>
+    setSettings((s) => ({ ...s, ...values })), []);
+  const detect = useCallback(() => {
     if (!navigator.geolocation) {
       setError("Location is unavailable. Enter your city and country below.");
       return;
@@ -221,11 +222,15 @@ export function PrayerTimesProvider({ children }: { children: ReactNode }) {
       },
       { timeout: 12000, maximumAge: 60000 },
     );
-  };
+  }, [update]);
+  const refreshedGps = useRef(false);
   // Refresh a previously GPS-selected location when returning after travel.
   useEffect(() => {
-    if (ready && settings.location?.lat !== undefined) detect();
-  }, [ready]);
+    if (ready && settings.location?.lat !== undefined && !refreshedGps.current) {
+      refreshedGps.current = true;
+      detect();
+    }
+  }, [ready, settings.location?.lat, detect]);
   const enableAlerts = async () => {
     if (!settings.location) {
       setNotice(
@@ -325,6 +330,7 @@ export function PrayerTimesProvider({ children }: { children: ReactNode }) {
     settings.location,
     loading,
     error,
+    t,
   ]);
   useEffect(() => {
     if (!toast) return;

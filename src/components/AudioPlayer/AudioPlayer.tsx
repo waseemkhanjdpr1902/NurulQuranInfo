@@ -127,7 +127,7 @@ export default function AudioPlayer({
     return () => {
       cancelled = true;
     };
-  }, [currentUrl, phase, segmentRequest]);
+  }, [currentUrl, phase, segmentRequest, t]);
 
   useEffect(() => {
     if (audioRef.current) {

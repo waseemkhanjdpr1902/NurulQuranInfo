@@ -60,6 +60,7 @@ export default function DawahPage() {
       content: "Assalamu Alaikum (Peace be upon you). I am your Dawah Companion. I'm here to answer any questions you have about Islam, its beliefs, or its practices with wisdom and kindness. How can I help you today?" 
     }
   ]);
+  const [requestError, setRequestError] = useState("");
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -75,16 +76,18 @@ export default function DawahPage() {
 
     const userMessage = input.trim();
     setInput("");
+    setRequestError("");
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/ai-chat", {
         method: "POST",
+        signal: AbortSignal.timeout(30000),
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           intent: "dawah",
-          messages: [{ role: "user", content: userMessage }],
+          messages: [...messages.slice(1).map(message => ({role: message.role === "ai" ? "model" : "user", content: message.content})), {role: "user", content: userMessage}].slice(-8),
         }),
       });
       const data = await response.json();
@@ -93,7 +96,9 @@ export default function DawahPage() {
       setMessages(prev => [...prev, { role: 'ai', content: aiContent }]);
     } catch (error) {
       console.error("Gemini Error:", error);
-      setMessages(prev => [...prev, { role: 'ai', content: "I encountered an error. Please try again shortly." }]);
+      setMessages(prev => prev.slice(0, -1));
+      setInput(userMessage);
+      setRequestError("The study companion could not respond. Your question is restored below; please retry.");
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +137,7 @@ export default function DawahPage() {
               </h2>
               <p className="text-parchment/60 leading-relaxed">
                 Whether you&apos;re a student of knowledge, a seeker of truth, or someone curious about Islam, 
-                our AI Companion is trained to provide authentic insights into the faith.
+                our AI Companion offers study guidance. AI can make mistakes; check references and consult a qualified scholar for rulings.
               </p>
               
               <div className="space-y-4">
@@ -198,6 +203,7 @@ export default function DawahPage() {
                 )}
               </div>
 
+              {requestError && <p role="alert" className="px-6 py-3 text-red-700">{requestError}</p>}
               <div className="p-6 border-t border-white/5 bg-ink/50 backdrop-blur-md">
                 <div className="relative">
                   <input
@@ -209,6 +215,7 @@ export default function DawahPage() {
                     className="w-full pl-6 pr-16 py-4 bg-white/5 border border-white/10 rounded-2xl text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-all"
                   />
                   <button 
+                    aria-label="Send question"
                     onClick={handleSendMessage}
                     disabled={isLoading || !input.trim()}
                     className="absolute right-2 top-2 w-12 h-12 gold-gradient rounded-xl flex items-center justify-center text-ink hover:scale-95 active:scale-90 transition-all disabled:opacity-50"

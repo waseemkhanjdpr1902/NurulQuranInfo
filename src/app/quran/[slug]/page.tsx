@@ -78,6 +78,7 @@ export default async function SurahPage({
           <div className="flex items-center justify-center gap-4 mb-8">
             {surah.prevSlug ? (
               <Link
+                aria-label="Previous surah"
                 href={`/quran/${surah.prevSlug}`}
                 className="w-10 h-10 rounded-full glass flex items-center justify-center text-parchment/50 hover:text-gold transition-colors"
               >
@@ -95,6 +96,7 @@ export default async function SurahPage({
 
             {surah.nextSlug ? (
               <Link
+                aria-label="Next surah"
                 href={`/quran/${surah.nextSlug}`}
                 className="w-10 h-10 rounded-full glass flex items-center justify-center text-parchment/50 hover:text-gold transition-colors"
               >

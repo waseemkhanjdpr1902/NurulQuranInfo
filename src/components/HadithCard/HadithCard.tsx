@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Book, Bookmark, Share2, Sparkles, Loader2, ChevronRight, X } from "lucide-react";
 import Link from "next/link";
@@ -11,11 +11,20 @@ interface HadithCardProps {
     number: string;
     text: string;
     narrator?: string;
+    grade?: string;
   };
   onSave?: () => void;
 }
 
 export default function HadithCard({ hadith, onSave }: HadithCardProps) {
+  const [saved, setSaved] = useState(false);
+  const [notice, setNotice] = useState("");
+  const key = `nurulquran.hadith.${hadith.collection}.${hadith.number}`;
+  useEffect(() => { try { setSaved(localStorage.getItem(key) !== null); } catch {} }, [key]);
+  const save = () => {
+    try { if (saved) localStorage.removeItem(key); else localStorage.setItem(key, JSON.stringify(hadith)); setSaved(!saved); setNotice(saved ? "Removed from saved hadiths." : "Hadith saved on this device."); onSave?.(); }
+    catch { setNotice("Device storage is unavailable."); }
+  };
   const [showAiContext, setShowAiContext] = useState(false);
   const [loadingAi, setLoadingAi] = useState(false);
   const [aiInsight, setAiInsight] = useState<string | null>(null);
@@ -25,7 +34,7 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
     if (navigator.share) {
       await navigator.share({ title: "Hadith", text }).catch(() => undefined);
     } else {
-      await navigator.clipboard.writeText(text);
+      try { await navigator.clipboard.writeText(text); setNotice("Hadith copied."); } catch { setNotice("Copy is unavailable. Select the hadith text to copy it."); }
     }
   };
 
@@ -76,8 +85,9 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
         </div>
         <div className="flex items-center gap-2">
           <button 
-            aria-label="Save hadith"
-            onClick={onSave}
+            aria-label={saved ? "Unsave hadith" : "Save hadith"}
+            aria-pressed={saved}
+            onClick={save}
             className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-parchment/30 hover:text-gold hover:bg-gold/10 transition-all"
           >
             <Bookmark size={18} />
@@ -88,6 +98,7 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
         </div>
       </div>
 
+      <p role="status" className="text-sm text-gold">{notice}</p>
       <div className="space-y-6 flex-grow">
         {hadith.narrator && (
           <p className="text-gold/80 font-medium text-sm italic border-l-2 border-gold/20 pl-4">
@@ -101,7 +112,7 @@ export default function HadithCard({ hadith, onSave }: HadithCardProps) {
 
       <div className="mt-10 pt-8 border-t border-white/5 flex flex-col gap-6">
         <div className="flex items-center justify-between">
-          <span className="text-[10px] uppercase tracking-[0.3em] text-parchment/20 font-bold">Authentic Tradition</span>
+          <span className="text-xs text-parchment/70">{hadith.grade || "Check the collection source for grading"}</span>
           <button 
             onClick={fetchAiContext}
             className={`px-5 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all flex items-center gap-2 ${showAiContext ? 'bg-gold text-ink' : 'glass text-gold/60 hover:text-gold'}`}
