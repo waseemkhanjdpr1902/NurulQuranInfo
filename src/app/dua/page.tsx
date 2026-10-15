@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Heart, Search, BookOpen, Sun, Moon, Sunrise, Sunset, CloudSun, Loader2, Copy, Share2, Volume2, VolumeX } from "lucide-react";
 import Navbar from "@/components/Navbar";
@@ -25,28 +25,40 @@ const DUAS = [
 
 export default function DuaPage() {
   const [playingId, setPlayingId] = useState<number | null>(null);
-  const [currentAudio, setCurrentAudio] = useState<HTMLAudioElement | null>(null);
-
-  const toggleAudio = (dua: any) => {
-    if (currentAudio) {
-      currentAudio.pause();
-      currentAudio.src = "";
-    }
-
-    if (playingId === dua.id) {
-      setPlayingId(null);
-      setCurrentAudio(null);
-      return;
-    }
-
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [notice, setNotice] = useState("");
+  const [favourites, setFavourites] = useState<number[]>([]);
+  useEffect(() => {
+    try { const saved = JSON.parse(localStorage.getItem("nurulquran.dua-favourites.v1") || "[]"); if (Array.isArray(saved)) setFavourites(saved.filter(id => DUAS.some(dua => dua.id === id))); } catch {}
+    return () => { audioRef.current?.pause(); };
+  }, []);
+  const textFor = (dua: typeof DUAS[number]) => `${dua.arabic}\n${dua.translation}\n${dua.reference}`;
+  const copyDua = async (dua: typeof DUAS[number]) => {
+    try { await navigator.clipboard.writeText(textFor(dua)); setNotice("Dua copied."); }
+    catch { setNotice("Copy is unavailable. Select the dua text to copy it."); }
+  };
+  const shareDua = async (dua: typeof DUAS[number]) => {
+    try {
+      if (navigator.share) await navigator.share({title: "Dua — NurulQuran", text: textFor(dua)});
+      else await copyDua(dua);
+    } catch (error) { if (!(error instanceof DOMException && error.name === "AbortError")) setNotice("Sharing is unavailable. Use Copy dua instead."); }
+  };
+  const toggleFavourite = (id: number) => {
+    const next = favourites.includes(id) ? favourites.filter(value => value !== id) : [...favourites, id];
+    setFavourites(next);
+    try { localStorage.setItem("nurulquran.dua-favourites.v1", JSON.stringify(next)); setNotice("Favourites saved on this device."); }
+    catch { setNotice("Favourite updated for this visit. Device storage is unavailable."); }
+  };
+  const toggleAudio = async (dua: typeof DUAS[number]) => {
+    audioRef.current?.pause();
+    if (playingId === dua.id) { setPlayingId(null); return; }
     const audio = new Audio(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(dua.arabic)}&tl=ar&client=tw-ob`);
-    audio.onended = () => {
-      setPlayingId(null);
-      setCurrentAudio(null);
-    };
-    audio.play();
+    audioRef.current = audio;
+    const failed = () => { if (audioRef.current === audio) { setPlayingId(null); setNotice("Audio is unavailable. You can still read and copy this dua."); } };
+    audio.onended = () => { if (audioRef.current === audio) setPlayingId(null); };
+    audio.onerror = failed;
     setPlayingId(dua.id);
-    setCurrentAudio(audio);
+    try { await audio.play(); } catch { failed(); }
   };
 
   return (
@@ -63,10 +75,11 @@ export default function DuaPage() {
             Dua & <span className="text-gold italic">Adhkar</span>
           </motion.h1>
           <p className="text-parchment/40 text-lg max-w-2xl mx-auto leading-relaxed font-light">
-            A curated collection of authentic supplications from the Quran and Sunnah. Now with audio recitation.
+            A curated collection of authentic supplications from the Quran and Sunnah. Audio uses computer-generated Arabic speech when available.
           </p>
         </div>
 
+        <p role="status" className="mb-6 text-center text-parchment">{notice}</p>
         <div className="grid grid-cols-1 gap-8 max-w-4xl mx-auto">
           {DUAS.map((dua) => (
             <motion.div
@@ -91,6 +104,7 @@ export default function DuaPage() {
               <div className="flex items-center justify-between pt-8 border-t border-white/5">
                 <div className="flex items-center gap-4">
                   <button 
+                    aria-label={playingId === dua.id ? "Stop dua audio" : "Listen to dua"}
                     onClick={() => toggleAudio(dua)}
                     className={`p-4 rounded-2xl transition-all ${
                       playingId === dua.id 
@@ -100,14 +114,14 @@ export default function DuaPage() {
                   >
                     {playingId === dua.id ? <VolumeX size={20} /> : <Volume2 size={20} />}
                   </button>
-                  <button className="p-4 glass rounded-2xl text-parchment/30 hover:text-gold transition-colors">
+                  <button aria-label="Copy dua" onClick={() => copyDua(dua)} className="p-4 glass rounded-2xl text-parchment/30 hover:text-gold transition-colors">
                     <Copy size={20} />
                   </button>
-                  <button className="p-4 glass rounded-2xl text-parchment/30 hover:text-gold transition-colors">
+                  <button aria-label="Share dua" onClick={() => shareDua(dua)} className="p-4 glass rounded-2xl text-parchment/30 hover:text-gold transition-colors">
                     <Share2 size={20} />
                   </button>
                 </div>
-                <button className="text-parchment/20 hover:text-rose-500 transition-colors">
+                <button aria-label="Favourite dua" aria-pressed={favourites.includes(dua.id)} onClick={() => toggleFavourite(dua.id)} className={favourites.includes(dua.id) ? "text-rose-600" : "text-parchment/60 hover:text-rose-500 transition-colors"}>
                   <Heart size={24} />
                 </button>
               </div>

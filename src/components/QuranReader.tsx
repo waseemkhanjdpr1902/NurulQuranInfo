@@ -247,7 +247,7 @@ export default function QuranReader({
 
     fetchVerses();
     return () => controller.abort();
-  }, [surah.number, reciterId, retryCount]);
+  }, [surah.number, surah.numberOfAyahs, reciterId, retryCount]);
 
   useEffect(() => {
     setAudioUrl(null);

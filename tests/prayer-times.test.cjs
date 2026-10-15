@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { localDate, addDay, nightMidpoint, schedule, nextPrayer, alertDue, timestamp } = require(process.env.PRAYER_TEST_MODULE);
+const { localDate, addDay, nightMidpoint, schedule, nextPrayer, alertDue, timestamp } = require(process.env.PRAYER_TEST_MODULE || "../src/lib/prayer-times.ts");
 const day = { timings: { Fajr:'2026-10-13T05:08:00+05:30',Sunrise:'2026-10-13T06:25:00+05:30',Dhuhr:'2026-10-13T12:13:00+05:30',Asr:'2026-10-13T16:23:00+05:30',Sunset:'2026-10-13T18:01:00+05:30',Maghrib:'2026-10-13T18:01:00+05:30',Isha:'2026-10-13T19:18:00+05:30' } };
 const tomorrow = { timings: { Fajr:'2026-10-14T05:09:00+05:30' } };
 test('selected location date differs from UTC and device date',()=>{const n=Date.parse('2026-10-13T20:00:00Z');assert.equal(localDate(n,'Asia/Kolkata'),'2026-10-14');assert.equal(localDate(n,'America/New_York'),'2026-10-13');});

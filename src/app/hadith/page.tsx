@@ -11,7 +11,8 @@ interface Hadith {
   collection: string;
   number: string;
   text: string;
-  narrator: string;
+  narrator?: string;
+  grade?: string;
 }
 
 const collections = [
@@ -24,6 +25,7 @@ const collections = [
 ];
 
 export default function HadithPage() {
+  const [visibleCount, setVisibleCount] = useState(20);
   const [search, setSearch] = useState("");
   const [hadiths, setHadiths] = useState<Hadith[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,37 +33,42 @@ export default function HadithPage() {
   const [selectedCollection, setSelectedCollection] = useState("eng-bukhari");
 
   useEffect(() => {
+    const controller = new AbortController();
+    setVisibleCount(20);
+    setHadiths([]);
     const fetchHadiths = async () => {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/${selectedCollection}.json`);
+        const res = await fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/${selectedCollection}.json`, { signal: AbortSignal.any([controller.signal, AbortSignal.timeout(20000)]) });
         if (!res.ok) throw new Error("Failed to fetch Hadith data");
         const data = await res.json();
         
         // The API structure varies slightly, but usually it's data.hadiths
-        const fetchedHadiths = data.hadiths.slice(0, 50).map((h: any) => ({
+        const fetchedHadiths = data.hadiths.map((h: any) => ({
           collection: collections.find(c => c.id === selectedCollection)?.name || "Unknown",
           number: h.hadithnumber || h.number || "0",
           text: h.text,
-          narrator: h.grades?.[0]?.name || "Prophetic Tradition",
+          grade: h.grades?.map((g: {name: string; grade: string}) => `${g.name}: ${g.grade}`).join(" · ") || undefined,
         }));
         
-        setHadiths(fetchedHadiths);
+        if (!controller.signal.aborted) setHadiths(fetchedHadiths);
       } catch (err) {
+        if (controller.signal.aborted) return;
         console.error(err);
         setError("Unable to load Hadith collection. Please try again later.");
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     };
 
     fetchHadiths();
+    return () => controller.abort();
   }, [selectedCollection]);
 
   const filteredHadiths = hadiths.filter(h => 
     h.text.toLowerCase().includes(search.toLowerCase()) ||
-    h.narrator.toLowerCase().includes(search.toLowerCase())
+    String(h.number).includes(search.trim())
   );
 
   return (
@@ -100,7 +107,8 @@ export default function HadithPage() {
               type="text" 
               placeholder="Search within this collection..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              aria-label="Search hadith collection"
+              onChange={(e) => {setSearch(e.target.value); setVisibleCount(20);}}
               className="w-full pl-16 pr-6 py-5 glass rounded-[32px] text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-colors shadow-2xl"
             />
           </div>
@@ -141,13 +149,13 @@ export default function HadithPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <AnimatePresence mode="popLayout">
-              {filteredHadiths.map((hadith, i) => (
+              {filteredHadiths.slice(0, visibleCount).map((hadith, i) => (
                 <motion.div
                   key={`${hadith.collection}-${hadith.number}`}
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ delay: i * 0.05 }}
+                  transition={{ delay: Math.min(i, 5) * 0.03 }}
                 >
                   <HadithCard hadith={hadith} />
                 </motion.div>
@@ -156,7 +164,8 @@ export default function HadithPage() {
           </div>
         )}
 
-        {!loading && filteredHadiths.length === 0 && (
+        {!loading && !error && filteredHadiths.length > visibleCount && <div className="mt-8 text-center"><p role="status" className="mb-4">Showing {Math.min(visibleCount, filteredHadiths.length)} of {filteredHadiths.length} matching hadiths</p><button className="min-h-11 rounded-xl bg-gold px-6 text-ink" onClick={() => setVisibleCount(n => n + 20)}>Load more hadiths</button></div>}
+        {!loading && !error && filteredHadiths.length === 0 && (
           <div className="text-center py-32">
             <p className="text-parchment/20 text-2xl font-display italic">No Hadith found matching your search.</p>
           </div>

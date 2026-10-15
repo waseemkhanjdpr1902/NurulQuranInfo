@@ -45,14 +45,14 @@ export default function TafseerPage() {
               viewport={{ once: true }}
             >
               <Sparkles className="text-gold mx-auto mb-8" size={64} />
-              <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">AI-Powered <span className="text-gold">Insights</span></h2>
+              <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">AI study <span className="text-gold">Reflections</span></h2>
               <p className="text-parchment/50 mb-12 max-w-2xl mx-auto text-lg leading-relaxed">
                 Our advanced AI assistant can provide instant linguistic analysis, 
                 historical context, and spiritual reflections for any verse you choose.
               </p>
               <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                <Link href="/#ai" className="w-full md:w-auto px-12 py-5 gold-gradient text-ink font-bold rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-3">
-                  Try AI Tafseer <MessageSquare size={20} />
+                <Link href="/dawah" className="w-full md:w-auto px-12 py-5 gold-gradient text-ink font-bold rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-3">
+                  AI study companion <MessageSquare size={20} />
                 </Link>
                 <Link href="/quran" className="w-full md:w-auto px-12 py-5 glass text-parchment font-bold rounded-full hover:bg-gold/5 transition-colors flex items-center justify-center gap-3">
                   Browse Classical Tafseer <BookOpen size={20} />
@@ -79,8 +79,8 @@ export default function TafseerPage() {
                 desc: "The most widely accepted explanation based on Hadith. Available for every verse in our Digital Quran study mode.",
                 href: "/quran"
               },
-              { title: "Tafsir Al-Jalalayn", author: "Al-Mahalli & Al-Suyuti", period: "15th Century", desc: "A concise and highly influential commentary known for its brevity and clarity.", href: "/quran" },
-              { title: "Tafsir Al-Tabari", author: "Imam Al-Tabari", period: "9th Century", desc: "The 'Mother of Tafsirs', providing exhaustive linguistic and historical documentation.", href: "/quran" },
+              { title: "Tafsir Ibn Kathir — Urdu", author: "Hafiz Ibn Kathir", period: "Urdu edition", desc: "Select Urdu in the tafsir language menu beside the ayahs.", href: "/quran" },
+              { title: "Al-Mukhtasar — Hindi", author: "Tafsir Center for Quranic Studies", period: "Hindi edition", desc: "Select Hindi in the tafsir language menu beside the ayahs.", href: "/quran" },
             ].map((work, i) => (
               <Link key={i} href={work.href} className="glass p-8 rounded-[32px] border-white/5 hover:border-gold/20 transition-all group block">
                 <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-gold mb-6 group-hover:bg-gold group-hover:text-ink transition-colors">
