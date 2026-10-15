@@ -42,7 +42,7 @@ export default function QuickGuide() {
       <div className="rounded-3xl border border-gold/30 bg-white p-5 text-[#12352a] shadow-sm sm:p-8">
         <h2 id="quick-guide-title" className="text-2xl font-bold sm:text-3xl">{t("New here? Quick navigation guide", "पहली बार आए हैं? आसान रहनुमाई", "پہلی بار آئے ہیں؟ آسان رہنمائی")}</h2>
         <p className="mt-3 text-base leading-relaxed">{t("On mobile, tap the menu button at the top right. On a computer, use the links across the top. Choose English, Hindi or Urdu from the language selector next to the menu.", "मोबाइल पर ऊपर दाईं तरफ मेनू बटन दबाएँ। कंप्यूटर पर ऊपर दिए लिंक इस्तेमाल करें। मेनू के पास भाषा विकल्प से English, हिंदी या उर्दू चुनें।", "موبائل پر اوپر دائیں طرف مینو بٹن دبائیں۔ کمپیوٹر پر اوپر دیے گئے لنکس استعمال کریں۔ مینو کے پاس زبان کے انتخاب سے انگریزی، ہندی یا اردو منتخب کریں۔")}</p>
-        <Link href="/mushaf" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#075c3a] px-4 py-2 font-semibold text-white">{t("Arabic only: Indo-Pak Mushaf with zoom", "सिर्फ अरबी: इंडो-पाक मुशहफ़ और ज़ूम", "صرف عربی: انڈو پاک مصحف اور زوم")}</Link>
+        <Link href="/mushaf" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#075c3a] px-4 py-2 font-semibold text-white">{t("Arabic only: Indian Mushaf with zoom", "सिर्फ अरबी: भारतीय मुशहफ़ और ज़ूम", "صرف عربی: ہندوستانی مصحف اور زوم")}</Link>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {items.map((item, index) => (
             <details key={item.title} className="rounded-2xl border border-[#c8ded4] bg-[#f4f9f6] p-4">

@@ -89,10 +89,10 @@ export default function MushafReader() {
     <div ref={container} dir={rtl ? "rtl" : "ltr"} className="mx-auto max-w-5xl bg-[#f6f7f1] text-[#12352a]" style={full ? {position:"fixed", inset:0, zIndex:200, maxWidth:"none", height:"100dvh", overflowY:"auto", padding:8} : undefined}>
       <div hidden={full} className="rounded-2xl border border-[#c8ded4] bg-white p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="text-xl font-bold sm:text-3xl">{t("Indo-Pak Mushaf", "इंडो-पाक मुशहफ़", "انڈو پاک مصحف")}</h1>
+          <h1 className="text-xl font-bold sm:text-3xl">{t("Indian Mushaf", "भारतीय मुशहफ़", "ہندوستانی مصحف")}</h1>
           <Link href="/quran" className={button}>{t("Translation & listening", "तर्जुमा और तिलावत", "ترجمہ اور تلاوت")}</Link>
         </div>
-        <p className="mt-2 text-sm leading-relaxed">{t("Indo-Pak script · Hafs · 610 reading pages · Original page images, without translation or audio. Your page is remembered on this browser.", "इंडो-पाक ख़त • हफ़्स • 610 पन्ने • असली पन्नों की तस्वीरें, बिना तर्जुमे और ऑडियो के। इसी ब्राउज़र पर आपका पन्ना याद रखा जाता है।", "انڈو پاک رسم الخط • حفص • 610 صفحات • اصل صفحات کی تصاویر، بغیر ترجمے اور آڈیو کے۔ اسی براؤزر پر آپ کا صفحہ یاد رکھا جاتا ہے۔")}</p>
+        <p className="mt-2 text-sm leading-relaxed">{t("Indian script · Hafs · 610 reading pages · Original page images, without translation or audio. Your page is remembered on this browser.", "भारतीय ख़त • हफ़्स • 610 पन्ने • असली पन्नों की तस्वीरें, बिना तर्जुमे और ऑडियो के। इसी ब्राउज़र पर आपका पन्ना याद रखा जाता है।", "ہندوستانی رسم الخط • حفص • 610 صفحات • اصل صفحات کی تصاویر، بغیر ترجمے اور آڈیو کے۔ اسی براؤزر پر آپ کا صفحہ یاد رکھا جاتا ہے۔")}</p>
         <details className="mt-3 text-sm">
           <summary className="cursor-pointer py-2 font-semibold">{t("Reading help & source", "पढ़ने की रहनुमाई और स्रोत", "پڑھنے کی رہنمائی اور ماخذ")}</summary>
           <p className="mt-2 leading-relaxed">{t("Use + to enlarge; scroll sideways to see the full line. Fit page resets zoom. You can also pinch to zoom on mobile. Page images need internet to load.", "+ से बड़ा करें; पूरी लाइन देखने के लिए दाएँ-बाएँ स्क्रॉल करें। पूरा पन्ना से ज़ूम रीसेट करें। मोबाइल पर दो उँगलियों से ज़ूम भी कर सकते हैं। पन्ने लोड करने के लिए इंटरनेट चाहिए।", "+ سے بڑا کریں؛ پوری سطر دیکھنے کے لیے دائیں بائیں اسکرول کریں۔ پورا صفحہ سے زوم ری سیٹ کریں۔ موبائل پر دو انگلیوں سے زوم بھی کر سکتے ہیں۔ صفحات لوڈ کرنے کے لیے انٹرنیٹ چاہیے۔")}</p>
@@ -139,7 +139,7 @@ export default function MushafReader() {
         {!loaded && !failed && <p role="status" className="p-5 text-center">{t("Loading Mushaf page…", "मुशहफ़ पन्ना लोड हो रहा है…", "مصحف صفحہ لوڈ ہو رہا ہے…")}</p>}
         {failed ? <div role="alert" className="p-8 text-center"><p>{t("Page could not load. Check your internet connection and retry.", "पन्ना लोड नहीं हुआ। इंटरनेट जाँचें और फिर कोशिश करें।", "صفحہ لوڈ نہیں ہوا۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔")}</p><button type="button" className={button + " mt-4"} onClick={() => {setFailed(false);setLoaded(false);setRetry(n => n + 1);}}>{t("Retry", "फिर कोशिश करें", "دوبارہ کوشش کریں")}</button></div> :
           ready && <div style={{width:`${zoom}%`, minWidth:"100%"}}>
-            <Image ref={image} key={`${page}-${retry}`} src={`/api/indopak-mushaf/${page}?retry=${retry}`} alt={t(`Indo-Pak Hafs Mushaf, printed page ${page + 1}`, `अरबी हफ़्स मुशहफ़, किताब का पन्ना ${page + 1}`, `عربی حفص مصحف، کتاب کا صفحہ ${page + 1}`)} width={1915} height={2736} unoptimized priority onLoad={() => setLoaded(true)} onError={() => {setFailed(true);setLoaded(false);}} style={{display:"block",width:"100%",height:"auto"}} />
+            <Image ref={image} key={`${page}-${retry}`} src={`/api/indopak-mushaf/${page}?retry=${retry}`} alt={t(`Indian Hafs Mushaf, printed page ${page + 1}`, `अरबी हफ़्स मुशहफ़, किताब का पन्ना ${page + 1}`, `عربی حفص مصحف، کتاب کا صفحہ ${page + 1}`)} width={1915} height={2736} unoptimized priority onLoad={() => setLoaded(true)} onError={() => {setFailed(true);setLoaded(false);}} style={{display:"block",width:"100%",height:"auto"}} />
           </div>}
       </div>
       <div className="mt-3 flex justify-between gap-2">
