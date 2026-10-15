@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useUILanguage } from "@/components/UILanguageProvider";
+import { MUSHAF_SURAHS } from "@/data/mushaf-surahs";
 import { MUSHAF_PAGE_COUNT, MUSHAF_STORAGE_KEY, validMushafPage } from "@/lib/mushaf";
 
 export default function MushafReader() {
@@ -16,6 +17,9 @@ export default function MushafReader() {
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
   const [showIndex, setShowIndex] = useState(false);
+  const [surahQuery, setSurahQuery] = useState("");
+  const query = surahQuery.trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[أإآٱ]/g, "ا").replace(/[^\p{L}\p{N}]/gu, "");
+  const matchingSurahs = MUSHAF_SURAHS.filter(surah => !query || `${surah.number} ${surah.name} ${surah.arabic}`.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[أإآٱ]/g, "ا").replace(/[^\p{L}\p{N}]/gu, "").includes(query));
   const [invalid, setInvalid] = useState(false);
   const [full, setFull] = useState(false);
   const container = useRef<HTMLDivElement>(null);
@@ -96,7 +100,7 @@ export default function MushafReader() {
         <details className="mt-3 text-sm">
           <summary className="cursor-pointer py-2 font-semibold">{t("Reading help & source", "पढ़ने की रहनुमाई और स्रोत", "پڑھنے کی رہنمائی اور ماخذ")}</summary>
           <p className="mt-2 leading-relaxed">{t("Use + to enlarge; scroll sideways to see the full line. Fit page resets zoom. You can also pinch to zoom on mobile. Page images need internet to load.", "+ से बड़ा करें; पूरी लाइन देखने के लिए दाएँ-बाएँ स्क्रॉल करें। पूरा पन्ना से ज़ूम रीसेट करें। मोबाइल पर दो उँगलियों से ज़ूम भी कर सकते हैं। पन्ने लोड करने के लिए इंटरनेट चाहिए।", "+ سے بڑا کریں؛ پوری سطر دیکھنے کے لیے دائیں بائیں اسکرول کریں۔ پورا صفحہ سے زوم ری سیٹ کریں۔ موبائل پر دو انگلیوں سے زوم بھی کر سکتے ہیں۔ صفحات لوڈ کرنے کے لیے انٹرنیٹ چاہیے۔")}</p>
-          <p className="mt-2 leading-relaxed">{t("King Fahd Qur’an Printing Complex, Nasta’liq edition. Original scans are displayed unchanged. Reading page 1 is printed page 2; reading page 610 is printed page 611. The surah index below is the publisher’s own index. Enter its printed page number in the page box.", "किंग फ़हद कुरआन प्रिंटिंग कॉम्प्लेक्स का नस्तालीक़ मुशहफ़। असली स्कैन बिना बदलाव दिखाए जाते हैं। पहला पढ़ने वाला पन्ना किताब का पन्ना 2 है और आख़िरी 611 है। नीचे प्रकाशक की असली सूरह फ़ेहरिस्त है। उसमें दिया पन्ना नंबर पन्ने के बॉक्स में डालें।", "کنگ فہد قرآن پرنٹنگ کمپلیکس کا نستعلیق مصحف۔ اصل اسکین بغیر تبدیلی دکھائے جاتے ہیں۔ پہلا پڑھنے والا صفحہ کتاب کا صفحہ 2 اور آخری 611 ہے۔ نیچے ناشر کی اصل سورتوں کی فہرست ہے۔ اس کا صفحہ نمبر صفحے کے خانے میں درج کریں۔")}</p>
+          <p className="mt-2 leading-relaxed">{t("King Fahd Qur’an Printing Complex, Nasta’liq edition. Original scans are displayed unchanged. Reading page 1 is printed page 2; reading page 610 is printed page 611. Tap Surah index, then select a surah to open its starting page. The publisher’s original index is also available below.", "किंग फ़हद कुरआन प्रिंटिंग कॉम्प्लेक्स का नस्तालीक़ मुशहफ़। असली स्कैन बिना बदलाव दिखाए जाते हैं। पहला पढ़ने वाला पन्ना किताब का पन्ना 2 है और आख़िरी 611 है। सूरह फ़ेहरिस्त खोलें और सूरह पर टैप करके उसका पहला पन्ना खोलें। प्रकाशक की असली फ़ेहरिस्त भी नीचे उपलब्ध है।", "کنگ فہد قرآن پرنٹنگ کمپلیکس کا نستعلیق مصحف۔ اصل اسکین بغیر تبدیلی دکھائے جاتے ہیں۔ پہلا پڑھنے والا صفحہ کتاب کا صفحہ 2 اور آخری 611 ہے۔ سورتوں کی فہرست کھولیں اور کسی سورت پر ٹیپ کر کے اس کا پہلا صفحہ کھولیں۔ ناشر کی اصل فہرست بھی نیچے دستیاب ہے۔")}</p>
           <a href="https://qurancomplex.gov.sa/wp-content/uploads/isdarat/hafs/nastaleeq-1.pdf" target="_blank" rel="noreferrer" className="mt-2 inline-block py-2 underline">{t("Publisher’s Mushaf PDF", "प्रकाशक का मुशहफ़ PDF", "ناشر کا مصحف PDF")}</a>
           <Link href="/sources" className="ms-4 inline-block py-2 underline">{t("Source details", "स्रोत की तफ़सील", "ماخذ کی تفصیل")}</Link>
         </details>
@@ -126,9 +130,27 @@ export default function MushafReader() {
 
       </div>
 
-      {showIndex && <section aria-label={t("Publisher surah index", "प्रकाशक की सूरह फ़ेहरिस्त", "ناشر کی سورتوں کی فہرست")} className="mt-3 rounded-xl border border-[#c8ded4] bg-white p-3">
-        <p className="mb-3 text-sm">{t("Find your surah in the original index. Type its printed page number above and press Go. Tap an index image to enlarge it.", "असली फ़ेहरिस्त में सूरह ढूँढें। उसका पन्ना नंबर ऊपर डालें और खोलें दबाएँ। तस्वीर बड़ी करने के लिए उस पर टैप करें।", "اصل فہرست میں سورت تلاش کریں۔ اس کا صفحہ نمبر اوپر درج کریں اور کھولیں دبائیں۔ تصویر بڑی کرنے کے لیے اس پر ٹیپ کریں۔")}</p>
+      {showIndex && <section aria-label={t("Surah index", "सूरह फ़ेहरिस्त", "سورتوں کی فہرست")} className="mt-3 rounded-xl border border-[#c8ded4] bg-white p-3">
+        <h2 className="mb-3 text-lg font-bold">{t("Tap a surah to start reading", "पढ़ने के लिए सूरह पर टैप करें", "پڑھنے کے لیے سورت پر ٹیپ کریں")}</h2>
+        <label className="block text-sm font-semibold">
+          {t("Search surahs by name or number", "नाम या नंबर से सूरह खोजें", "نام یا نمبر سے سورت تلاش کریں")}
+          <input type="search" value={surahQuery} onChange={event => setSurahQuery(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-[#b9d8ca] bg-white px-3 text-base" />
+        </label>
+        <p role="status" className="my-3 text-sm">{matchingSurahs.length} / 114</p>
+        <div className="grid max-h-[55svh] gap-2 overflow-y-auto overscroll-contain sm:grid-cols-2" aria-label={t("Choose a surah", "सूरह चुनें", "سورت منتخب کریں")}>
+          {matchingSurahs.map(surah => <button type="button" key={surah.number} onClick={() => {
+            go(surah.printedPage - 1);
+            setSurahQuery("");
+            requestAnimationFrame(() => { viewport.current?.focus({preventScroll:true}); viewport.current?.scrollIntoView({block:"center", behavior:"smooth"}); });
+          }} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#b9d8ca] bg-[#f4f9f6] px-3 py-3 text-start hover:bg-[#d9eee6] focus-visible:outline-2 focus-visible:outline-[#075c3a]">
+            <span><span className="block font-semibold" dir="ltr">{surah.number}. {surah.name}</span><span className="text-xs">{t("Page", "पन्ना", "صفحہ")} {surah.printedPage}</span></span>
+            <span lang="ar" dir="rtl" className="font-arabic text-2xl leading-relaxed">{surah.arabic}</span>
+          </button>)}
+        </div>
+        {!matchingSurahs.length && <p className="my-4 text-sm">{t("No surah found. Try another name or number.", "सूरह नहीं मिली। दूसरा नाम या नंबर खोजें।", "سورت نہیں ملی۔ دوسرا نام یا نمبر تلاش کریں۔")}</p>}
+        <details className="mt-4"><summary className="cursor-pointer py-3 text-sm font-semibold">{t("Publisher’s original index", "प्रकाशक की असली फ़ेहरिस्त", "ناشر کی اصل فہرست")}</summary>
         <div className="grid gap-3 sm:grid-cols-2">{[620, 621].map((scan, i) => <a key={scan} href={`https://raw.githubusercontent.com/1uc1d23/IndoPak-15-Line-Naskh-Mushaf-Page-Images/a93e8947229889a2e486d9b414fe94e69c72c6e4/original_pages/${scan}.jpg`} target="_blank" rel="noreferrer"><Image src={`https://raw.githubusercontent.com/1uc1d23/IndoPak-15-Line-Naskh-Mushaf-Page-Images/a93e8947229889a2e486d9b414fe94e69c72c6e4/original_pages/${scan}.jpg`} alt={t(`Original surah index, part ${i + 1}`, `असली सूरह फ़ेहरिस्त, हिस्सा ${i + 1}`, `اصل سورتوں کی فہرست، حصہ ${i + 1}`)} width={1915} height={2736} unoptimized style={{width:"100%",height:"auto"}} /></a>)}</div>
+        </details>
       </section>}
       <nav aria-label={t("Mushaf page navigation", "मुशहफ़ पन्नों की नेविगेशन", "مصحف صفحات کی رہنمائی")} className="my-3 flex items-center justify-between gap-2">
         <button type="button" onClick={() => go(page - 1)} disabled={page === 1} className={button}>{t("Previous page", "पिछला पन्ना", "پچھلا صفحہ")}</button>

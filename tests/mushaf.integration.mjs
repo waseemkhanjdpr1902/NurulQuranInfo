@@ -26,10 +26,11 @@ globalThis.fetch = async () => { throw new Error("network"); };
 assert.equal((await get("1")).status, 502);
 
 const dom = new JSDOM('<div id="root"></div>', { url: "https://example.test/mushaf?page=610", pretendToBeVisual:true });
-Object.assign(globalThis, {window:dom.window, self:dom.window, document:dom.window.document, HTMLElement:dom.window.HTMLElement, Element:dom.window.Element, React, IS_REACT_ACT_ENVIRONMENT:true});
+Object.assign(globalThis, {requestAnimationFrame:callback => callback(), window:dom.window, self:dom.window, document:dom.window.document, HTMLElement:dom.window.HTMLElement, Element:dom.window.Element, React, IS_REACT_ACT_ENVIRONMENT:true});
 Object.defineProperty(globalThis,"navigator",{value:dom.window.navigator, configurable:true});
 Object.defineProperty(globalThis,"localStorage",{value:dom.window.localStorage, configurable:true});
 dom.window.HTMLElement.prototype.scrollTo = () => {};
+dom.window.HTMLElement.prototype.scrollIntoView = () => {};
 const { createRoot } = await import("react-dom/client");
 const { UILanguageProvider } = unwrap(await import("../src/components/UILanguageProvider.tsx"));
 const readerModule = await import("../src/components/MushafReader.tsx");
@@ -49,9 +50,42 @@ assert.ok(find("Retry"));
 await act(async()=>find("Retry").click());
 assert.ok(document.querySelector("img").getAttribute("src").includes("retry=1"));
 await act(async()=>find("Surah index").click());
-assert.equal(document.querySelectorAll('section[aria-label="Publisher surah index"] img').length,2);
+assert.equal(document.querySelectorAll('section[aria-label="Surah index"] img').length,2);
+const { MUSHAF_SURAHS } = unwrap(await import("../src/data/mushaf-surahs.ts"));
+assert.equal(MUSHAF_SURAHS.length,114);
+assert.equal(new Set(MUSHAF_SURAHS.map(s => s.number)).size,114);
+for (const [number, printedPage] of [[1,2],[2,3],[18,294],[36,441],[55,532],[67,563],[112,610],[114,611]]) {
+  const surah = MUSHAF_SURAHS.find(s => s.number === number);
+  assert.equal(surah.printedPage,printedPage, "matches publisher index");
+  const button = [...document.querySelectorAll('section button')].find(b=>b.textContent.startsWith(`${number}. `));
+  assert.ok(button);
+  await act(async()=>button.click());
+  assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,String(printedPage));
+  assert.equal(new URL(document.querySelector('div[role="region"] img').getAttribute('src'),window.location.href).pathname, `/api/indopak-mushaf/${printedPage - 1}`);
+  assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).zoom,125, "surah selection preserves zoom");
+  await act(async()=>find("Surah index").click());
+}
+// All 114 controls have the correct reading-page offset, including shared start pages.
+for (const surah of MUSHAF_SURAHS) {
+  assert.ok(validMushafPage(surah.printedPage - 1));
+  const button = [...document.querySelectorAll('section button')].find(b=>b.textContent.startsWith(`${surah.number}. `));
+  await act(async()=>button.click());
+  assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,String(surah.printedPage));
+  await act(async()=>find("Surah index").click());
+}
+const search=document.querySelector('input[type="search"]');
+for (const term of ['al kahf','الكهف']) {
+  await act(async()=>{
+    Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype,'value').set.call(search,term);
+    search.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+  });
+  assert.equal(document.querySelectorAll('section button').length,1,"search ignores punctuation and Arabic vowel marks");
+}
+await act(async()=>{
+  Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype,'value').set.call(search,'');
+  search.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
+});
 await act(async()=>find("Close surah index").click());
-await act(async()=>find("Next page").click());
 assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,"611");
 assert.equal(mushafSourceUrl(610).endsWith("/615.jpg"),true,"last Quran page excludes back matter");
 await act(async()=>find("Full screen").click());
