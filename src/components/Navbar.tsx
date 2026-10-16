@@ -85,7 +85,7 @@ export default function Navbar() {
         <Link
           href="/"
           aria-label="NurulQuran home"
-          className="group flex shrink-0 items-center rounded-xl bg-white px-3 py-2 shadow-sm transition-transform hover:scale-[1.02]"
+          className="group flex shrink-0 items-center rounded-xl bg-white px-2 py-2 sm:px-3 shadow-sm transition-transform hover:scale-[1.02]"
         >
           <Image
             src="/nurulquran-logo.png"
@@ -93,8 +93,8 @@ export default function Navbar() {
             width={2172}
             height={724}
             priority
-            sizes="(max-width: 640px) 180px, 216px"
-            className="h-auto w-[105px] sm:w-[180px] lg:w-[190px]"
+            sizes="(max-width: 639px) calc(100vw - 184px), (max-width: 1023px) 220px, 230px"
+            className="h-auto w-[min(180px,calc(100vw-184px))] sm:w-[220px] lg:w-[230px]"
           />
         </Link>
 
@@ -136,7 +136,7 @@ export default function Navbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 [&_select]:max-w-[84px] sm:[&_select]:max-w-[105px]">
           <LanguageSelector />
           {/* Mobile Toggle */}
           <button

@@ -168,7 +168,8 @@ export default function AppInstall() {
               alt="NurulQuran"
               width={2172}
               height={724}
-              style={{ width: 190, height: "auto" }}
+              sizes="220px"
+              style={{ width: 220, maxWidth: "calc(100% - 52px)", height: "auto" }}
             />
             <button
               type="button"
