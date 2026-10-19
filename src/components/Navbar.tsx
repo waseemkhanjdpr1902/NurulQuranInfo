@@ -5,7 +5,7 @@ import {
   useUILanguage,
 } from "@/components/UILanguageProvider";
 import { PrayerBanner } from "@/components/PrayerTimesProvider";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   BookOpen,
   Sparkles,
@@ -23,6 +23,16 @@ import { createClient, isSupabaseConfigured } from "@/services/supabase";
 
 export default function Navbar() {
   const { t } = useUILanguage();
+  const navigation = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const element = navigation.current;
+    if (!element) return;
+    const update = () => document.documentElement.style.setProperty("--navigation-height", `${element.getBoundingClientRect().height}px`);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -46,6 +56,7 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
+    { name: t("Dawah", "दावत", "دعوت"), href: "/dawah", icon: Sparkles },
     { name: t("Quick guide", "रहनुमाई", "رہنمائی"), href: "/#quick-guide", icon: Compass },
     { name: t("Quran", "क़ुरआन", "قرآن"), href: "/quran", icon: Book },
     {
@@ -73,6 +84,7 @@ export default function Navbar() {
 
   return (
     <nav
+      ref={navigation}
       aria-label="Main navigation"
       className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${
         isScrolled

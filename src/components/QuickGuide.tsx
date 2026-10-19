@@ -7,6 +7,11 @@ export default function QuickGuide() {
   const { t, rtl } = useUILanguage();
   const items = [
     {
+      href: "/dawah",
+      title: t("Dawah: learn and ask questions", "दावत: जानें और सवाल पूछें", "دعوت: جانیں اور سوال پوچھیں"),
+      text: t("Open Dawah to explore Islamic beliefs and common questions. Type your question in the chat and send it. AI answers can contain mistakes; check references with a qualified scholar.", "दावत खोलकर इस्लाम की बुनियादी बातें और आम सवाल जानें। चैट में अपना सवाल लिखकर भेजें। AI के जवाब में ग़लती हो सकती है; हवाले किसी आलिम से जाँचें।", "دعوت کھول کر اسلام کی بنیادی باتیں اور عام سوالات جانیں۔ چیٹ میں اپنا سوال لکھ کر بھیجیں۔ AI کے جواب میں غلطی ہو سکتی ہے؛ حوالے کسی عالم سے جانچیں۔"),
+    },
+    {
       href: "/quran",
       title: t("Read and listen to Quran", "कुरआन पढ़ें और सुनें", "قرآن پڑھیں اور سنیں"),
       text: t("Open Quran from the menu and choose a surah. Tap Play in the bottom player, or Listen from here below an ayah. Use the player to pause or move between ayahs.", "मेनू में कुरआन खोलें और सूरह चुनें। नीचे प्लेयर में Play या किसी आयत के नीचे यहाँ से सुनें दबाएँ। प्लेयर से रोकें या अगली-पिछली आयत पर जाएँ।", "مینو سے قرآن کھولیں اور سورت منتخب کریں۔ نیچے پلیئر میں Play یا آیت کے نیچے یہاں سے سنیں دبائیں۔ پلیئر سے روکیں یا اگلی پچھلی آیت پر جائیں۔"),
@@ -45,7 +50,7 @@ export default function QuickGuide() {
         <Link href="/mushaf" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#075c3a] px-4 py-2 font-semibold text-white">{t("Arabic only: Indian Mushaf with zoom", "सिर्फ अरबी: भारतीय मुशहफ़ और ज़ूम", "صرف عربی: ہندوستانی مصحف اور زوم")}</Link>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {items.map((item, index) => (
-            <details key={item.title} className="rounded-2xl border border-[#c8ded4] bg-[#f4f9f6] p-4">
+            <details open key={item.title} className="rounded-2xl border border-[#c8ded4] bg-[#f4f9f6] p-4">
               <summary className="min-h-11 cursor-pointer text-base font-bold leading-relaxed focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0d6658]">{index + 1}. {item.title}</summary>
               <p className="mt-3 text-base leading-relaxed">{item.text}</p>
               <Link href={item.href} className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#075c3a] px-4 py-2 font-semibold text-white hover:bg-[#064b30] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075c3a]">{t("Open this section", "यह हिस्सा खोलें", "یہ حصہ کھولیں")}</Link>
@@ -53,7 +58,7 @@ export default function QuickGuide() {
             </details>
           ))}
           <details className="rounded-2xl border border-[#c8ded4] bg-[#f4f9f6] p-4 sm:col-span-2">
-            <summary className="min-h-11 cursor-pointer text-base font-bold leading-relaxed focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0d6658]">{t("7. Install the app on your mobile", "7. मोबाइल पर ऐप इंस्टॉल करें", "7. موبائل پر ایپ انسٹال کریں")}</summary>
+            <summary className="min-h-11 cursor-pointer text-base font-bold leading-relaxed focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0d6658]">{t("8. Install the app on your mobile", "8. मोबाइल पर ऐप इंस्टॉल करें", "8. موبائل پر ایپ انسٹال کریں")}</summary>
             <p className="mt-3 text-base leading-relaxed">{t("Android: open this website in Chrome or Edge. Tap Install app / How to install at the bottom left, or choose Install app / Add to Home screen from the browser menu. If you opened the link in WhatsApp, open it in your browser first.", "Android: वेबसाइट Chrome या Edge में खोलें। नीचे बाईं तरफ ऐप जोड़ें / ऐप कैसे जोड़ें दबाएँ, या ब्राउज़र मेनू में Install app / Add to Home screen चुनें। WhatsApp से आए हों तो पहले ब्राउज़र में खोलें।", "Android: ویب سائٹ Chrome یا Edge میں کھولیں۔ نیچے بائیں طرف ایپ شامل کریں / ایپ کیسے شامل کریں دبائیں، یا براؤزر مینو میں Install app / Add to Home screen منتخب کریں۔ WhatsApp سے آئے ہوں تو پہلے براؤزر میں کھولیں۔")}</p>
             <p className="mt-3 text-base leading-relaxed" dir="ltr">iPhone: Safari → Share → Add to Home Screen → Add.</p>
             <p className="mt-3 text-base leading-relaxed">{t("The installed web app opens from your home screen. Audio requires internet. Already installed? Open the NurulQuran icon on your home screen.", "इंस्टॉल की गई वेब ऐप होम स्क्रीन से खुलती है। ऑडियो के लिए इंटरनेट ज़रूरी है। ऐप पहले से है? होम स्क्रीन पर NurulQuran आइकन खोलें।", "انسٹال شدہ ویب ایپ ہوم اسکرین سے کھلتی ہے۔ آڈیو کے لیے انٹرنیٹ ضروری ہے۔ ایپ پہلے سے ہے؟ ہوم اسکرین پر NurulQuran آئیکن کھولیں۔")}</p>

@@ -6,6 +6,12 @@ export default function HeroSection() {
   const { t, rtl } = useUILanguage();
   const actions = [
     {
+      href: "/dawah",
+      icon: Sparkles,
+      label: t("Dawah & questions", "दावत और सवाल", "دعوت اور سوالات"),
+      help: t("Explore Islam and ask a question", "इस्लाम जानें और अपना सवाल पूछें", "اسلام جانیں اور اپنا سوال پوچھیں"),
+    },
+    {
       href: "/mushaf",
       icon: BookOpen,
       label: t("Indian Mushaf", "भारतीय मुशहफ़", "ہندوستانی مصحف"),
@@ -76,7 +82,7 @@ export default function HeroSection() {
             "قرآن پڑھیں، اردو ترجمے کے ساتھ تلاوت سنیں اور اپنے مقام کے مطابق نماز کے اوقات دیکھیں۔",
           )}
         </p>
-        <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-5">
+        <div className="mt-7 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
           {actions.map((a) => (
             <Link
               key={a.href}

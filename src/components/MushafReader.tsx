@@ -73,6 +73,7 @@ export default function MushafReader() {
     const next = validMushafPage(value);
     if (next === null) return;
     setShowIndex(false);
+    viewport.current?.scrollTo({ top: 0, left: 0 });
     if (next === page) return;
     setPage(next); setPageInput(String(next + 1)); setLoaded(false); setFailed(false); setInvalid(false); setRetry(0);
     viewport.current?.scrollTo({ top: 0, left: 0 });
@@ -106,7 +107,7 @@ export default function MushafReader() {
         </details>
       </div>
 
-      <div style={{top: full ? 0 : 144}} className="sticky z-20 mt-3 rounded-2xl border border-[#c8ded4] bg-white p-3 shadow-sm">
+      <div className="relative z-20 mt-3 rounded-2xl border border-[#c8ded4] bg-white p-3 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <button type="button" aria-expanded={showIndex} onClick={() => setShowIndex(!showIndex)} className={button}>{t(showIndex ? "Close surah index" : "Surah index", showIndex ? "सूरह फ़ेहरिस्त बंद करें" : "सूरह फ़ेहरिस्त", showIndex ? "سورتوں کی فہرست بند کریں" : "سورتوں کی فہرست")}</button>
           <form onSubmit={e => {e.preventDefault(); const value = validMushafPage(Number(pageInput) - 1); setInvalid(value === null); if (value !== null) go(value);}} className="flex items-end gap-2">
@@ -141,7 +142,7 @@ export default function MushafReader() {
           {matchingSurahs.map(surah => <button type="button" key={surah.number} onClick={() => {
             go(surah.printedPage - 1);
             setSurahQuery("");
-            requestAnimationFrame(() => { viewport.current?.focus({preventScroll:true}); viewport.current?.scrollIntoView({block:"center", behavior:"smooth"}); });
+            requestAnimationFrame(() => { viewport.current?.focus({preventScroll:true}); viewport.current?.scrollIntoView({block:"start", behavior:"smooth"}); });
           }} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#b9d8ca] bg-[#f4f9f6] px-3 py-3 text-start hover:bg-[#d9eee6] focus-visible:outline-2 focus-visible:outline-[#075c3a]">
             <span><span className="block font-semibold" dir="ltr">{surah.number}. {surah.name}</span><span className="text-xs">{t("Page", "पन्ना", "صفحہ")} {surah.printedPage}</span></span>
             <span lang="ar" dir="rtl" className="font-arabic text-2xl leading-relaxed">{surah.arabic}</span>
@@ -157,7 +158,7 @@ export default function MushafReader() {
         <p aria-live="polite" className="text-sm font-semibold" dir="ltr">{page + 1} / {MUSHAF_PAGE_COUNT + 1}</p>
         <button type="button" onClick={() => go(page + 1)} disabled={page === 610} className={button}>{t("Next page", "अगला पन्ना", "اگلا صفحہ")}</button>
       </nav>
-      <div ref={viewport} tabIndex={0} role="region" aria-label={t("Arabic Mushaf page", "अरबी मुशहफ़ पन्ना", "عربی مصحف صفحہ")} onKeyDown={e => {if(e.key === "ArrowLeft") { e.preventDefault(); go(page + 1); } else if(e.key === "ArrowRight") { e.preventDefault(); go(page - 1); }}} className="relative overflow-auto rounded-xl border border-[#c8ded4] bg-white" style={{maxHeight:full ? "calc(100dvh - 230px)" : "78svh", touchAction:"pan-x pan-y pinch-zoom"}} dir="ltr">
+      <div ref={viewport} tabIndex={0} role="region" aria-label={t("Arabic Mushaf page", "अरबी मुशहफ़ पन्ना", "عربی مصحف صفحہ")} onKeyDown={e => {if(e.key === "ArrowLeft") { e.preventDefault(); go(page + 1); } else if(e.key === "ArrowRight") { e.preventDefault(); go(page - 1); }}} className="relative overflow-auto rounded-xl border border-[#c8ded4] bg-white" style={{scrollMarginTop: full ? 12 : "calc(var(--navigation-height, 144px) + 16px)", maxHeight:full ? "calc(100dvh - 230px)" : "78svh", touchAction:"pan-x pan-y pinch-zoom"}} dir="ltr">
         {!loaded && !failed && <p role="status" className="p-5 text-center">{t("Loading Mushaf page…", "मुशहफ़ पन्ना लोड हो रहा है…", "مصحف صفحہ لوڈ ہو رہا ہے…")}</p>}
         {failed ? <div role="alert" className="p-8 text-center"><p>{t("Page could not load. Check your internet connection and retry.", "पन्ना लोड नहीं हुआ। इंटरनेट जाँचें और फिर कोशिश करें।", "صفحہ لوڈ نہیں ہوا۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔")}</p><button type="button" className={button + " mt-4"} onClick={() => {setFailed(false);setLoaded(false);setRetry(n => n + 1);}}>{t("Retry", "फिर कोशिश करें", "دوبارہ کوشش کریں")}</button></div> :
           ready && <div style={{width:`${zoom}%`, minWidth:"100%"}}>

@@ -8,5 +8,5 @@ export const metadata: Metadata = {
   alternates: { canonical: "/mushaf" },
 };
 export default function MushafPage() {
-  return <main className="min-h-screen bg-ink"><Navbar /><div className="px-2 pb-10 pt-40 sm:px-6 sm:pt-44"><MushafReader /></div></main>;
+  return <main className="min-h-screen bg-ink"><Navbar /><div className="px-2 pb-10 sm:px-6" style={{paddingTop:"calc(var(--navigation-height, 160px) + 16px)"}}><MushafReader /></div></main>;
 }
