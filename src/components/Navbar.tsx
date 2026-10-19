@@ -29,6 +29,10 @@ export default function Navbar() {
     if (!element) return;
     const update = () => document.documentElement.style.setProperty("--navigation-height", `${element.getBoundingClientRect().height}px`);
     update();
+    if (typeof ResizeObserver === "undefined") {
+      window.addEventListener("resize", update);
+      return () => window.removeEventListener("resize", update);
+    }
     const observer = new ResizeObserver(update);
     observer.observe(element);
     return () => observer.disconnect();
