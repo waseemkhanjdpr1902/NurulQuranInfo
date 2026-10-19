@@ -8,8 +8,8 @@ export default function HeroSection() {
     {
       href: "/dawah",
       icon: Sparkles,
-      label: t("Dawah & questions", "दावत और सवाल", "دعوت اور سوالات"),
-      help: t("Explore Islam and ask a question", "इस्लाम जानें और अपना सवाल पूछें", "اسلام جانیں اور اپنا سوال پوچھیں"),
+      label: t("Dawah & learning", "दावत और तालीम", "دعوت اور تعلیم"),
+      help: t("Introductory reading with references", "हवालों के साथ बुनियादी बातें पढ़ें", "حوالوں کے ساتھ بنیادی باتیں پڑھیں"),
     },
     {
       href: "/mushaf",

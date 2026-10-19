@@ -8,8 +8,8 @@ export default function QuickGuide() {
   const items = [
     {
       href: "/dawah",
-      title: t("Dawah: learn and ask questions", "दावत: जानें और सवाल पूछें", "دعوت: جانیں اور سوال پوچھیں"),
-      text: t("Open Dawah to explore Islamic beliefs and common questions. Type your question in the chat and send it. AI answers can contain mistakes; check references with a qualified scholar.", "दावत खोलकर इस्लाम की बुनियादी बातें और आम सवाल जानें। चैट में अपना सवाल लिखकर भेजें। AI के जवाब में ग़लती हो सकती है; हवाले किसी आलिम से जाँचें।", "دعوت کھول کر اسلام کی بنیادی باتیں اور عام سوالات جانیں۔ چیٹ میں اپنا سوال لکھ کر بھیجیں۔ AI کے جواب میں غلطی ہو سکتی ہے؛ حوالے کسی عالم سے جانچیں۔"),
+      title: t("Dawah: introductory reading", "दावत: बुनियादी बातें पढ़ें", "دعوت: بنیادی باتیں پڑھیں"),
+      text: t("Open Dawah for introductory reading with Quran references. Its AI chat is disabled. The website guide helps you find pages and existing topic summaries; personal rulings belong with a qualified scholar.", "दावत पेज पर कुरआन के हवालों के साथ बुनियादी बातें पढ़ें। इसका AI चैट बंद है। वेबसाइट रहनुमा पेज और मौजूदा मौज़ू ढूँढता है; निजी मसलों के लिए आलिम से पूछें।", "دعوت کے صفحے پر قرآنی حوالوں کے ساتھ بنیادی باتیں پڑھیں۔ اس کی AI چیٹ بند ہے۔ ویب سائٹ رہنما صفحات اور موجودہ موضوعات تلاش کرتا ہے؛ ذاتی مسائل کے لیے عالم سے پوچھیں۔"),
     },
     {
       href: "/quran",

@@ -54,7 +54,7 @@ export default function HomeSections() {
     {
       href: "/dawah",
       icon: MessageSquare,
-      title: t("AI study companion", "AI अध्ययन सहायक", "AI مطالعے کا معاون"),
+      title: t("Dawah & learning", "दावत और तालीम", "دعوت اور تعلیم"),
     },
   ];
   const faqs = [
@@ -80,14 +80,14 @@ export default function HomeSections() {
     },
     {
       q: t(
-        "How should I use AI answers?",
-        "AI के जवाब कैसे उपयोग करें?",
-        "AI کے جوابات کیسے استعمال کریں؟",
+        "What can the website guide do?",
+        "वेबसाइट रहनुमा क्या करता है?",
+        "ویب سائٹ رہنما کیا کرتا ہے؟",
       ),
       a: t(
-        "Use AI as a study companion. It may make mistakes: verify the references and ask a qualified scholar for religious rulings.",
-        "AI को अध्ययन सहायक की तरह उपयोग करें। इसमें गलती हो सकती है: संदर्भ जाँचें और धार्मिक फ़ैसलों के लिए योग्य आलिम से पूछें।",
-        "AI کو مطالعے کے معاون کے طور پر استعمال کریں۔ اس میں غلطی ہو سکتی ہے: حوالہ جات کی تصدیق کریں اور شرعی مسائل کے لیے مستند عالم سے پوچھیں۔",
+        "The guide finds surahs, website features and existing topic summaries with references. It does not generate religious advice, wazifas or personal rulings.",
+        "रहनुमा सूरह, वेबसाइट के फ़ीचर और हवालों के साथ मौजूदा मौज़ू ढूँढता है। यह नई दीनी सलाह, वज़ीफ़े या निजी फ़तवे नहीं देता।",
+        "رہنما سورتیں، ویب سائٹ کی سہولتیں اور حوالوں کے ساتھ موجودہ موضوعات تلاش کرتا ہے۔ یہ نئی دینی نصیحت، وظائف یا ذاتی فتوے نہیں دیتا۔",
       ),
     },
   ];

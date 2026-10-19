@@ -70,7 +70,7 @@ export default function Footer() {
         name: t("Spiritual Guide", "रूहानी मार्गदर्शन", "روحانی رہنمائی"),
         href: "/spiritual-guide",
       },
-      { name: t("AI Dawah", "AI दावत", "AI دعوت"), href: "/dawah" },
+      { name: t("Dawah", "दावत", "دعوت"), href: "/dawah" },
       { name: t("Dashboard", "डैशबोर्ड", "ڈیش بورڈ"), href: "/dashboard" },
     ],
   };

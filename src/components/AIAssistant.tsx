@@ -10,10 +10,11 @@ interface Message {
   role: "user" | "model";
   content: string;
   references?: string[];
+  links?: { label: string; href: string }[];
 }
 
 export default function AIAssistant() {
-  const { t } = useUILanguage();
+  const { t, language } = useUILanguage();
   const [error, setError] = useState<"busy" | "unavailable" | null>(null);
   const [retryMessages, setRetryMessages] = useState<Message[] | null>(null);
   const requestRef = useRef<AbortController | null>(null);
@@ -58,6 +59,7 @@ export default function AIAssistant() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             intent: "quran",
+            language,
             messages: conversation.slice(-8),
           }),
           signal: controller.signal,
@@ -78,6 +80,7 @@ export default function AIAssistant() {
           {
             role: "model",
             content: data.text,
+            links: Array.isArray(data.links) ? data.links.filter((link: {href?: unknown; label?: unknown}) => typeof link.href === "string" && /^\/(?!\/)/.test(link.href) && typeof link.label === "string") : [],
             references: Array.isArray(data.references)
               ? data.references.filter(
                   (ref: unknown) =>
@@ -112,13 +115,13 @@ export default function AIAssistant() {
       {/* Floating Button */}
       <button
         id="ai"
-        aria-label="Open AI Quranic Guide"
+        aria-label="Open website guide"
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-4 sm:right-8 h-14 px-5 rounded-full bg-[#d4af37] text-[#101b18] flex items-center gap-2 shadow-2xl hover:scale-105 transition-transform z-[120]"
       >
         <Sparkles className="text-[#101b18]" size={24} />
         <span className="font-bold text-sm">
-          {t("AI Guide", "AI सहायक", "AI معاون")}
+          {t("Website guide", "वेबसाइट रहनुमा", "ویب سائٹ رہنما")}
         </span>
       </button>
 
@@ -130,7 +133,7 @@ export default function AIAssistant() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             role="dialog"
-            aria-label="AI Quranic Guide"
+            aria-label="Website guide"
             className="fixed bottom-24 right-4 sm:right-8 w-[calc(100vw-32px)] md:w-[400px] h-[min(600px,calc(100dvh-120px))] bg-[#101b18] border border-[#d4af37] text-[#faf7ef] rounded-3xl overflow-hidden flex flex-col z-[130] shadow-2xl"
           >
             {/* Header */}
@@ -141,19 +144,19 @@ export default function AIAssistant() {
                 </div>
                 <div>
                   <h3 className="text-[#faf7ef] font-sans text-lg font-bold">
-                    {t("AI Qur’an Guide", "AI क़ुरआन सहायक", "AI قرآنی معاون")}
+                    {t("NurulQuran guide", "नूरुलकुरआन रहनुमा", "نورالقرآن رہنما")}
                   </h3>
                   <p className="text-xs text-[#e8cf78] uppercase tracking-widest">
                     {t(
-                      "Study companion, not a fatwa service",
-                      "अध्ययन सहायक, फ़तवा सेवा नहीं",
-                      "مطالعے کا معاون، فتویٰ کی خدمت نہیں",
+                      "Navigation & existing sources only",
+                      "रहनुमाई और मौजूदा मआख़िज़",
+                      "رہنمائی اور موجودہ ماخذ",
                     )}
                   </p>
                 </div>
               </div>
               <button
-                aria-label="Close AI Quranic Guide"
+                aria-label="Close website guide"
                 onClick={() => setIsOpen(false)}
                 className="text-[#d6e4dd] hover:text-white"
               >
@@ -171,9 +174,9 @@ export default function AIAssistant() {
                 className="rounded-2xl bg-[#20312a] p-4 text-sm leading-relaxed"
               >
                 {t(
-                  "Assalamu Alaikum! Ask about an ayah or Qur’anic theme. Verify references and consult a qualified scholar for personal rulings.",
-                  "अस्सलामु अलैकुम! किसी आयत या क़ुरआन के विषय के बारे में पूछें। संदर्भ जाँचें और व्यक्तिगत धार्मिक मसलों में योग्य आलिम से सलाह लें।",
-                  "السلام علیکم! کسی آیت یا قرآنی موضوع کے بارے میں پوچھیں۔ حوالہ جات کی تصدیق کریں اور ذاتی شرعی مسائل میں مستند عالم سے مشورہ کریں۔",
+                  "Assalamu Alaikum! Find a surah, website feature or existing topic summary with references. Try “Surah 36”, “patience” or “Mushaf”. No generated religious advice.",
+                  "अस्सलामु अलैकुम! सूरह, वेबसाइट का फ़ीचर या हवालों के साथ मौजूदा मौज़ू ढूँढें। “Surah 36”, “सब्र” या “मुशहफ़” लिखें। नई दीनी सलाह नहीं दी जाती।",
+                  "السلام علیکم! سورت، ویب سائٹ کی سہولت یا حوالوں کے ساتھ موجودہ موضوع تلاش کریں۔ “Surah 36”، “صبر” یا “مصحف” لکھیں۔ نئی دینی نصیحت نہیں دی جاتی۔",
                 )}
               </p>
               {error && (
@@ -189,7 +192,7 @@ export default function AIAssistant() {
                           "سروس مصروف ہے۔ کچھ دیر بعد دوبارہ کوشش کریں۔",
                         )
                       : t(
-                          "The AI guide could not connect. You can keep reading the Qur’an and tafsir, or retry your question.",
+                          "The guide could not connect. You can keep reading the Qur’an and tafsir, or retry your search.",
                           "AI सहायक से संपर्क नहीं हुआ। आप क़ुरआन और तफ़सीर पढ़ सकते हैं या सवाल के लिए फिर कोशिश कर सकते हैं।",
                           "AI معاون سے رابطہ نہیں ہوا۔ آپ قرآن اور تفسیر پڑھ سکتے ہیں یا سوال کے لیے دوبارہ کوشش کر سکتے ہیں۔",
                         )}
@@ -235,6 +238,7 @@ export default function AIAssistant() {
                       className={`p-4 rounded-2xl text-base leading-7 whitespace-pre-wrap break-words ${msg.role === "user" ? "bg-[#3b3420] text-[#faf7ef] rounded-tr-none" : "bg-[#20312a] text-[#faf7ef] rounded-tl-none"}`}
                     >
                       {msg.content}
+                      {msg.links && msg.links.length > 0 && <div className="mt-3 flex flex-wrap gap-2">{msg.links.map(link => <a key={link.href} href={link.href} className="inline-flex min-h-11 items-center rounded-lg border border-amber-200 px-3 py-2 text-amber-100 underline">{link.label}</a>)}</div>}
                       {msg.references && msg.references.length > 0 && (
                         <div className="mt-3 border-t border-white/20 pt-3 text-sm">
                           <p>
@@ -298,14 +302,14 @@ export default function AIAssistant() {
                 <input
                   type="text"
                   aria-label={t(
-                    "Ask the AI Qur’an Guide",
-                    "AI क़ुरआन सहायक से पूछें",
-                    "AI قرآنی معاون سے پوچھیں",
+                    "Ask the website guide",
+                    "वेबसाइट रहनुमा से पूछें",
+                    "ویب سائٹ رہنما سے پوچھیں",
                   )}
                   placeholder={t(
-                    "Ask about an ayah or topic…",
-                    "आयत या विषय के बारे में पूछें…",
-                    "آیت یا موضوع کے بارے میں پوچھیں…",
+                    "Find a surah, topic or feature…",
+                    "सूरह, मौज़ू या फ़ीचर ढूँढें…",
+                    "سورت، موضوع یا سہولت تلاش کریں…",
                   )}
                   value={input}
                   onChange={(e) => setInput(e.target.value)}

@@ -11,7 +11,7 @@
     "check": "npm run lint && npm run typecheck && npm run build",
     "test:audio": "node --import tsx tests/audio-player.integration.mjs",
     "test:interface": "node --import tsx tests/website-interface.integration.mjs",
-    "test": "npm run test:audio && npm run test:interface && node --import tsx --test tests/prayer-times.test.cjs && node --import tsx tests/study-answer.test.mjs && node --import tsx tests/tools.integration.mjs"
+    "test": "npm run test:audio && npm run test:interface && node --import tsx --test tests/prayer-times.test.cjs && node --import tsx tests/study-answer.test.mjs && node --import tsx tests/tools.integration.mjs && node --import tsx tests/website-guide.test.mjs"
   },
   "dependencies": {
     "@google/genai": "^2.0.1",
