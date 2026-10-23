@@ -81,6 +81,12 @@ export default function QuranReader({
 }) {
   const { t, language } = useUILanguage();
   const router = useRouter();
+  const [memorise, setMemorise] = useState(false);
+  const [practiceStart, setPracticeStart] = useState(1);
+  const [practiceEnd, setPracticeEnd] = useState(1);
+  const [practiceRepeats, setPracticeRepeats] = useState(3);
+  const [practiceGap, setPracticeGap] = useState(3);
+  const [hidePracticeText, setHidePracticeText] = useState(false);
   const [verses, setVerses] = useState<Verse[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -253,6 +259,7 @@ export default function QuranReader({
     setAudioUrl(null);
     setPlayingVerseId(null);
     setIsAudioPlaying(false);
+    setMemorise(false);
   }, [reciterId]);
 
   // Handle autoplay on mount
@@ -282,6 +289,10 @@ export default function QuranReader({
   const playNextVerse = useCallback(() => {
     if (playingVerseId === null) return;
     const currentIndex = verses.findIndex((v) => v.id === playingVerseId);
+    if (memorise && verses[currentIndex]?.verse_number >= practiceEnd) {
+      playVerse(verses[practiceStart - 1]);
+      return;
+    }
     if (currentIndex !== -1 && currentIndex < verses.length - 1) {
       playVerse(verses[currentIndex + 1]);
     } else if (audioMode === "arabic-urdu") {
@@ -292,17 +303,20 @@ export default function QuranReader({
     } else if (nextSlug) {
       router.push(`/quran/${nextSlug}?autoplay=true`);
     }
-  }, [playingVerseId, verses, playVerse, nextSlug, router, audioMode]);
+  }, [playingVerseId, verses, playVerse, nextSlug, router, audioMode, memorise, practiceStart, practiceEnd]);
 
   const playPrevVerse = useCallback(() => {
     if (playingVerseId === null) return;
     const currentIndex = verses.findIndex((v) => v.id === playingVerseId);
+    if (memorise && verses[currentIndex]?.verse_number <= practiceStart) {
+      playVerse(verses[practiceEnd - 1]); return;
+    }
     if (currentIndex !== -1 && currentIndex > 0) {
       playVerse(verses[currentIndex - 1]);
     } else if (prevSlug) {
       router.push(`/quran/${prevSlug}`);
     }
-  }, [playingVerseId, verses, playVerse, prevSlug, router]);
+  }, [playingVerseId, verses, playVerse, prevSlug, router, memorise, practiceStart, practiceEnd]);
 
   if (loading) {
     return (
@@ -548,6 +562,20 @@ export default function QuranReader({
         </div>
       </div>
 
+      <details className="mb-8 rounded-2xl border border-gold/30 bg-white p-4 text-[#12352a]">
+        <summary className="cursor-pointer py-3 text-xl font-semibold">{t("Memorisation practice", "हिफ़्ज़ की मश्क़", "حفظ کی مشق")}</summary>
+        <p className="my-3">{t("Choose an ayah range, repeat each ayah and pause to recite it yourself. Practice loops within this range until you stop it.", "आयतें चुनें, हर आयत दोहराएँ और वक़्फ़े में ख़ुद पढ़ें। रोकने तक चुनी हुई आयतें चलती रहेंगी।", "آیات منتخب کریں، ہر آیت دہرائیں اور وقفے میں خود پڑھیں۔ روکنے تک منتخب آیات چلتی رہیں گی۔")}</p>
+        <div className="flex flex-wrap gap-3">
+          <label>{t("From ayah", "पहली आयत", "پہلی آیت")}<select className="ms-2 min-h-12 rounded-lg border px-3" value={practiceStart} disabled={memorise} onChange={e => {const n=Number(e.target.value);setPracticeStart(n);setPracticeEnd(end=>Math.max(n,end));}}>{verses.map(v=><option key={v.id} value={v.verse_number}>{v.verse_number}</option>)}</select></label>
+          <label>{t("To ayah", "आख़िरी आयत", "آخری آیت")}<select className="ms-2 min-h-12 rounded-lg border px-3" value={practiceEnd} disabled={memorise} onChange={e=>setPracticeEnd(Number(e.target.value))}>{verses.filter(v=>v.verse_number>=practiceStart).map(v=><option key={v.id} value={v.verse_number}>{v.verse_number}</option>)}</select></label>
+          <label>{t("Repeats per ayah", "हर आयत की दोहराई", "ہر آیت کی دہرائی")}<select className="ms-2 min-h-12 rounded-lg border px-3" value={practiceRepeats} disabled={memorise} onChange={e=>setPracticeRepeats(Number(e.target.value))}>{[1,2,3,5,10].map(n=><option key={n}>{n}</option>)}</select></label>
+          <label>{t("Practice pause (seconds)", "मश्क़ का वक़्फ़ा (सेकंड)", "مشق کا وقفہ (سیکنڈ)")}<select className="ms-2 min-h-12 rounded-lg border px-3" value={practiceGap} disabled={memorise} onChange={e=>setPracticeGap(Number(e.target.value))}>{[0,3,5,10].map(n=><option key={n}>{n}</option>)}</select></label>
+        </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <button className="min-h-12 rounded-xl bg-[#075c3a] px-4 font-semibold text-white" onClick={() => {setMemorise(!memorise); if(memorise) {setAudioUrl(null);setPlayingVerseId(null);setIsAudioPlaying(false);} else {setAudioMode("arabic");playVerse(verses[practiceStart-1]);}}}>{memorise ? t("Stop practice", "मश्क़ रोकें", "مشق روکیں") : t("Start practice", "मश्क़ शुरू करें", "مشق شروع کریں")}</button>
+          <button aria-pressed={hidePracticeText} className="min-h-12 rounded-xl border px-4" onClick={()=>setHidePracticeText(value=>!value)}>{hidePracticeText ? t("Reveal selected ayahs", "चुनी आयतें दिखाएँ", "منتخب آیات دکھائیں") : t("Hide selected ayahs", "चुनी आयतें छुपाएँ", "منتخب آیات چھپائیں")}</button>
+        </div>
+      </details>
       {/* Verses List */}
       <div className="space-y-8">
         {verses.map((verse, index) => (
@@ -575,7 +603,7 @@ export default function QuranReader({
                 </span>
               )}
             </div>
-            <div className="text-right mb-8">
+            <div hidden={hidePracticeText && verse.verse_number >= practiceStart && verse.verse_number <= practiceEnd} className="text-right mb-8">
               <p
                 dir="rtl"
                 lang="ar"
@@ -657,6 +685,9 @@ export default function QuranReader({
 
       {/* One recitation control, available before playback starts. */}
       <AudioPlayer
+        practiceMode={memorise}
+        repetitions={memorise ? practiceRepeats : 1}
+        practicePause={memorise ? practiceGap : 0}
         modeLabel={
           audioMode === "arabic-urdu"
             ? t(
@@ -681,12 +712,13 @@ export default function QuranReader({
         title={surah.englishName}
         subtitle={`${playingVerseId ? `${t("Ayah", "आयत", "آیت")} ${verses.find((verse) => verse.id === playingVerseId)?.verse_number} · ` : ""}${RECITERS.find((reciter) => reciter.id === reciterId)?.name || ""}`}
         onPlayRequest={() => {
-          if (verses[0]) playVerse(verses[0]);
+          if (verses[0]) playVerse(verses[memorise ? practiceStart - 1 : 0]);
         }}
         onNext={playNextVerse}
         onPrev={playPrevVerse}
         onPlayStateChange={setIsAudioPlaying}
         onStop={() => {
+          setMemorise(false);
           setAudioUrl(null);
           setPlayingVerseId(null);
           setIsAudioPlaying(false);

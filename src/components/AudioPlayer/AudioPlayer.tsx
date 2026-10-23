@@ -16,6 +16,9 @@ import {
 import { nextAudioAction, type AudioPhase } from "@/lib/quran-audio";
 
 interface AudioPlayerProps {
+  practiceMode?: boolean;
+  repetitions?: number;
+  practicePause?: number;
   modeLabel?: string;
   translationAudioUrl?: string | null;
   onPhaseChange?: (phase: AudioPhase) => void;
@@ -32,6 +35,9 @@ interface AudioPlayerProps {
 
 export default function AudioPlayer({
   modeLabel,
+  practiceMode = false,
+  repetitions = 1,
+  practicePause = 0,
   audioUrl,
   translationAudioUrl = null,
   onPhaseChange,
@@ -56,6 +62,14 @@ export default function AudioPlayer({
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [rate, setRate] = useState(1);
+  const completed = useRef(0);
+  const practiceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [waiting, setWaiting] = useState(false);
+  useEffect(() => {
+    completed.current = 0;
+    setWaiting(false);
+    return () => { if (practiceTimer.current) clearTimeout(practiceTimer.current); };
+  }, [audioUrl, playbackRequest, repetitions, practicePause]);
   const [repeat, setRepeat] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [error, setError] = useState("");
@@ -153,6 +167,8 @@ export default function AudioPlayer({
   }, [buffering, t]);
 
   const togglePlay = () => {
+    if (practiceTimer.current) { clearTimeout(practiceTimer.current); practiceTimer.current = null; }
+    if (waiting) { setWaiting(false); return; }
     if (!audioUrl) {
       onPlayRequest?.();
       return;
@@ -173,18 +189,18 @@ export default function AudioPlayer({
             type="button"
             onClick={togglePlay}
             aria-label={
-              playing
+              (playing || waiting)
                 ? t("Pause recitation", "तिलावत रोकें", "تلاوت روکیں")
                 : t("Play recitation", "तिलावत चलाएँ", "تلاوت چلائیں")
             }
             className="flex min-h-12 shrink-0 items-center gap-2 rounded-full bg-[#e8b94f] px-4 font-semibold text-[#0b332d] focus-visible:outline-white"
           >
-            {playing ? (
+            {(playing || waiting) ? (
               <Pause size={22} aria-hidden="true" />
             ) : (
               <Play size={22} aria-hidden="true" />
             )}
-            {playing
+            {(playing || waiting)
               ? t("Pause", "रोकें", "وقفہ")
               : t("Play", "चलाएँ", "چلائیں")}
           </button>
@@ -194,6 +210,7 @@ export default function AudioPlayer({
             {modeLabel && (
               <p className="text-xs text-emerald-100">{modeLabel}</p>
             )}
+            {waiting && <p role="status" className="text-sm text-amber-200">{t("Pause to practise · tap Pause to stop", "दोहराने का वक़्त · रोकने के लिए रोकें दबाएँ", "دہرانے کا وقفہ · روکنے کے لیے وقفہ دبائیں")}</p>}
             {audioUrl && (
               <p role="status" className="text-xs text-amber-200">
                 {phase === "urdu"
@@ -418,16 +435,26 @@ export default function AudioPlayer({
           onEnded={() => {
             setPlaying(false);
             onPlayStateChange?.(false);
+            const pairFinished = phaseRef.current === "urdu" || !translationAudioUrl;
+            if (pairFinished) completed.current += 1;
             const action = nextAudioAction(
               phaseRef.current,
               Boolean(translationAudioUrl),
-              repeat,
+              practiceMode ? completed.current < repetitions : repeat,
             );
             if (action === "urdu") {
               changePhase("urdu");
               setSegmentRequest((value) => value + 1);
-            } else if (action === "replay") replayAyah();
-            else onNext?.();
+            } else {
+              const advance = () => {
+                practiceTimer.current = null; setWaiting(false);
+                if (action === "replay") replayAyah(); else onNext?.();
+              };
+              if (practicePause > 0) {
+                setWaiting(true);
+                practiceTimer.current = setTimeout(advance, practicePause * 1000);
+              } else advance();
+            }
           }}
         />
       </div>
