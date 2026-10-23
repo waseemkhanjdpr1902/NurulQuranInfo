@@ -119,6 +119,21 @@ assert.equal(next, 1);
 props = { ...props, audioUrl: null };
 await render();
 assert.equal(src(), null);
+// Practice repeats are finite even when the ordinary repeat toggle was enabled.
+props = {...props, audioUrl:"https://test/practice.mp3", translationAudioUrl:null, practiceMode:true, repetitions:3, practicePause:0};
+await render();
+const before=next;
+await end(); assert.equal(next,before);
+await end(); assert.equal(next,before);
+await end(); assert.equal(next,before+1);
+// Cancelling a practice pause must not trigger a delayed next ayah.
+props={...props,audioUrl:"https://test/gap.mp3",repetitions:1,practicePause:0.05};
+await render();
+await end();
+assert.ok(document.body.textContent.includes("Pause to practise"));
+await click("Pause recitation");
+await act(async()=>new Promise(resolve=>setTimeout(resolve,80)));
+assert.equal(next,before+1);
 await act(async () => root.unmount());
 console.log(
   "PASS: actual player component sequence, pause/resume, replay, repeat pair, changing ayah during Urdu, Arabic-only, errors and stop.",

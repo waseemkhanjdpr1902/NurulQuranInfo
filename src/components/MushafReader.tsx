@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import MushafDownloads from "@/components/MushafDownloads";
 import Image from "next/image";
 import Link from "next/link";
 import { useUILanguage } from "@/components/UILanguageProvider";
+import { MUSHAF_PARAS } from "@/data/mushaf-paras";
 import { MUSHAF_SURAHS } from "@/data/mushaf-surahs";
 import { MUSHAF_PAGE_COUNT, MUSHAF_STORAGE_KEY, validMushafPage } from "@/lib/mushaf";
 
@@ -12,6 +14,9 @@ export default function MushafReader() {
   const [page, setPage] = useState(1);
   const [pageInput, setPageInput] = useState("2");
   const [zoom, setZoom] = useState(100);
+  const [largeControls, setLargeControls] = useState(false);
+  const pendingPosition = useRef<{top: number; left: number} | null>(null);
+  const position = useRef({top: 0, left: 0});
   const [ready, setReady] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -25,7 +30,7 @@ export default function MushafReader() {
   const container = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
   const image = useRef<HTMLImageElement>(null);
-  const button = "min-h-11 rounded-xl border border-[#b9d8ca] bg-white px-3 py-2 text-sm font-semibold text-[#12352a] hover:bg-[#e7f3ee] disabled:opacity-40";
+  const button = (largeControls ? "min-h-14 !text-lg px-5 " : "") + "min-h-11 rounded-xl border border-[#b9d8ca] bg-white px-3 py-2 text-sm font-semibold text-[#12352a] hover:bg-[#e7f3ee] disabled:opacity-40";
 
   useEffect(() => {
     let savedPage: number | null = null;
@@ -33,6 +38,15 @@ export default function MushafReader() {
     try {
       const saved = JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY) || "null");
       savedPage = validMushafPage(saved?.page);
+      setLargeControls(saved?.largeControls === true);
+      const requested = validMushafPage(new URLSearchParams(window.location.search).get("page"));
+      if (savedPage && (!requested || requested === savedPage)) {
+        pendingPosition.current = {
+          top: Number.isFinite(saved?.top) ? Math.max(0, Math.min(1, saved.top)) : 0,
+          left: Number.isFinite(saved?.left) ? Math.max(0, Math.min(1, saved.left)) : 0,
+        };
+        position.current = pendingPosition.current;
+      }
       if (Number.isInteger(saved?.zoom) && saved.zoom >= 100 && saved.zoom <= 300) savedZoom = saved.zoom;
     } catch {}
     const initial = validMushafPage(new URLSearchParams(window.location.search).get("page")) || savedPage || 1;
@@ -43,6 +57,7 @@ export default function MushafReader() {
     const onHistory = () => {
       const requested = validMushafPage(new URLSearchParams(window.location.search).get("page"));
       if (requested) {
+        pendingPosition.current = null; position.current = {top:0, left:0}; viewport.current?.scrollTo({top:0,left:0});
         setPage(requested); setPageInput(String(requested + 1)); setLoaded(false); setFailed(false);
       }
     };
@@ -52,11 +67,11 @@ export default function MushafReader() {
 
   useEffect(() => {
     if (!ready) return;
-    try { localStorage.setItem(MUSHAF_STORAGE_KEY, JSON.stringify({ page, zoom })); } catch {}
+    try { localStorage.setItem(MUSHAF_STORAGE_KEY, JSON.stringify({ page, zoom, largeControls, ...position.current })); } catch {}
     const url = new URL(window.location.href);
     url.searchParams.set("page", String(page));
     window.history.replaceState(window.history.state, "", url);
-  }, [page, zoom, ready]);
+  }, [page, zoom, largeControls, ready]);
 
   useEffect(() => {
     const onFull = () => setFull(document.fullscreenElement === container.current);
@@ -66,12 +81,34 @@ export default function MushafReader() {
 
   useEffect(() => {
     // Cached images may complete before React attaches the load handler.
-    if (image.current?.complete && image.current.naturalWidth > 0) setLoaded(true);
+    if (image.current?.complete && image.current.naturalWidth > 0) pageLoaded();
   }, [page, retry, ready]);
 
+  function pageLoaded() {
+    setLoaded(true);
+    const saved = pendingPosition.current;
+    if (!saved) return;
+    requestAnimationFrame(() => {
+      const el = viewport.current;
+      if (!el) return;
+      el.scrollTop = saved.top * Math.max(0, el.scrollHeight - el.clientHeight);
+      el.scrollLeft = saved.left * Math.max(0, el.scrollWidth - el.clientWidth);
+      pendingPosition.current = null;
+    });
+  }
+  function savePosition() {
+    const el = viewport.current;
+    if (!el || !ready || !loaded || pendingPosition.current) return;
+    position.current = {
+      top: el.scrollTop / Math.max(1, el.scrollHeight - el.clientHeight),
+      left: el.scrollLeft / Math.max(1, el.scrollWidth - el.clientWidth),
+    };
+    try { localStorage.setItem(MUSHAF_STORAGE_KEY, JSON.stringify({page, zoom, largeControls, ...position.current})); } catch {}
+  }
   function go(value: number) {
     const next = validMushafPage(value);
     if (next === null) return;
+    pendingPosition.current = null; position.current = {top:0, left:0};
     setShowIndex(false);
     viewport.current?.scrollTo({ top: 0, left: 0 });
     if (next === page) return;
@@ -97,10 +134,10 @@ export default function MushafReader() {
           <h1 className="text-xl font-bold sm:text-3xl">{t("Indian Mushaf", "भारतीय मुशहफ़", "ہندوستانی مصحف")}</h1>
           <Link href="/quran" className={button}>{t("Translation & listening", "तर्जुमा और तिलावत", "ترجمہ اور تلاوت")}</Link>
         </div>
-        <p className="mt-2 text-sm leading-relaxed">{t("Indian script · Hafs · 610 reading pages · Original page images, without translation or audio. Your page is remembered on this browser.", "भारतीय ख़त • हफ़्स • 610 पन्ने • असली पन्नों की तस्वीरें, बिना तर्जुमे और ऑडियो के। इसी ब्राउज़र पर आपका पन्ना याद रखा जाता है।", "ہندوستانی رسم الخط • حفص • 610 صفحات • اصل صفحات کی تصاویر، بغیر ترجمے اور آڈیو کے۔ اسی براؤزر پر آپ کا صفحہ یاد رکھا جاتا ہے۔")}</p>
+        <p className="mt-2 text-sm leading-relaxed">{t("Indian script · Hafs · 610 reading pages · Original page images, without translation or audio. Your page, zoom and reading position are remembered on this browser.", "भारतीय ख़त • हफ़्स • 610 पन्ने • असली पन्नों की तस्वीरें, बिना तर्जुमे और ऑडियो के। इसी ब्राउज़र पर आपका पन्ना, ज़ूम और पढ़ने की जगह याद रखी जाती है।", "ہندوستانی رسم الخط • حفص • 610 صفحات • اصل صفحات کی تصاویر، بغیر ترجمے اور آڈیو کے۔ اسی براؤزر پر آپ کا صفحہ، زوم اور پڑھنے کی جگہ یاد رکھی جاتی ہے۔")}</p>
         <details className="mt-3 text-sm">
           <summary className="cursor-pointer py-2 font-semibold">{t("Reading help & source", "पढ़ने की रहनुमाई और स्रोत", "پڑھنے کی رہنمائی اور ماخذ")}</summary>
-          <p className="mt-2 leading-relaxed">{t("Use + to enlarge; scroll sideways to see the full line. Fit page resets zoom. You can also pinch to zoom on mobile. Page images need internet to load.", "+ से बड़ा करें; पूरी लाइन देखने के लिए दाएँ-बाएँ स्क्रॉल करें। पूरा पन्ना से ज़ूम रीसेट करें। मोबाइल पर दो उँगलियों से ज़ूम भी कर सकते हैं। पन्ने लोड करने के लिए इंटरनेट चाहिए।", "+ سے بڑا کریں؛ پوری سطر دیکھنے کے لیے دائیں بائیں اسکرول کریں۔ پورا صفحہ سے زوم ری سیٹ کریں۔ موبائل پر دو انگلیوں سے زوم بھی کر سکتے ہیں۔ صفحات لوڈ کرنے کے لیے انٹرنیٹ چاہیے۔")}</p>
+          <p className="mt-2 leading-relaxed">{t("Use + to enlarge; scroll sideways to see the full line. Fit page resets zoom. You can also pinch to zoom on mobile. Unsaved pages need internet. Use Offline reading downloads to save a page or para.", "+ से बड़ा करें; पूरी लाइन देखने के लिए दाएँ-बाएँ स्क्रॉल करें। पूरा पन्ना से ज़ूम रीसेट करें। मोबाइल पर दो उँगलियों से ज़ूम भी कर सकते हैं। जो पन्ने सेव नहीं हैं उनके लिए इंटरनेट चाहिए। ऑफ़लाइन डाउनलोड से पन्ना या पारा सेव करें।", "+ سے بڑا کریں؛ پوری سطر دیکھنے کے لیے دائیں بائیں اسکرول کریں۔ پورا صفحہ سے زوم ری سیٹ کریں۔ موبائل پر دو انگلیوں سے زوم بھی کر سکتے ہیں۔ غیر محفوظ صفحات کے لیے انٹرنیٹ چاہیے۔ آف لائن ڈاؤن لوڈ سے صفحہ یا پارہ محفوظ کریں۔")}</p>
           <p className="mt-2 leading-relaxed">{t("King Fahd Qur’an Printing Complex, Nasta’liq edition. Original scans are displayed unchanged. Reading page 1 is printed page 2; reading page 610 is printed page 611. Tap Surah index, then select a surah to open its starting page. The publisher’s original index is also available below.", "किंग फ़हद कुरआन प्रिंटिंग कॉम्प्लेक्स का नस्तालीक़ मुशहफ़। असली स्कैन बिना बदलाव दिखाए जाते हैं। पहला पढ़ने वाला पन्ना किताब का पन्ना 2 है और आख़िरी 611 है। सूरह फ़ेहरिस्त खोलें और सूरह पर टैप करके उसका पहला पन्ना खोलें। प्रकाशक की असली फ़ेहरिस्त भी नीचे उपलब्ध है।", "کنگ فہد قرآن پرنٹنگ کمپلیکس کا نستعلیق مصحف۔ اصل اسکین بغیر تبدیلی دکھائے جاتے ہیں۔ پہلا پڑھنے والا صفحہ کتاب کا صفحہ 2 اور آخری 611 ہے۔ سورتوں کی فہرست کھولیں اور کسی سورت پر ٹیپ کر کے اس کا پہلا صفحہ کھولیں۔ ناشر کی اصل فہرست بھی نیچے دستیاب ہے۔")}</p>
           <a href="https://qurancomplex.gov.sa/wp-content/uploads/isdarat/hafs/nastaleeq-1.pdf" target="_blank" rel="noreferrer" className="mt-2 inline-block py-2 underline">{t("Publisher’s Mushaf PDF", "प्रकाशक का मुशहफ़ PDF", "ناشر کا مصحف PDF")}</a>
           <Link href="/sources" className="ms-4 inline-block py-2 underline">{t("Source details", "स्रोत की तफ़सील", "ماخذ کی تفصیل")}</Link>
@@ -109,7 +146,15 @@ export default function MushafReader() {
 
       <div className="relative z-20 mt-3 rounded-2xl border border-[#c8ded4] bg-white p-3 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
+          <button type="button" aria-pressed={largeControls} onClick={() => setLargeControls(value => !value)} className={button}>{t("Large controls", "बड़े बटन", "بڑے بٹن")}</button>
           <button type="button" aria-expanded={showIndex} onClick={() => setShowIndex(!showIndex)} className={button}>{t(showIndex ? "Close surah index" : "Surah index", showIndex ? "सूरह फ़ेहरिस्त बंद करें" : "सूरह फ़ेहरिस्त", showIndex ? "سورتوں کی فہرست بند کریں" : "سورتوں کی فہرست")}</button>
+          <label className="flex flex-col gap-1 text-sm font-semibold">
+            {t("Para / Juz", "पारा / जुज़", "پارہ / جز")}
+            <select aria-label={t("Choose para", "पारा चुनें", "پارہ منتخب کریں")} value="" onChange={event => { if (event.target.value) go(Number(event.target.value) - 1); }} className="min-h-14 rounded-xl border border-[#b9d8ca] bg-white px-3 text-lg">
+              <option value="">{t("Choose para", "पारा चुनें", "پارہ منتخب کریں")}</option>
+              {MUSHAF_PARAS.map(para => <option key={para.number} value={para.printedPage}>{t("Para", "पारा", "پارہ")} {para.number} · {t("Page", "पन्ना", "صفحہ")} {para.printedPage}</option>)}
+            </select>
+          </label>
           <form onSubmit={e => {e.preventDefault(); const value = validMushafPage(Number(pageInput) - 1); setInvalid(value === null); if (value !== null) go(value);}} className="flex items-end gap-2">
             <label className="flex flex-col gap-1 text-sm font-semibold">
               {t("Printed page", "किताब का पन्ना", "کتاب کا صفحہ")}
@@ -118,6 +163,7 @@ export default function MushafReader() {
             <button type="submit" className={button}>{t("Go", "खोलें", "کھولیں")}</button>
           </form>
         </div>
+        <p className="mt-2 text-sm">{t("A para may begin partway down its opening page.", "पारा अपने पहले पन्ने के बीच से भी शुरू हो सकता है।", "پارہ اپنے پہلے صفحے کے درمیان سے بھی شروع ہو سکتا ہے۔")}</p>
         {invalid && <p role="alert" className="mt-2 text-sm text-red-700">{t("Enter a printed page from 2 to 611.", "2 से 611 के बीच पन्ना चुनें।", "2 سے 611 کے درمیان صفحہ منتخب کریں۔")}</p>}
         <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2" dir="ltr">
@@ -131,6 +177,7 @@ export default function MushafReader() {
 
       </div>
 
+      <MushafDownloads page={page} />
       {showIndex && <section aria-label={t("Surah index", "सूरह फ़ेहरिस्त", "سورتوں کی فہرست")} className="mt-3 rounded-xl border border-[#c8ded4] bg-white p-3">
         <h2 className="mb-3 text-lg font-bold">{t("Tap a surah to start reading", "पढ़ने के लिए सूरह पर टैप करें", "پڑھنے کے لیے سورت پر ٹیپ کریں")}</h2>
         <label className="block text-sm font-semibold">
@@ -158,11 +205,11 @@ export default function MushafReader() {
         <p aria-live="polite" className="text-sm font-semibold" dir="ltr">{page + 1} / {MUSHAF_PAGE_COUNT + 1}</p>
         <button type="button" onClick={() => go(page + 1)} disabled={page === 610} className={button}>{t("Next page", "अगला पन्ना", "اگلا صفحہ")}</button>
       </nav>
-      <div ref={viewport} tabIndex={0} role="region" aria-label={t("Arabic Mushaf page", "अरबी मुशहफ़ पन्ना", "عربی مصحف صفحہ")} onKeyDown={e => {if(e.key === "ArrowLeft") { e.preventDefault(); go(page + 1); } else if(e.key === "ArrowRight") { e.preventDefault(); go(page - 1); }}} className="relative overflow-auto rounded-xl border border-[#c8ded4] bg-white" style={{scrollMarginTop: full ? 12 : "calc(var(--navigation-height, 144px) + 16px)", maxHeight:full ? "calc(100dvh - 230px)" : "78svh", touchAction:"pan-x pan-y pinch-zoom"}} dir="ltr">
+      <div ref={viewport} onScroll={savePosition} tabIndex={0} role="region" aria-label={t("Arabic Mushaf page", "अरबी मुशहफ़ पन्ना", "عربی مصحف صفحہ")} onKeyDown={e => {if(e.key === "ArrowLeft") { e.preventDefault(); go(page + 1); } else if(e.key === "ArrowRight") { e.preventDefault(); go(page - 1); }}} className="relative overflow-auto rounded-xl border border-[#c8ded4] bg-white" style={{scrollMarginTop: full ? 12 : "calc(var(--navigation-height, 144px) + 16px)", maxHeight:full ? "calc(100dvh - 230px)" : "78svh", touchAction:"pan-x pan-y pinch-zoom"}} dir="ltr">
         {!loaded && !failed && <p role="status" className="p-5 text-center">{t("Loading Mushaf page…", "मुशहफ़ पन्ना लोड हो रहा है…", "مصحف صفحہ لوڈ ہو رہا ہے…")}</p>}
         {failed ? <div role="alert" className="p-8 text-center"><p>{t("Page could not load. Check your internet connection and retry.", "पन्ना लोड नहीं हुआ। इंटरनेट जाँचें और फिर कोशिश करें।", "صفحہ لوڈ نہیں ہوا۔ انٹرنیٹ چیک کریں اور دوبارہ کوشش کریں۔")}</p><button type="button" className={button + " mt-4"} onClick={() => {setFailed(false);setLoaded(false);setRetry(n => n + 1);}}>{t("Retry", "फिर कोशिश करें", "دوبارہ کوشش کریں")}</button></div> :
           ready && <div style={{width:`${zoom}%`, minWidth:"100%"}}>
-            <Image ref={image} key={`${page}-${retry}`} src={`/api/indopak-mushaf/${page}?retry=${retry}`} alt={t(`Indian Hafs Mushaf, printed page ${page + 1}`, `अरबी हफ़्स मुशहफ़, किताब का पन्ना ${page + 1}`, `عربی حفص مصحف، کتاب کا صفحہ ${page + 1}`)} width={1915} height={2736} unoptimized priority onLoad={() => setLoaded(true)} onError={() => {setFailed(true);setLoaded(false);}} style={{display:"block",width:"100%",height:"auto"}} />
+            <Image ref={image} key={`${page}-${retry}`} src={`/api/indopak-mushaf/${page}?retry=${retry}`} alt={t(`Indian Hafs Mushaf, printed page ${page + 1}`, `अरबी हफ़्स मुशहफ़, किताब का पन्ना ${page + 1}`, `عربی حفص مصحف، کتاب کا صفحہ ${page + 1}`)} width={1915} height={2736} unoptimized priority onLoad={pageLoaded} onError={() => {setFailed(true);setLoaded(false);}} style={{display:"block",width:"100%",height:"auto"}} />
           </div>}
       </div>
       <div className="mt-3 flex justify-between gap-2">

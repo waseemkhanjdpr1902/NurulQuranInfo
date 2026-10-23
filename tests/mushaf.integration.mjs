@@ -94,11 +94,35 @@ assert.ok(document.querySelector('div[style*="position: fixed"]'));
 await act(async()=>find("Exit full screen").click());
 assert.ok(find("Full screen"));
 assert.ok(new URL(document.querySelector("img").getAttribute("src"),window.location.href).pathname.startsWith("/api/indopak-mushaf/610"));
+// Save a meaningful position within a zoomed scan, then restore it on remount.
+await act(async()=>find("Large controls").click());
+const region = document.querySelector('div[role="region"]');
+Object.defineProperties(region, {scrollHeight:{value:2000,configurable:true},clientHeight:{value:500,configurable:true},scrollWidth:{value:1000,configurable:true},clientWidth:{value:500,configurable:true}});
+await act(async()=>document.querySelector('div[role="region"] img').dispatchEvent(new dom.window.Event("load")));
+region.scrollTop=750; region.scrollLeft=125;
+await act(async()=>region.dispatchEvent(new dom.window.Event("scroll")));
+assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).top,0.5);
+assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).left,0.25);
 await act(async()=>root.unmount());
 window.history.replaceState(null,"","/mushaf");
 root=createRoot(document.getElementById("root"));
 await render();
 assert.ok(new URL(document.querySelector("img").getAttribute("src"),window.location.href).pathname.startsWith("/api/indopak-mushaf/610"),"saved page restored");
 assert.equal(document.querySelector('[aria-label="Zoom level"]').textContent,"125%");
+assert.equal(find("Large controls").getAttribute("aria-pressed"),"true");
+const restored = document.querySelector('div[role="region"]');
+Object.defineProperties(restored, {scrollHeight:{value:3000},clientHeight:{value:600},scrollWidth:{value:1500},clientWidth:{value:500}});
+await act(async()=>document.querySelector('div[role="region"] img').dispatchEvent(new dom.window.Event("load")));
+assert.equal(restored.scrollTop,1200,"relative position survives a viewport size change");
+assert.equal(restored.scrollLeft,250);
+const { MUSHAF_PARAS } = unwrap(await import("../src/data/mushaf-paras.ts"));
+assert.equal(MUSHAF_PARAS.length,30);
+for (const para of MUSHAF_PARAS) {
+  await act(async()=>{
+    const select=document.querySelector('[aria-label="Choose para"]');
+    select.value=String(para.printedPage);select.dispatchEvent(new dom.window.Event("change",{bubbles:true}));
+  });
+  assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,String(para.printedPage));
+}
 await act(async()=>root.unmount());
 console.log("Mushaf: page limits, unchanged image proxy, network recovery, navigation, zoom and saved position passed.");
