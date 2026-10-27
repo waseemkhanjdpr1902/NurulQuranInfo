@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import {
   Inter,
   Playfair_Display,
@@ -81,6 +82,13 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} ${amiri.variable} ${hindi.variable}`}
       >
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-1MRBMDGBLC" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">{`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag(\x27js\x27, new Date());
+          gtag(\x27config\x27, \x27G-1MRBMDGBLC\x27);
+        `}</Script>
         <UILanguageProvider>
           <PrayerTimesProvider>
             {children}
