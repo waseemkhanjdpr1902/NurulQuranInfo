@@ -2,6 +2,9 @@ import assert from "node:assert/strict";
 import { JSDOM } from "jsdom";
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
+require("next/font/google").Noto_Nastaliq_Urdu = () => ({ className: "test-font" });
 
 const dom = new JSDOM('<div id="root"></div>', { url: "https://example.test", pretendToBeVisual: true });
 Object.assign(globalThis, { window: dom.window, document: dom.window.document, HTMLElement: dom.window.HTMLElement, Element: dom.window.Element, SVGElement: dom.window.SVGElement, CustomEvent: dom.window.CustomEvent, React, IS_REACT_ACT_ENVIRONMENT: true, getComputedStyle: dom.window.getComputedStyle });
