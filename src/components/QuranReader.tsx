@@ -290,7 +290,10 @@ export default function QuranReader({
     if (playingVerseId === null) return;
     const currentIndex = verses.findIndex((v) => v.id === playingVerseId);
     if (memorise && verses[currentIndex]?.verse_number >= practiceEnd) {
-      playVerse(verses[practiceStart - 1]);
+      setMemorise(false);
+      setAudioUrl(null);
+      setPlayingVerseId(null);
+      setIsAudioPlaying(false);
       return;
     }
     if (currentIndex !== -1 && currentIndex < verses.length - 1) {
@@ -564,7 +567,7 @@ export default function QuranReader({
 
       <details className="mb-8 rounded-2xl border border-gold/30 bg-white p-4 text-[#12352a]">
         <summary className="cursor-pointer py-3 text-xl font-semibold">{t("Memorisation practice", "हिफ़्ज़ की मश्क़", "حفظ کی مشق")}</summary>
-        <p className="my-3">{t("Choose an ayah range, repeat each ayah and pause to recite it yourself. Practice loops within this range until you stop it.", "आयतें चुनें, हर आयत दोहराएँ और वक़्फ़े में ख़ुद पढ़ें। रोकने तक चुनी हुई आयतें चलती रहेंगी।", "آیات منتخب کریں، ہر آیت دہرائیں اور وقفے میں خود پڑھیں۔ روکنے تک منتخب آیات چلتی رہیں گی۔")}</p>
+        <p className="my-3">{t("Choose an ayah range, repeat each ayah and pause to recite it yourself. Practice stops after the selected range is completed.", "आयतें चुनें, हर आयत दोहराएँ और वक़्फ़े में ख़ुद पढ़ें। चुनी हुई आयतें पूरी होने पर मश्क़ रुक जाएगी।", "آیات منتخب کریں، ہر آیت دہرائیں اور وقفے میں خود پڑھیں۔ منتخب آیات مکمل ہونے پر مشق رک جائے گی۔")}</p>
         <div className="flex flex-wrap gap-3">
           <label>{t("From ayah", "पहली आयत", "پہلی آیت")}<select className="ms-2 min-h-12 rounded-lg border px-3" value={practiceStart} disabled={memorise} onChange={e => {const n=Number(e.target.value);setPracticeStart(n);setPracticeEnd(end=>Math.max(n,end));}}>{verses.map(v=><option key={v.id} value={v.verse_number}>{v.verse_number}</option>)}</select></label>
           <label>{t("To ayah", "आख़िरी आयत", "آخری آیت")}<select className="ms-2 min-h-12 rounded-lg border px-3" value={practiceEnd} disabled={memorise} onChange={e=>setPracticeEnd(Number(e.target.value))}>{verses.filter(v=>v.verse_number>=practiceStart).map(v=><option key={v.id} value={v.verse_number}>{v.verse_number}</option>)}</select></label>
