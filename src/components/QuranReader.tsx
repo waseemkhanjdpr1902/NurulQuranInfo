@@ -306,7 +306,7 @@ export default function QuranReader({
     } else if (nextSlug) {
       router.push(`/quran/${nextSlug}?autoplay=true`);
     }
-  }, [playingVerseId, verses, playVerse, nextSlug, router, audioMode, memorise, practiceStart, practiceEnd]);
+  }, [playingVerseId, verses, playVerse, nextSlug, router, audioMode, memorise, practiceEnd]);
 
   const playPrevVerse = useCallback(() => {
     if (playingVerseId === null) return;
