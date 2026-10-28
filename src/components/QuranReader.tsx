@@ -106,8 +106,10 @@ export default function QuranReader({
   const [playbackRequest, setPlaybackRequest] = useState(0);
 
   const [translationLanguage, setTranslationLanguage] = useState<
-    "en" | "hi" | "ur"
+    "en" | "hi" | "ur" | "ur-kanzuliman"
   >("en");
+  const urduEdition = translationLanguage === "ur-kanzuliman" ? "ur.kanzuliman" : "ur.jalandhry";
+  const isUrduTranslation = translationLanguage === "ur" || translationLanguage === "ur-kanzuliman";
   const [arabicSize, setArabicSize] = useState<"normal" | "large">("normal");
   const [relaxedArabic, setRelaxedArabic] = useState(true);
   const { data: journey, update: updateJourney } = useQuranJourney();
@@ -118,7 +120,7 @@ export default function QuranReader({
     const savedTafsir = localStorage.getItem("nurulquran.tafsir-language");
     if (isTafsirLanguage(savedTafsir)) setTafsirLanguage(savedTafsir);
     else if (isTafsirLanguage(saved)) setTafsirLanguage(saved);
-    if (saved === "en" || saved === "hi" || saved === "ur")
+    if (saved === "en" || saved === "hi" || saved === "ur" || saved === "ur-kanzuliman")
       setTranslationLanguage(saved);
     if (localStorage.getItem("nurulquran.arabic-size") === "large")
       setArabicSize("large");
@@ -190,7 +192,7 @@ export default function QuranReader({
       setLoadError(false);
       try {
         const res = await fetchWithTimeout(
-          `https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,hi.hindi,ur.jalandhry,${reciterId}`,
+          `https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,hi.hindi,${urduEdition},${reciterId}`,
           { signal: controller.signal },
         );
         if (!res.ok) throw new Error("Failed to fetch verses");
@@ -206,6 +208,8 @@ export default function QuranReader({
           )
         )
           throw new Error("Incomplete ayah data");
+        if (data.data[3].edition?.identifier !== urduEdition || data.data[3].edition?.language !== "ur")
+          throw new Error("Unexpected Urdu translation edition");
         const arabicVerses = data.data[0].ayahs;
         const englishVerses = data.data[1].ayahs;
         const hindiVerses = data.data[2].ayahs;
@@ -253,7 +257,7 @@ export default function QuranReader({
 
     fetchVerses();
     return () => controller.abort();
-  }, [surah.number, surah.numberOfAyahs, reciterId, retryCount]);
+  }, [surah.number, surah.numberOfAyahs, reciterId, retryCount, urduEdition]);
 
   useEffect(() => {
     setAudioUrl(null);
@@ -385,7 +389,7 @@ export default function QuranReader({
                       setPlayingVerseId(null);
                       setIsAudioPlaying(false);
                       setAudioPhase("arabic");
-                      if (mode === "arabic-urdu") {
+                      if (mode === "arabic-urdu" && !isUrduTranslation) {
                         setTranslationLanguage("ur");
                         localStorage.setItem(
                           "nurulquran.translation-language",
@@ -422,9 +426,9 @@ export default function QuranReader({
               </a>
               .{" "}
               {t(
-                "Written Urdu: Fateh Muhammad Jalandhry.",
-                "लिखित उर्दू: Fateh Muhammad Jalandhry.",
-                "تحریری اردو: Fateh Muhammad Jalandhry.",
+                "Written translation is selected separately. This audio is not Kanzul Iman narration.",
+                "लिखित तर्जुमा अलग से चुनें। यह ऑडियो कंज़ुल ईमान का पाठ नहीं है।",
+                "تحریری ترجمہ الگ منتخب کریں۔ یہ آڈیو کنزالایمان کی روایت نہیں ہے۔",
               )}
             </p>
           </div>
@@ -433,7 +437,8 @@ export default function QuranReader({
             <select
               value={translationLanguage}
               onChange={(event) => {
-                const value = event.target.value as "en" | "hi" | "ur";
+                const value = event.target.value as "en" | "hi" | "ur" | "ur-kanzuliman";
+                if ((value === "ur-kanzuliman") !== (translationLanguage === "ur-kanzuliman")) setLoading(true);
                 setTranslationLanguage(value);
                 localStorage.setItem("nurulquran.translation-language", value);
               }}
@@ -441,6 +446,7 @@ export default function QuranReader({
             >
               <option value="en">English — Saheeh International</option>
               <option value="hi">हिंदी — Farooq Khan & Nadwi</option>
+              <option value="ur-kanzuliman">اردو — کنزالایمان — امام احمد رضا خان (Kanzul Iman)</option>
               <option value="ur">اردو — Fateh Muhammad Jalandhry</option>
             </select>
           </label>
@@ -619,18 +625,20 @@ export default function QuranReader({
               <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-gold/60">
                 {translationLanguage === "hi"
                   ? "हिंदी — Farooq Khan & Nadwi"
-                  : translationLanguage === "ur"
+                  : translationLanguage === "ur-kanzuliman"
+                    ? "اردو — کنزالایمان — امام احمد رضا خان"
+                    : translationLanguage === "ur"
                     ? "اردو — Fateh Muhammad Jalandhry"
                     : "English — Saheeh International"}
               </p>
               <p
-                dir={translationLanguage === "ur" ? "rtl" : "ltr"}
-                lang={translationLanguage}
+                dir={isUrduTranslation ? "rtl" : "ltr"}
+                lang={isUrduTranslation ? "ur" : translationLanguage}
                 className="text-parchment/70 text-lg md:text-xl leading-relaxed font-light"
               >
                 {translationLanguage === "hi"
                   ? verse.hindi_translation
-                  : translationLanguage === "ur"
+                  : isUrduTranslation
                     ? verse.urdu_translation
                     : verse.translation}
               </p>

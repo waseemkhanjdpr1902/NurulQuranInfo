@@ -17,7 +17,13 @@ Object.defineProperty(dom.window.HTMLMediaElement.prototype, "paused", { get() {
 dom.window.HTMLMediaElement.prototype.play = function () { this._paused = false; this.dispatchEvent(new dom.window.Event("play")); this.dispatchEvent(new dom.window.Event("playing")); return Promise.resolve(); };
 dom.window.HTMLMediaElement.prototype.pause = function () { this._paused = true; this.dispatchEvent(new dom.window.Event("pause")); };
 const verses = [1, 2].map(n => ({ number: n, numberInSurah: n, text: "verse", audio: `https://test/${n}.mp3` }));
-globalThis.fetch = async () => Response.json({ data: Array.from({length: 5}, () => ({ayahs: verses})) });
+globalThis.fetch = async url => {
+  const kanzul = String(url).includes("ur.kanzuliman");
+  return Response.json({ data: Array.from({length: 5}, (_, i) => ({
+    edition: { identifier: i === 3 ? (kanzul ? "ur.kanzuliman" : "ur.jalandhry") : "test", language: i === 3 ? "ur" : "en" },
+    ayahs: verses.map(v => ({...v, text: i === 3 ? (kanzul ? "kanzul-test" : "jalandhry-test") : v.text}))
+  })) });
+};
 const { AppRouterContext } = await import("next/dist/shared/lib/app-router-context.shared-runtime.js");
 const router = { push() {}, replace() {}, back() {}, forward() {}, prefetch() {}, refresh() {} };
 const unwrap = mod => mod.default && typeof mod.default === "object" ? mod.default : mod;
@@ -32,6 +38,14 @@ const button = text => [...document.querySelectorAll("button")].find(x => x.text
 const start = async () => act(async () => button("Start practice").click());
 const end = async () => act(async () => document.querySelector("audio").dispatchEvent(new dom.window.Event("ended")));
 const src = () => document.querySelector("audio").getAttribute("src");
+await setSelect("Written translation", "ur-kanzuliman");
+assert.equal(localStorage.getItem("nurulquran.translation-language"), "ur-kanzuliman");
+assert.ok(document.querySelector('p[lang="ur"][dir="rtl"]').textContent.includes("kanzul-test"));
+assert.ok(document.body.textContent.includes("کنزالایمان"));
+await act(async () => button("Arabic + Urdu translation").click());
+assert.equal(labelSelect("Written translation").value, "ur-kanzuliman", "audio mode preserves selected Kanzul Iman");
+await setSelect("Written translation", "ur");
+assert.ok(document.querySelector('p[lang="ur"]').textContent.includes("jalandhry-test"));
 await setSelect("Practice pause", 0);
 await start();
 assert.match(src(), /1.mp3/);
