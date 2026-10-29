@@ -208,6 +208,12 @@ export default function Navbar() {
                   ? t("Open Dashboard", "डैशबोर्ड खोलें", "ڈیش بورڈ کھولیں")
                   : t("Sign In", "लॉगिन", "لاگ اِن")}
               </Link>
+              <nav aria-label={t("Privacy and support", "निजता और सहायता", "رازداری اور مدد")} className="grid grid-cols-2 gap-3 border-t border-gold/20 pt-4 text-sm font-semibold">
+                <Link onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl border border-gold/20 p-3 underline" href="/privacy">{t("Privacy & choices", "निजता और विकल्प", "رازداری اور اختیارات")}</Link>
+                <Link onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl border border-gold/20 p-3 underline" href="/delete-account">{t("Delete account / data", "खाता / डेटा हटाएँ", "اکاؤنٹ / ڈیٹا حذف کریں")}</Link>
+                <Link onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl border border-gold/20 p-3 underline" href="/contact">{t("Contact support", "सहायता से संपर्क", "سپورٹ سے رابطہ")}</Link>
+                <Link onClick={() => setIsMobileMenuOpen(false)} className="rounded-xl border border-gold/20 p-3 underline" href="/terms">{t("Terms of use", "इस्तेमाल की शर्तें", "استعمال کی شرائط")}</Link>
+              </nav>
             </div>
           </motion.div>
         )}

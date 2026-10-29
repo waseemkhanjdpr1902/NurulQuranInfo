@@ -170,6 +170,11 @@ export default function LoginPage() {
           <p className="mt-10 text-center text-parchment/40 text-sm">
             Don&apos;t have an account? <Link href="/signup" className="text-gold font-bold hover:underline">Sign up for free</Link>
           </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-x-4 gap-y-2 text-sm">
+            <Link href="/privacy" className="py-2 text-gold underline">Privacy policy</Link>
+            <Link href="/terms" className="py-2 text-gold underline">Terms of use</Link>
+            <Link href="/delete-account" className="py-2 text-gold underline">Delete account or data</Link>
+          </div>
         </motion.div>
       </div>
 

@@ -31,6 +31,7 @@ export default function JourneyDashboard({ compact = false }: { compact?: boolea
 
   return (
     <section className={`rounded-[32px] border border-gold/20 bg-white/75 shadow-xl shadow-gold/5 ${compact ? "p-5 sm:p-7" : "p-6 sm:p-10"}`} aria-labelledby={compact ? "journey-home-title" : "journey-title"}>
+      {!compact && <nav aria-label="Account privacy" className="mb-5 flex flex-wrap gap-x-5 gap-y-2 text-sm"><Link href="/privacy#privacy-choices" className="py-2 font-semibold text-gold underline">Privacy choices</Link><Link href="/delete-account" className="py-2 font-semibold text-gold underline">Delete account or data</Link></nav>}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.28em] text-gold">Private learning progress</p>
