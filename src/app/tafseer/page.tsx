@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Search, BookOpen, Sparkles, MessageSquare, Info, ArrowRight } from "lucide-react";
+import { BookOpen, Sparkles, Info, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
@@ -45,14 +45,14 @@ export default function TafseerPage() {
               viewport={{ once: true }}
             >
               <Sparkles className="text-gold mx-auto mb-8" size={64} />
-              <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">AI study <span className="text-gold">Reflections</span></h2>
+              <h2 className="text-4xl md:text-6xl font-display text-parchment mb-8">Read published <span className="text-gold">Tafseer</span></h2>
               <p className="text-parchment/50 mb-12 max-w-2xl mx-auto text-lg leading-relaxed">
-                Our advanced AI assistant can provide instant linguistic analysis, 
-                historical context, and spiritual reflections for any verse you choose.
+                Choose a surah, select your tafsir language, then open tafsir below an ayah.
+                Published tafsir is kept separate from translation and general reflection prompts.
               </p>
               <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-                <Link href="/dawah" className="w-full md:w-auto px-12 py-5 gold-gradient text-ink font-bold rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-3">
-                  AI study companion <MessageSquare size={20} />
+                <Link href="/sources" className="w-full md:w-auto px-12 py-5 gold-gradient text-ink font-bold rounded-full hover:scale-105 transition-transform flex items-center justify-center gap-3">
+                  Sources and methodology <BookOpen size={20} />
                 </Link>
                 <Link href="/quran" className="w-full md:w-auto px-12 py-5 glass text-parchment font-bold rounded-full hover:bg-gold/5 transition-colors flex items-center justify-center gap-3">
                   Browse Classical Tafseer <BookOpen size={20} />
@@ -76,7 +76,7 @@ export default function TafseerPage() {
                 title: "Tafsir Ibn Kathir", 
                 author: "Imam Ibn Kathir", 
                 period: "14th Century", 
-                desc: "The most widely accepted explanation based on Hadith. Available for every verse in our Digital Quran study mode.",
+                desc: "English abridged edition. Open a surah and select English in the tafsir language menu.",
                 href: "/quran"
               },
               { title: "Tafsir Ibn Kathir — Urdu", author: "Hafiz Ibn Kathir", period: "Urdu edition", desc: "Select Urdu in the tafsir language menu beside the ayahs.", href: "/quran" },

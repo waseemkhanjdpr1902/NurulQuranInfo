@@ -9,7 +9,7 @@
     "lint": "next lint --max-warnings=0",
     "typecheck": "tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm run build",
-    "test:mushaf": "node --import tsx tests/mushaf.integration.mjs && node tests/mushaf-offline.test.mjs",
+    "test:mushaf": "node --import tsx tests/mushaf.integration.mjs && node tests/mushaf-offline.test.mjs && node --import tsx tests/downloads.integration.mjs",
     "test:audio": "node --import tsx tests/audio-player.integration.mjs && node --import tsx tests/practice-range.integration.mjs",
     "test:interface": "node --import tsx tests/website-interface.integration.mjs",
     "test": "npm run test:mushaf && npm run test:audio && npm run test:interface && node --import tsx --test tests/prayer-times.test.cjs && node --import tsx tests/study-answer.test.mjs && node --import tsx tests/tools.integration.mjs && node --import tsx tests/website-guide.test.mjs"

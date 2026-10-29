@@ -17,7 +17,7 @@ export default function Footer() {
         href: "/hadith",
       },
       {
-        name: t("Tafseer & AI", "तफ़सीर और AI", "تفسیر اور AI"),
+        name: t("Tafseer", "तफ़सीर", "تفسیر"),
         href: "/tafseer",
       },
       {
