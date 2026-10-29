@@ -53,6 +53,10 @@ export default function AudioPlayer({
   const { t } = useUILanguage();
   const [buffering, setBuffering] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => { audio?.pause(); };
+  }, []);
   const [phase, setPhase] = useState<AudioPhase>("arabic");
   const phaseRef = useRef<AudioPhase>("arabic");
   const [segmentRequest, setSegmentRequest] = useState(0);

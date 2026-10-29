@@ -58,6 +58,7 @@ import {
   urduAudioUrl,
   type AudioPhase,
 } from "@/lib/quran-audio";
+import KanzulImanPlayer from "@/components/KanzulImanPlayer";
 import AudioPlayer from "@/components/AudioPlayer/AudioPlayer";
 import { useQuranJourney } from "@/hooks/useQuranJourney";
 import { surahSlug } from "@/lib/quran-journey";
@@ -96,7 +97,7 @@ export default function QuranReader({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [tafsirLanguage, setTafsirLanguage] = useState<TafsirLanguage>("en");
 
-  const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu">(
+  const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu" | "kanzuliman">(
     "arabic-urdu",
   );
   const [audioPhase, setAudioPhase] = useState<AudioPhase>("arabic");
@@ -175,6 +176,7 @@ export default function QuranReader({
 
   const playVerse = useCallback(
     (verse: Verse) => {
+      setAudioMode(mode => mode === "kanzuliman" ? "arabic-urdu" : mode);
       recordMeaningfulRead(verse);
       const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
       const audio = verse.audio_url || fallbackAudio;
@@ -377,7 +379,7 @@ export default function QuranReader({
                 )}
                 className="grid grid-cols-1 gap-2 sm:grid-cols-2"
               >
-                {(["arabic-urdu", "arabic"] as const).map((mode) => (
+                {(["arabic-urdu", "arabic", "kanzuliman"] as const).map((mode) => (
                   <button
                     key={mode}
                     type="button"
@@ -385,6 +387,12 @@ export default function QuranReader({
                     disabled={mode === "arabic-urdu" && !urduAudioAvailable}
                     onClick={() => {
                       setAudioMode(mode);
+                      setMemorise(false);
+                      if (mode === "kanzuliman") {
+                        if (translationLanguage !== "ur-kanzuliman") setLoading(true);
+                        setTranslationLanguage("ur-kanzuliman");
+                        localStorage.setItem("nurulquran.translation-language", "ur-kanzuliman");
+                      }
                       setAudioUrl(null);
                       setPlayingVerseId(null);
                       setIsAudioPlaying(false);
@@ -405,13 +413,14 @@ export default function QuranReader({
                           "अरबी + उर्दू तर्जुमा",
                           "عربی + اردو ترجمہ",
                         )
+                      : mode === "kanzuliman" ? t("Kanzul Iman · full surah", "कंज़ुल ईमान · पूरी सूरह", "کنزالایمان · مکمل سورت")
                       : t("Arabic only", "केवल अरबी", "صرف عربی")}
                   </button>
                 ))}
               </div>
             </div>
             <p className="mt-2 text-xs text-parchment/70">
-              {t(
+              {audioMode === "kanzuliman" ? t("Kanzul Iman plays as a full-surah recording from Siraatal Mustaqim. It has no ayah timing or highlighting. Arabic reciter selection applies to the other listening modes. Internet is required.", "कंज़ुल ईमान की पूरी सूरह Siraatal Mustaqim से चलती है। इसमें आयत के मुताबिक़ हाइलाइट नहीं होता। क़ारी का चुनाव दूसरे तरीक़ों के लिए है। इंटरनेट ज़रूरी है।", "کنزالایمان کی مکمل سورت Siraatal Mustaqim سے چلتی ہے۔ اس میں آیت کے مطابق ہائی لائٹ نہیں ہوتا۔ قاری کا انتخاب دوسرے طریقوں کے لیے ہے۔ انٹرنیٹ ضروری ہے۔") : <>{t(
                 "Arabic plays first, followed by Urdu for each ayah. Audio requires internet. Urdu narration: Shamshad Ali Khan, via",
                 "हर आयत की अरबी तिलावत के बाद उर्दू तर्जुमा चलता है। ऑडियो के लिए इंटरनेट ज़रूरी है। उर्दू आवाज़: Shamshad Ali Khan, स्रोत",
                 "ہر آیت کی عربی تلاوت کے بعد اردو ترجمہ چلتا ہے۔ آڈیو کے لیے انٹرنیٹ ضروری ہے۔ اردو آواز: Shamshad Ali Khan، ماخذ",
@@ -429,7 +438,7 @@ export default function QuranReader({
                 "Written translation is selected separately. This audio is not Kanzul Iman narration.",
                 "लिखित तर्जुमा अलग से चुनें। यह ऑडियो कंज़ुल ईमान का पाठ नहीं है।",
                 "تحریری ترجمہ الگ منتخب کریں۔ یہ آڈیو کنزالایمان کی روایت نہیں ہے۔",
-              )}
+              )}</>}
             </p>
           </div>
           <label className="flex min-w-0 flex-col gap-2 text-[10px] font-bold uppercase tracking-wider text-parchment/70 sm:flex-row sm:items-center">
@@ -695,7 +704,7 @@ export default function QuranReader({
       </div>
 
       {/* One recitation control, available before playback starts. */}
-      <AudioPlayer
+      {audioMode === "kanzuliman" ? <KanzulImanPlayer key={surah.number} surahNumber={surah.number} surahName={surah.englishName} /> : <AudioPlayer
         practiceMode={memorise}
         repetitions={memorise ? practiceRepeats : 1}
         practicePause={memorise ? practiceGap : 0}
@@ -734,7 +743,7 @@ export default function QuranReader({
           setPlayingVerseId(null);
           setIsAudioPlaying(false);
         }}
-      />
+      />}
     </div>
   );
 }
