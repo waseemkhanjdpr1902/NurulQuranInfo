@@ -61,7 +61,7 @@ export default function SourcesPage() {
         <div className="mt-8 flex flex-wrap gap-4">
           <Link href="/quran" className="py-2 font-bold text-gold underline">Read the Qur’an</Link>
           <Link href="/quran-topics" className="py-2 font-bold text-gold underline">Explore topics</Link>
-          <a href="mailto:contact@nurulquran.info?subject=NurulQuran%20source%20or%20display%20issue" className="py-2 font-bold text-gold underline">Report an issue</a>
+          <a href="mailto:support@nurulquran.info?subject=NurulQuran%20source%20or%20display%20issue" className="py-2 font-bold text-gold underline">Report an issue</a>
         </div>
       </article>
       <Footer />

@@ -83,6 +83,12 @@ export default function Footer() {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[300px] bg-gold/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto relative z-10">
+        <nav aria-label={t("Privacy and support", "निजता और सहायता", "رازداری اور مدد")} className="mb-10 flex flex-wrap gap-x-6 gap-y-2 rounded-2xl border border-gold/20 bg-white p-5 text-sm font-semibold text-parchment">
+          <Link href="/privacy" className="py-2 underline underline-offset-4">{t("Privacy policy & choices", "निजता नीति और विकल्प", "رازداری کی پالیسی اور اختیارات")}</Link>
+          <Link href="/delete-account" className="py-2 underline underline-offset-4">{t("Delete account or data", "खाता या डेटा हटाएँ", "اکاؤنٹ یا ڈیٹا حذف کریں")}</Link>
+          <Link href="/contact" className="py-2 underline underline-offset-4">{t("Contact support", "सहायता से संपर्क", "سپورٹ سے رابطہ")}</Link>
+          <Link href="/terms" className="py-2 underline underline-offset-4">{t("Terms of use", "इस्तेमाल की शर्तें", "استعمال کی شرائط")}</Link>
+        </nav>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-16 mb-16 md:mb-20">
           <div className="lg:col-span-2">
             <Link href="/" className="flex items-center gap-4 mb-8 group">

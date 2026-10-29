@@ -198,6 +198,8 @@ export default function SignupPage() {
               </p>
             </>
           )}
+          <p className="mt-6 text-sm leading-7 text-parchment/80">Before creating an account, please read the <Link href="/privacy" className="text-gold underline">privacy policy</Link> and <Link href="/terms" className="text-gold underline">terms of use</Link>. Account creation is optional for reading and listening.</p>
+          <Link href="/delete-account" className="mt-3 inline-block min-h-11 py-2 text-sm text-gold underline">Request account or data deletion</Link>
         </motion.div>
       </div>
 

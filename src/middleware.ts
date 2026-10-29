@@ -2,6 +2,10 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Public policy/deletion resources must remain readable when authentication is unavailable.
+  if (["/privacy", "/delete-account", "/contact", "/terms"].includes(request.nextUrl.pathname)) {
+    return NextResponse.next();
+  }
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
