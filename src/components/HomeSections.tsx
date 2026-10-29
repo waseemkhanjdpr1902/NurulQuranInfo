@@ -73,9 +73,9 @@ export default function HomeSections() {
         "کیا انٹرنیٹ ضروری ہے؟",
       ),
       a: t(
-        "Internet is needed to load surahs, translations and tafsir, and to play audio or use AI. Text already loaded can remain on screen, but full offline access is not guaranteed.",
-        "सूरहें, अनुवाद और तफ़सीर लोड करने, ऑडियो चलाने और AI के लिए इंटरनेट चाहिए। पहले लोड हुआ पाठ स्क्रीन पर रह सकता है, लेकिन पूरी ऑफ़लाइन सुविधा की गारंटी नहीं है।",
-        "سورتیں، ترجمے اور تفسیر لوڈ کرنے، آڈیو چلانے اور AI کے لیے انٹرنیٹ چاہیے۔ پہلے لوڈ ہوا متن اسکرین پر رہ سکتا ہے، لیکن مکمل آف لائن سہولت کی ضمانت نہیں ہے۔",
+        "In Indian Mushaf, open Offline reading downloads to save a page, surah or para on this device. Check that your pages are available offline before disconnecting. Audio, translations and tafsir still need internet. Browser storage may be cleared by your device.",
+        "इंडियन मुशहफ़ में ऑफ़लाइन डाउनलोड खोलकर पन्ना, सूरह या पारा इस डिवाइस पर सेव करें। इंटरनेट बंद करने से पहले सेव पन्नों की स्थिति जाँचें। ऑडियो, तर्जुमा और तफ़सीर के लिए इंटरनेट चाहिए। डिवाइस सेव पन्ने हटा सकता है।",
+        "انڈین مصحف میں آف لائن ڈاؤن لوڈ کھول کر صفحہ، سورت یا پارہ اس ڈیوائس پر محفوظ کریں۔ انٹرنیٹ بند کرنے سے پہلے محفوظ صفحات کی حالت دیکھیں۔ آڈیو، ترجمہ اور تفسیر کے لیے انٹرنیٹ چاہیے۔ ڈیوائس محفوظ صفحات حذف کر سکتی ہے۔",
       ),
     },
     {
@@ -123,9 +123,9 @@ export default function HomeSections() {
         </h2>
         <p className="mt-3 max-w-3xl leading-relaxed text-parchment/80">
           {t(
-            "Qur’anic Arabic, published translations, tafsir and AI guidance are labelled separately. Read about our sources and methodology.",
-            "क़ुरआन की अरबी, प्रकाशित अनुवाद, तफ़सीर और AI मार्गदर्शन की अलग पहचान दी गई है। हमारे स्रोत और कार्यप्रणाली जानें।",
-            "قرآنی عربی، شائع شدہ ترجمے، تفسیر اور AI رہنمائی کی الگ شناخت دی گئی ہے۔ ہمارے ماخذ اور طریقۂ کار جانیں۔",
+            "Qur’anic Arabic, published translations and tafsir are labelled separately. The website guide helps with navigation and existing references. Read about our sources and methodology.",
+            "क़ुरआन की अरबी, प्रकाशित अनुवाद और तफ़सीर की अलग पहचान दी गई है। वेबसाइट रहनुमा नेविगेशन और मौजूदा हवालों में मदद करता है। हमारे स्रोत और कार्यप्रणाली जानें।",
+            "قرآنی عربی، شائع شدہ ترجمے اور تفسیر کی الگ شناخت دی گئی ہے۔ ویب سائٹ رہنما نیویگیشن اور موجودہ حوالوں میں مدد کرتا ہے۔ ہمارے ماخذ اور طریقۂ کار جانیں۔",
           )}
         </p>
         <Link
