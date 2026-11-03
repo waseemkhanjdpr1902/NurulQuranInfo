@@ -58,6 +58,7 @@ import {
   urduAudioUrl,
   type AudioPhase,
 } from "@/lib/quran-audio";
+import CPSUrduPlayer from "@/components/CPSUrduPlayer";
 import KanzulImanPlayer from "@/components/KanzulImanPlayer";
 import AudioPlayer from "@/components/AudioPlayer/AudioPlayer";
 import { useQuranJourney } from "@/hooks/useQuranJourney";
@@ -97,7 +98,7 @@ export default function QuranReader({
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [tafsirLanguage, setTafsirLanguage] = useState<TafsirLanguage>("en");
 
-  const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu" | "kanzuliman">(
+  const [audioMode, setAudioMode] = useState<"arabic" | "arabic-urdu" | "kanzuliman" | "cps-urdu">(
     "arabic-urdu",
   );
   const [audioPhase, setAudioPhase] = useState<AudioPhase>("arabic");
@@ -176,7 +177,7 @@ export default function QuranReader({
 
   const playVerse = useCallback(
     (verse: Verse) => {
-      setAudioMode(mode => mode === "kanzuliman" ? "arabic-urdu" : mode);
+      setAudioMode(mode => (mode === "kanzuliman" || mode === "cps-urdu") ? "arabic-urdu" : mode);
       recordMeaningfulRead(verse);
       const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
       const audio = verse.audio_url || fallbackAudio;
@@ -379,7 +380,7 @@ export default function QuranReader({
                 )}
                 className="grid grid-cols-1 gap-2 sm:grid-cols-2"
               >
-                {(["arabic-urdu", "arabic", "kanzuliman"] as const).map((mode) => (
+                {(["arabic-urdu", "arabic", "kanzuliman", "cps-urdu"] as const).map((mode) => (
                   <button
                     key={mode}
                     type="button"
@@ -413,6 +414,7 @@ export default function QuranReader({
                           "अरबी + उर्दू तर्जुमा",
                           "عربی + اردو ترجمہ",
                         )
+                      : mode === "cps-urdu" ? t("CPS Urdu · Khalid Syed", "CPS उर्दू · ख़ालिद सैयद", "سی پی ایس اردو · خالد سید")
                       : mode === "kanzuliman" ? t("Kanzul Iman · full surah", "कंज़ुल ईमान · पूरी सूरह", "کنزالایمان · مکمل سورت")
                       : t("Arabic only", "केवल अरबी", "صرف عربی")}
                   </button>
@@ -420,7 +422,7 @@ export default function QuranReader({
               </div>
             </div>
             <p className="mt-2 text-xs text-parchment/70">
-              {audioMode === "kanzuliman" ? t("Kanzul Iman plays as a full-surah recording from Siraatal Mustaqim. It has no ayah timing or highlighting. Arabic reciter selection applies to the other listening modes. Internet is required.", "कंज़ुल ईमान की पूरी सूरह Siraatal Mustaqim से चलती है। इसमें आयत के मुताबिक़ हाइलाइट नहीं होता। क़ारी का चुनाव दूसरे तरीक़ों के लिए है। इंटरनेट ज़रूरी है।", "کنزالایمان کی مکمل سورت Siraatal Mustaqim سے چلتی ہے۔ اس میں آیت کے مطابق ہائی لائٹ نہیں ہوتا۔ قاری کا انتخاب دوسرے طریقوں کے لیے ہے۔ انٹرنیٹ ضروری ہے۔") : <>{t(
+              {audioMode === "cps-urdu" ? t("Urdu translation by Maulana Wahiduddin Khan, voiced by Khalid Syed. Open the publisher-linked playlist below and select your surah. No ayah synchronisation. Written translation is selected separately.", "मौलाना वहीदुद्दीन ख़ान का उर्दू तर्जुमा, ख़ालिद सैयद की आवाज़ में। नीचे प्लेलिस्ट खोलकर सूरह चुनें। आयत सिंक नहीं है। लिखित तर्जुमा अलग चुनें।", "مولانا وحید الدین خان کا اردو ترجمہ، خالد سید کی آواز میں۔ نیچے پلے لسٹ کھول کر سورت منتخب کریں۔ آیت کے مطابق ہم آہنگی نہیں ہے۔ تحریری ترجمہ الگ منتخب کریں۔") : audioMode === "kanzuliman" ? t("Kanzul Iman plays as a full-surah recording from Siraatal Mustaqim. It has no ayah timing or highlighting. Arabic reciter selection applies to the other listening modes. Internet is required.", "कंज़ुल ईमान की पूरी सूरह Siraatal Mustaqim से चलती है। इसमें आयत के मुताबिक़ हाइलाइट नहीं होता। क़ारी का चुनाव दूसरे तरीक़ों के लिए है। इंटरनेट ज़रूरी है।", "کنزالایمان کی مکمل سورت Siraatal Mustaqim سے چلتی ہے۔ اس میں آیت کے مطابق ہائی لائٹ نہیں ہوتا۔ قاری کا انتخاب دوسرے طریقوں کے لیے ہے۔ انٹرنیٹ ضروری ہے۔") : <>{t(
                 "Arabic plays first, followed by Urdu for each ayah. Audio requires internet. Urdu narration: Shamshad Ali Khan, via",
                 "हर आयत की अरबी तिलावत के बाद उर्दू तर्जुमा चलता है। ऑडियो के लिए इंटरनेट ज़रूरी है। उर्दू आवाज़: Shamshad Ali Khan, स्रोत",
                 "ہر آیت کی عربی تلاوت کے بعد اردو ترجمہ چلتا ہے۔ آڈیو کے لیے انٹرنیٹ ضروری ہے۔ اردو آواز: Shamshad Ali Khan، ماخذ",
@@ -704,7 +706,7 @@ export default function QuranReader({
       </div>
 
       {/* One recitation control, available before playback starts. */}
-      {audioMode === "kanzuliman" ? <KanzulImanPlayer key={surah.number} surahNumber={surah.number} surahName={surah.englishName} /> : <AudioPlayer
+      {audioMode === "cps-urdu" ? <CPSUrduPlayer key={surah.number} /> : audioMode === "kanzuliman" ? <KanzulImanPlayer key={surah.number} surahNumber={surah.number} surahName={surah.englishName} /> : <AudioPlayer
         practiceMode={memorise}
         repetitions={memorise ? practiceRepeats : 1}
         practicePause={memorise ? practiceGap : 0}
