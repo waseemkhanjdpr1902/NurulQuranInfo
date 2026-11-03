@@ -422,7 +422,7 @@ export default function QuranReader({
               </div>
             </div>
             <p className="mt-2 text-xs text-parchment/70">
-              {audioMode === "cps-urdu" ? t("Urdu translation by Maulana Wahiduddin Khan, voiced by Khalid Syed. Open the publisher-linked playlist below and select your surah. No ayah synchronisation. Written translation is selected separately.", "मौलाना वहीदुद्दीन ख़ान का उर्दू तर्जुमा, ख़ालिद सैयद की आवाज़ में। नीचे प्लेलिस्ट खोलकर सूरह चुनें। आयत सिंक नहीं है। लिखित तर्जुमा अलग चुनें।", "مولانا وحید الدین خان کا اردو ترجمہ، خالد سید کی آواز میں۔ نیچے پلے لسٹ کھول کر سورت منتخب کریں۔ آیت کے مطابق ہم آہنگی نہیں ہے۔ تحریری ترجمہ الگ منتخب کریں۔") : audioMode === "kanzuliman" ? t("Kanzul Iman plays as a full-surah recording from Siraatal Mustaqim. It has no ayah timing or highlighting. Arabic reciter selection applies to the other listening modes. Internet is required.", "कंज़ुल ईमान की पूरी सूरह Siraatal Mustaqim से चलती है। इसमें आयत के मुताबिक़ हाइलाइट नहीं होता। क़ारी का चुनाव दूसरे तरीक़ों के लिए है। इंटरनेट ज़रूरी है।", "کنزالایمان کی مکمل سورت Siraatal Mustaqim سے چلتی ہے۔ اس میں آیت کے مطابق ہائی لائٹ نہیں ہوتا۔ قاری کا انتخاب دوسرے طریقوں کے لیے ہے۔ انٹرنیٹ ضروری ہے۔") : <>{t(
+              {audioMode === "cps-urdu" ? t("Urdu translation by Maulana Wahiduddin Khan, voiced by Khalid Syed. Play the current surah directly in the audio player below. No ayah synchronisation. Written translation is selected separately.", "मौलाना वहीदुद्दीन ख़ान का उर्दू तर्जुमा, ख़ालिद सैयद की आवाज़ में। नीचे ऑडियो प्लेयर में यही सूरह सुनें। आयत सिंक नहीं है। लिखित तर्जुमा अलग चुनें।", "مولانا وحید الدین خان کا اردو ترجمہ، خالد سید کی آواز میں۔ نیچے آڈیو پلیئر میں یہی سورت سنیں۔ آیت کے مطابق ہم آہنگی نہیں ہے۔ تحریری ترجمہ الگ منتخب کریں۔") : audioMode === "kanzuliman" ? t("Kanzul Iman plays as a full-surah recording from Siraatal Mustaqim. It has no ayah timing or highlighting. Arabic reciter selection applies to the other listening modes. Internet is required.", "कंज़ुल ईमान की पूरी सूरह Siraatal Mustaqim से चलती है। इसमें आयत के मुताबिक़ हाइलाइट नहीं होता। क़ारी का चुनाव दूसरे तरीक़ों के लिए है। इंटरनेट ज़रूरी है।", "کنزالایمان کی مکمل سورت Siraatal Mustaqim سے چلتی ہے۔ اس میں آیت کے مطابق ہائی لائٹ نہیں ہوتا۔ قاری کا انتخاب دوسرے طریقوں کے لیے ہے۔ انٹرنیٹ ضروری ہے۔") : <>{t(
                 "Arabic plays first, followed by Urdu for each ayah. Audio requires internet. Urdu narration: Shamshad Ali Khan, via",
                 "हर आयत की अरबी तिलावत के बाद उर्दू तर्जुमा चलता है। ऑडियो के लिए इंटरनेट ज़रूरी है। उर्दू आवाज़: Shamshad Ali Khan, स्रोत",
                 "ہر آیت کی عربی تلاوت کے بعد اردو ترجمہ چلتا ہے۔ آڈیو کے لیے انٹرنیٹ ضروری ہے۔ اردو آواز: Shamshad Ali Khan، ماخذ",
@@ -706,7 +706,7 @@ export default function QuranReader({
       </div>
 
       {/* One recitation control, available before playback starts. */}
-      {audioMode === "cps-urdu" ? <CPSUrduPlayer key={surah.number} /> : audioMode === "kanzuliman" ? <KanzulImanPlayer key={surah.number} surahNumber={surah.number} surahName={surah.englishName} /> : <AudioPlayer
+      {audioMode === "cps-urdu" ? <CPSUrduPlayer key={surah.number} surahNumber={surah.number} surahName={surah.englishName} /> : audioMode === "kanzuliman" ? <KanzulImanPlayer key={surah.number} surahNumber={surah.number} surahName={surah.englishName} /> : <AudioPlayer
         practiceMode={memorise}
         repetitions={memorise ? practiceRepeats : 1}
         practicePause={memorise ? practiceGap : 0}
