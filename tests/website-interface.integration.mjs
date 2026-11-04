@@ -70,7 +70,7 @@ assert.equal(document.documentElement.lang, "hi");
 assert.ok(document.body.textContent.includes("क़ुरआन पढ़ें"));
 assert.ok(document.body.textContent.includes("नमाज़ का समय"));
 assert.ok(document.querySelector('section a[href="/mushaf"]'));
-assert.ok(document.querySelector('section a[href="/quran"]'));
+assert.ok(document.querySelector('section a[href="/listen"]'));
 await act(async () => {
   const select = document.querySelector("select");
   select.value = "ur";
@@ -181,5 +181,5 @@ const pending = fetchWithTimeout(
 controller.abort();
 await assert.rejects(pending, (e) => e.name === "AbortError");
 console.log(
-  "PASS: Hindi deep link, homepage Quran and Mushaf actions, Urdu direction, language persistence, failed-surah retry, six-surah preview, AI error/retry without duplicate questions, request timeout and caller cancellation.",
+  "PASS: Hindi deep link, homepage reading and listening actions, Urdu direction, language persistence, failed-surah retry, six-surah preview, AI error/retry without duplicate questions, request timeout and caller cancellation.",
 );

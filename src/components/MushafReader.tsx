@@ -132,7 +132,7 @@ export default function MushafReader() {
       <div hidden={full} className="rounded-2xl border border-[#c8ded4] bg-white p-4 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="text-xl font-bold sm:text-3xl">{t("Indian Mushaf", "भारतीय मुशहफ़", "ہندوستانی مصحف")}</h1>
-          <Link href="/quran" className={button}>{t("Translation & listening", "तर्जुमा और तिलावत", "ترجمہ اور تلاوت")}</Link>
+          <Link href="/quran" className={button}>{t("Read with translation", "तर्जुमा के साथ पढ़ें", "ترجمے کے ساتھ پڑھیں")}</Link>
         </div>
         <p className="mt-2 text-sm leading-relaxed">{t("Indian script · Hafs · 610 reading pages · Original page images, without translation or audio. Your page, zoom and reading position are remembered on this browser.", "भारतीय ख़त • हफ़्स • 610 पन्ने • असली पन्नों की तस्वीरें, बिना तर्जुमे और ऑडियो के। इसी ब्राउज़र पर आपका पन्ना, ज़ूम और पढ़ने की जगह याद रखी जाती है।", "ہندوستانی رسم الخط • حفص • 610 صفحات • اصل صفحات کی تصاویر، بغیر ترجمے اور آڈیو کے۔ اسی براؤزر پر آپ کا صفحہ، زوم اور پڑھنے کی جگہ یاد رکھی جاتی ہے۔")}</p>
         <details className="mt-3 text-sm">

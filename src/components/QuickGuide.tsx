@@ -12,9 +12,9 @@ export default function QuickGuide() {
       text: t("Open Dawah for introductory reading with Quran references. Its AI chat is disabled. The website guide helps you find pages and existing topic summaries; personal rulings belong with a qualified scholar.", "दावत पेज पर कुरआन के हवालों के साथ बुनियादी बातें पढ़ें। इसका AI चैट बंद है। वेबसाइट रहनुमा पेज और मौजूदा मौज़ू ढूँढता है; निजी मसलों के लिए आलिम से पूछें।", "دعوت کے صفحے پر قرآنی حوالوں کے ساتھ بنیادی باتیں پڑھیں۔ اس کی AI چیٹ بند ہے۔ ویب سائٹ رہنما صفحات اور موجودہ موضوعات تلاش کرتا ہے؛ ذاتی مسائل کے لیے عالم سے پوچھیں۔"),
     },
     {
-      href: "/quran",
+      href: "/listen",
       title: t("Read and listen to Quran", "कुरआन पढ़ें और सुनें", "قرآن پڑھیں اور سنیں"),
-      text: t("Open Quran from the menu and choose a surah. Tap Play in the bottom player, or Listen from here below an ayah. Use the player to pause or move between ayahs.", "मेनू में कुरआन खोलें और सूरह चुनें। नीचे प्लेयर में Play या किसी आयत के नीचे यहाँ से सुनें दबाएँ। प्लेयर से रोकें या अगली-पिछली आयत पर जाएँ।", "مینو سے قرآن کھولیں اور سورت منتخب کریں۔ نیچے پلیئر میں Play یا آیت کے نیچے یہاں سے سنیں دبائیں۔ پلیئر سے روکیں یا اگلی پچھلی آیت پر جائیں۔"),
+      text: t("Choose Read Quran in the menu for the Indian Mushaf. Choose Listen to select a surah and voice, then tap Play.", "भारतीय मुशहफ़ के लिए मेनू में क़ुरआन पढ़ें चुनें। सुनने के लिए सूरह और आवाज़ चुनकर प्ले दबाएँ।", "ہندوستانی مصحف کے لیے مینو میں قرآن پڑھیں منتخب کریں۔ سننے کے لیے سورت اور آواز منتخب کر کے پلے دبائیں۔"),
     },
     {
       href: "/quran",
@@ -47,7 +47,6 @@ export default function QuickGuide() {
       <div className="rounded-3xl border border-gold/30 bg-white p-5 text-[#12352a] shadow-sm sm:p-8">
         <h2 id="quick-guide-title" className="text-2xl font-bold sm:text-3xl">{t("New here? Quick navigation guide", "पहली बार आए हैं? आसान रहनुमाई", "پہلی بار آئے ہیں؟ آسان رہنمائی")}</h2>
         <p className="mt-3 text-base leading-relaxed">{t("On mobile, tap the menu button at the top right. On a computer, use the links across the top. Choose English, Hindi or Urdu from the language selector next to the menu.", "मोबाइल पर ऊपर दाईं तरफ मेनू बटन दबाएँ। कंप्यूटर पर ऊपर दिए लिंक इस्तेमाल करें। मेनू के पास भाषा विकल्प से English, हिंदी या उर्दू चुनें।", "موبائل پر اوپر دائیں طرف مینو بٹن دبائیں۔ کمپیوٹر پر اوپر دیے گئے لنکس استعمال کریں۔ مینو کے پاس زبان کے انتخاب سے انگریزی، ہندی یا اردو منتخب کریں۔")}</p>
-        <Link href="/mushaf" className="mt-4 inline-flex min-h-11 items-center rounded-xl bg-[#075c3a] px-4 py-2 font-semibold text-white">{t("Arabic only: Indian Mushaf with zoom", "सिर्फ अरबी: भारतीय मुशहफ़ और ज़ूम", "صرف عربی: ہندوستانی مصحف اور زوم")}</Link>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {items.map((item, index) => (
             <details open key={item.title} className="rounded-2xl border border-[#c8ded4] bg-[#f4f9f6] p-4">

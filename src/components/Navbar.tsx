@@ -62,7 +62,7 @@ export default function Navbar() {
   const navLinks = [
     { name: t("Dawah", "दावत", "دعوت"), href: "/dawah", icon: Sparkles },
     { name: t("Quick guide", "रहनुमाई", "رہنمائی"), href: "/#quick-guide", icon: Compass },
-    { name: t("Read Quran", "क़ुरआन पढ़ें", "قرآن پڑھیں"), href: "/quran", icon: Book },
+    { name: t("Read Quran", "क़ुरआन पढ़ें", "قرآن پڑھیں"), href: "/mushaf", icon: Book },
     { name: t("Listen", "सुनें", "سنیں"), href: "/listen", icon: Book },
     {
       name: t("Topics", "विषय", "موضوعات"),

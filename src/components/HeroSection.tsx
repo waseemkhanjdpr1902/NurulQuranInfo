@@ -14,17 +14,11 @@ export default function HeroSection() {
     {
       href: "/mushaf",
       icon: BookOpen,
-      label: t("Indian Mushaf", "भारतीय मुशहफ़", "ہندوستانی مصحف"),
-      help: t("Read like a printed Quran · Zoom", "कुरआन के पन्ने पढ़ें • ज़ूम करें", "مطبوعہ قرآن کی طرح پڑھیں • زوم"),
-    },
-    {
-      href: "/quran",
-      icon: BookOpen,
       label: t("Read Qur’an", "क़ुरआन पढ़ें", "قرآن پڑھیں"),
       help: t(
-        "Choose a surah and translation",
-        "सूरह और अनुवाद चुनें",
-        "سورت اور ترجمہ منتخب کریں",
+        "Read the Indian Mushaf page by page",
+        "भारतीय मुशहफ़ पन्ना दर पन्ना पढ़ें",
+        "ہندوستانی مصحف صفحہ بہ صفحہ پڑھیں",
       ),
     },
     {
