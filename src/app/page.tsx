@@ -6,7 +6,6 @@ import Footer from "@/components/Footer";
 import HeroSection from "@/components/HeroSection";
 import SurahGrid from "@/components/SurahGrid";
 import AIAssistant from "@/components/AIAssistant";
-import RemembrancePopup from "@/components/RemembrancePopup";
 import MuraqbaSection from "@/components/MuraqbaSection";
 import HomeSections from "@/components/HomeSections";
 import JourneyDashboard from "@/components/JourneyDashboard";
@@ -34,7 +33,6 @@ export default function Home() {
       </div>
 
       <AIAssistant />
-      <RemembrancePopup />
       <Footer />
     </main>
   );

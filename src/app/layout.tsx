@@ -10,6 +10,7 @@ import { PrayerTimesProvider } from "@/components/PrayerTimesProvider";
 import { UILanguageProvider } from "@/components/UILanguageProvider";
 import AppInstall from "@/components/AppInstall";
 import PrivacyAnalytics from "@/components/PrivacyAnalytics";
+import RemembrancePopup from "@/components/RemembrancePopup";
 
 const hindi = Noto_Sans_Devanagari({
   subsets: ["devanagari"],
@@ -85,6 +86,7 @@ export default function RootLayout({
         <UILanguageProvider>
           <PrayerTimesProvider>
             {children}
+            <RemembrancePopup />
             <AppInstall />
             <PrivacyAnalytics />
           </PrayerTimesProvider>
