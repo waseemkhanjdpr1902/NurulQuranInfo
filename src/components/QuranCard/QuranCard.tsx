@@ -7,6 +7,7 @@ import { Play, ArrowRight, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 interface QuranCardProps {
+  listening?: boolean;
   surah: {
     number: number;
     name: string;
@@ -18,17 +19,17 @@ interface QuranCardProps {
   };
 }
 
-export default function QuranCard({ surah }: QuranCardProps) {
+export default function QuranCard({ surah, listening = false }: QuranCardProps) {
   const { t } = useUILanguage();
   const router = useRouter();
 
   const handleCardClick = () => {
-    router.push(`/quran/${surah.slug}`);
+    router.push(`${listening ? "/listen" : "/quran"}/${surah.slug}`);
   };
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    router.push(`/quran/${surah.slug}?autoplay=true`);
+    router.push(`/listen/${surah.slug}?autoplay=true`);
   };
 
   return (
@@ -59,7 +60,7 @@ export default function QuranCard({ surah }: QuranCardProps) {
       <div className="mb-6">
         <h3 className="text-xl font-display text-parchment group-hover:text-gold transition-colors">
           <Link
-            href={`/quran/${surah.slug}`}
+            href={`${listening ? "/listen" : "/quran"}/${surah.slug}`}
             onClick={(e) => e.stopPropagation()}
           >
             {surah.englishName}

@@ -8,7 +8,7 @@ import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { Search, Loader2 } from "lucide-react";
 import QuranCard from "@/components/QuranCard/QuranCard";
 
-export default function SurahGrid({ limit }: { limit?: number }) {
+export default function SurahGrid({ limit, listening = false }: { limit?: number; listening?: boolean }) {
   const { t, rtl } = useUILanguage();
   const [error, setError] = useState(false);
   const [retry, setRetry] = useState(0);
@@ -149,7 +149,7 @@ export default function SurahGrid({ limit }: { limit?: number }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {visible.map((surah) => (
-          <QuranCard key={surah.number} surah={surah} />
+          <QuranCard key={surah.number} surah={surah} listening={listening} />
         ))}
       </div>
 

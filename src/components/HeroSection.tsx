@@ -28,11 +28,11 @@ export default function HeroSection() {
       ),
     },
     {
-      href: "/quran/al-faatiha?autoplay=true",
+      href: "/listen",
       icon: Headphones,
       label: t("Listen", "तिलावत सुनें", "تلاوت سنیں"),
       help: t(
-        "Arabic + Urdu, or Arabic only",
+        "Choose a surah and listening voice",
         "अरबी + उर्दू, या केवल अरबी",
         "عربی + اردو، یا صرف عربی",
       ),

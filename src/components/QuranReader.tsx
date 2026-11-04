@@ -75,11 +75,13 @@ export default function QuranReader({
   nextSlug,
   prevSlug,
   autoplay = false,
+  listening = false,
 }: {
   surah: Surah;
   nextSlug?: string | null;
   prevSlug?: string | null;
   autoplay?: boolean;
+  listening?: boolean;
 }) {
   const { t, language } = useUILanguage();
   const router = useRouter();
@@ -311,9 +313,9 @@ export default function QuranReader({
       setPlayingVerseId(null);
       setIsAudioPlaying(false);
     } else if (nextSlug) {
-      router.push(`/quran/${nextSlug}?autoplay=true`);
+      router.push(`${listening ? "/listen" : "/quran"}/${nextSlug}?autoplay=true`);
     }
-  }, [playingVerseId, verses, playVerse, nextSlug, router, audioMode, memorise, practiceEnd]);
+  }, [playingVerseId, verses, playVerse, nextSlug, router, audioMode, memorise, practiceEnd, listening]);
 
   const playPrevVerse = useCallback(() => {
     if (playingVerseId === null) return;
@@ -324,9 +326,9 @@ export default function QuranReader({
     if (currentIndex !== -1 && currentIndex > 0) {
       playVerse(verses[currentIndex - 1]);
     } else if (prevSlug) {
-      router.push(`/quran/${prevSlug}`);
+      router.push(`${listening ? "/listen" : "/quran"}/${prevSlug}`);
     }
-  }, [playingVerseId, verses, playVerse, prevSlug, router, memorise, practiceStart, practiceEnd]);
+  }, [playingVerseId, verses, playVerse, prevSlug, router, memorise, practiceStart, practiceEnd, listening]);
 
   if (loading) {
     return (
@@ -364,7 +366,12 @@ export default function QuranReader({
 
   return (
     <div className="mx-auto max-w-5xl">
-      <SurahNavigation prevSlug={prevSlug} nextSlug={nextSlug} />
+      <div className="mb-6 rounded-2xl border border-gold/25 bg-white p-5 text-[#12352a]">
+        <h2 className="text-xl font-bold">{listening ? t("Listen to this surah", "यह सूरह सुनें", "یہ سورت سنیں") : t("Read this surah", "यह सूरह पढ़ें", "یہ سورت پڑھیں")}</h2>
+        <p className="mt-2">{listening ? t("1. Choose a listening option below. 2. Tap Play in the audio player. More settings are available below.", "1. नीचे सुनने का तरीका चुनें। 2. ऑडियो प्लेयर में प्ले दबाएँ।", "۱۔ نیچے سننے کا طریقہ منتخب کریں۔ ۲۔ آڈیو پلیئر میں پلے دبائیں۔") : t("Choose your written translation and read the ayahs below.", "लिखित तर्जुमा चुनें और नीचे आयतें पढ़ें।", "تحریری ترجمہ منتخب کریں اور نیچے آیات پڑھیں۔")}</p>
+        <Link className="mt-3 inline-block font-semibold underline" href={`${listening ? "/quran" : "/listen"}/${currentSlug}`}>{listening ? t("Switch to reading", "पढ़ने के लिए जाएँ", "پڑھنے کے لیے جائیں") : t("Switch to listening", "सुनने के लिए जाएँ", "سننے کے لیے جائیں")}</Link>
+      </div>
+      <SurahNavigation prevSlug={prevSlug} nextSlug={nextSlug} listening={listening} />
       {/* Reciter Selection & Info */}
       <div className="mb-10 flex flex-col items-stretch justify-between gap-5 rounded-3xl border-2 border-gold/25 bg-[#e7f3ee] p-4 shadow-[0_16px_40px_rgba(13,102,88,0.12)] sm:p-6 md:mb-12 lg:flex-row lg:items-center">
         <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center">
@@ -422,7 +429,7 @@ export default function QuranReader({
               </div>
             </div>
             <p className="mt-2 text-xs text-parchment/70">
-              {audioMode === "cps-urdu" ? t("Urdu translation by Maulana Wahiduddin Khan, voiced by Khalid Syed. Play the current surah directly in the audio player below. No ayah synchronisation. Written translation is selected separately.", "मौलाना वहीदुद्दीन ख़ान का उर्दू तर्जुमा, ख़ालिद सैयद की आवाज़ में। नीचे ऑडियो प्लेयर में यही सूरह सुनें। आयत सिंक नहीं है। लिखित तर्जुमा अलग चुनें।", "مولانا وحید الدین خان کا اردو ترجمہ، خالد سید کی آواز میں۔ نیچے آڈیو پلیئر میں یہی سورت سنیں۔ آیت کے مطابق ہم آہنگی نہیں ہے۔ تحریری ترجمہ الگ منتخب کریں۔") : audioMode === "kanzuliman" ? t("Kanzul Iman plays as a full-surah recording from Siraatal Mustaqim. It has no ayah timing or highlighting. Arabic reciter selection applies to the other listening modes. Internet is required.", "कंज़ुल ईमान की पूरी सूरह Siraatal Mustaqim से चलती है। इसमें आयत के मुताबिक़ हाइलाइट नहीं होता। क़ारी का चुनाव दूसरे तरीक़ों के लिए है। इंटरनेट ज़रूरी है।", "کنزالایمان کی مکمل سورت Siraatal Mustaqim سے چلتی ہے۔ اس میں آیت کے مطابق ہائی لائٹ نہیں ہوتا۔ قاری کا انتخاب دوسرے طریقوں کے لیے ہے۔ انٹرنیٹ ضروری ہے۔") : <>{t(
+              {audioMode === "arabic" ? t("Arabic recitation only. Choose a reciter in the additional settings. Internet is required.", "केवल अरबी तिलावत। अन्य सेटिंग्स में क़ारी चुनें। इंटरनेट ज़रूरी है।", "صرف عربی تلاوت۔ دیگر ترتیبات میں قاری منتخب کریں۔ انٹرنیٹ ضروری ہے۔") : audioMode === "cps-urdu" ? t("Urdu translation by Maulana Wahiduddin Khan, voiced by Khalid Syed. Play the current surah directly in the audio player below. No ayah synchronisation. Written translation is selected separately.", "मौलाना वहीदुद्दीन ख़ान का उर्दू तर्जुमा, ख़ालिद सैयद की आवाज़ में। नीचे ऑडियो प्लेयर में यही सूरह सुनें। आयत सिंक नहीं है। लिखित तर्जुमा अलग चुनें।", "مولانا وحید الدین خان کا اردو ترجمہ، خالد سید کی آواز میں۔ نیچے آڈیو پلیئر میں یہی سورت سنیں۔ آیت کے مطابق ہم آہنگی نہیں ہے۔ تحریری ترجمہ الگ منتخب کریں۔") : audioMode === "kanzuliman" ? t("Kanzul Iman plays as a full-surah recording from Siraatal Mustaqim. It has no ayah timing or highlighting. Arabic reciter selection applies to the other listening modes. Internet is required.", "कंज़ुल ईमान की पूरी सूरह Siraatal Mustaqim से चलती है। इसमें आयत के मुताबिक़ हाइलाइट नहीं होता। क़ारी का चुनाव दूसरे तरीक़ों के लिए है। इंटरनेट ज़रूरी है।", "کنزالایمان کی مکمل سورت Siraatal Mustaqim سے چلتی ہے۔ اس میں آیت کے مطابق ہائی لائٹ نہیں ہوتا۔ قاری کا انتخاب دوسرے طریقوں کے لیے ہے۔ انٹرنیٹ ضروری ہے۔") : <>{t(
                 "Arabic plays first, followed by Urdu for each ayah. Audio requires internet. Urdu narration: Shamshad Ali Khan, via",
                 "हर आयत की अरबी तिलावत के बाद उर्दू तर्जुमा चलता है। ऑडियो के लिए इंटरनेट ज़रूरी है। उर्दू आवाज़: Shamshad Ali Khan, स्रोत",
                 "ہر آیت کی عربی تلاوت کے بعد اردو ترجمہ چلتا ہے۔ آڈیو کے لیے انٹرنیٹ ضروری ہے۔ اردو آواز: Shamshad Ali Khan، ماخذ",
@@ -443,7 +450,9 @@ export default function QuranReader({
               )}</>}
             </p>
           </div>
-          <label className="flex min-w-0 flex-col gap-2 text-[10px] font-bold uppercase tracking-wider text-parchment/70 sm:flex-row sm:items-center">
+          <details className="w-full rounded-xl border border-gold/30 bg-white p-4" open={!listening}>
+          <summary className="cursor-pointer font-semibold">{t("Reading and additional settings", "पढ़ने और अन्य सेटिंग्स", "پڑھنے اور دیگر ترتیبات")}</summary>
+          <label className="mt-4 flex min-w-0 flex-col gap-2 text-[10px] font-bold uppercase tracking-wider text-parchment/70 sm:flex-row sm:items-center">
             {t("Written translation", "लिखित अनुवाद", "تحریری ترجمہ")}
             <select
               value={translationLanguage}
@@ -541,7 +550,6 @@ export default function QuranReader({
               ))}
             </select>
           </div>
-        </div>
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:flex lg:items-center lg:gap-3">
           <button
@@ -579,6 +587,8 @@ export default function QuranReader({
                   "سورت مکمل نشان زد کریں",
                 )}
           </button>
+        </div>
+          </details>
         </div>
       </div>
 
@@ -702,7 +712,12 @@ export default function QuranReader({
       </div>
 
       <div className="mt-8 mb-80 md:mb-64">
-        <SurahNavigation prevSlug={prevSlug} nextSlug={nextSlug} />
+        <div className="mb-6 rounded-2xl border border-gold/25 bg-white p-5 text-[#12352a]">
+        <h2 className="text-xl font-bold">{listening ? t("Listen to this surah", "यह सूरह सुनें", "یہ سورت سنیں") : t("Read this surah", "यह सूरह पढ़ें", "یہ سورت پڑھیں")}</h2>
+        <p className="mt-2">{listening ? t("1. Choose a listening option below. 2. Tap Play in the audio player. More settings are available below.", "1. नीचे सुनने का तरीका चुनें। 2. ऑडियो प्लेयर में प्ले दबाएँ।", "۱۔ نیچے سننے کا طریقہ منتخب کریں۔ ۲۔ آڈیو پلیئر میں پلے دبائیں۔") : t("Choose your written translation and read the ayahs below.", "लिखित तर्जुमा चुनें और नीचे आयतें पढ़ें।", "تحریری ترجمہ منتخب کریں اور نیچے آیات پڑھیں۔")}</p>
+        <Link className="mt-3 inline-block font-semibold underline" href={`${listening ? "/quran" : "/listen"}/${currentSlug}`}>{listening ? t("Switch to reading", "पढ़ने के लिए जाएँ", "پڑھنے کے لیے جائیں") : t("Switch to listening", "सुनने के लिए जाएँ", "سننے کے لیے جائیں")}</Link>
+      </div>
+      <SurahNavigation prevSlug={prevSlug} nextSlug={nextSlug} listening={listening} />
       </div>
 
       {/* One recitation control, available before playback starts. */}
@@ -751,9 +766,11 @@ export default function QuranReader({
 }
 
 function SurahNavigation({
+  listening = false,
   prevSlug,
   nextSlug,
 }: {
+  listening?: boolean;
   prevSlug?: string | null;
   nextSlug?: string | null;
 }) {
@@ -763,7 +780,7 @@ function SurahNavigation({
   return (
     <nav aria-label="Surah navigation" className="mb-6 grid grid-cols-2 gap-3">
       {prevSlug ? (
-        <Link href={`/quran/${prevSlug}`} className={linkClass}>
+        <Link href={`${listening ? "/listen" : "/quran"}/${prevSlug}`} className={linkClass}>
           <ArrowLeft size={18} aria-hidden="true" />{" "}
           {t("Previous surah", "पिछली सूरह", "پچھلی سورت")}
         </Link>
@@ -777,7 +794,7 @@ function SurahNavigation({
         </span>
       )}
       <Link
-        href={nextSlug ? `/quran/${nextSlug}` : "/quran"}
+        href={nextSlug ? `${listening ? "/listen" : "/quran"}/${nextSlug}` : (listening ? "/listen" : "/quran")}
         className={linkClass}
       >
         {nextSlug

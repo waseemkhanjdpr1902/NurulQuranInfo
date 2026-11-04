@@ -58,10 +58,11 @@ export default async function SurahPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ autoplay?: string }>;
+  searchParams: Promise<{ autoplay?: string; view?: string }>;
 }) {
   const { slug } = await params;
-  const { autoplay } = await searchParams;
+  const { autoplay, view } = await searchParams;
+  const listening = view === "listen";
   const surah = await getSurahData(slug);
 
   if (!surah) notFound();
@@ -79,7 +80,7 @@ export default async function SurahPage({
             {surah.prevSlug ? (
               <Link
                 aria-label="Previous surah"
-                href={`/quran/${surah.prevSlug}`}
+                href={`${listening ? "/listen" : "/quran"}/${surah.prevSlug}`}
                 className="w-10 h-10 rounded-full glass flex items-center justify-center text-parchment/50 hover:text-gold transition-colors"
               >
                 <ChevronLeft size={20} />
@@ -97,7 +98,7 @@ export default async function SurahPage({
             {surah.nextSlug ? (
               <Link
                 aria-label="Next surah"
-                href={`/quran/${surah.nextSlug}`}
+                href={`${listening ? "/listen" : "/quran"}/${surah.nextSlug}`}
                 className="w-10 h-10 rounded-full glass flex items-center justify-center text-parchment/50 hover:text-gold transition-colors"
               >
                 <ChevronRight size={20} />
@@ -133,6 +134,7 @@ export default async function SurahPage({
           nextSlug={surah.nextSlug}
           prevSlug={surah.prevSlug}
           autoplay={autoplay === "true"}
+          listening={listening}
         />
       </section>
 
