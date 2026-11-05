@@ -1,0 +1,17 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls",
+      "delegate_permission/common.get_login_creds"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "info.nurulquran.app",
+      "sha256_cert_fingerprints": [
+        "F3:9E:7A:ED:7E:8A:2C:58:44:4E:DC:64:ED:AA:7F:DC:28:F6:A4:E9:3E:E1:9D:B9:01:64:27:29:BA:6E:A0:D0",
+        "5B:F8:7E:30:3F:74:7D:B7:87:B5:83:D9:EE:A1:7F:1E:33:2B:E5:DA:05:4C:4F:33:9C:E3:8E:95:17:B2:B9:88",
+        "AC:64:68:CF:49:0D:E3:AD:D5:F4:EF:B2:73:28:D9:47:DA:56:B2:92:A3:50:A2:AB:E9:40:A9:77:65:05:2E:E5"
+      ]
+    }
+  }
+]
