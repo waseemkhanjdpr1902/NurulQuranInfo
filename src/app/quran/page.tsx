@@ -1,6 +1,7 @@
 "use client";
 
 import { useUILanguage } from "@/components/UILanguageProvider";
+import ResumeBookmark from "@/components/ResumeBookmark";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SurahGrid from "@/components/SurahGrid";
@@ -36,7 +37,7 @@ export default function QuranExplorerPage() {
           <p className="mt-2">{t("Read Arabic-only pages like a printed Mushaf, or choose a surah below for translation, tafseer and listening.", "सिर्फ अरबी में मुशहफ़ के पन्ने पढ़ें, या नीचे सूरह चुनकर तर्जुमा, तफ़सीर और तिलावत खोलें।", "صرف عربی میں مصحف کے صفحات پڑھیں، یا نیچے سورت منتخب کر کے ترجمہ، تفسیر اور تلاوت کھولیں۔")}</p>
           <Link href="/mushaf" className="mt-4 inline-flex min-h-12 items-center rounded-xl bg-[#075c3a] px-5 font-semibold text-white">{t("Open Indian Mushaf", "भारतीय मुशहफ़ खोलें", "ہندوستانی مصحف کھولیں")}</Link>
         </div>
-        <SurahGrid />
+<ResumeBookmark kind="reading" />        <SurahGrid />
       </div>
 
       <Footer />

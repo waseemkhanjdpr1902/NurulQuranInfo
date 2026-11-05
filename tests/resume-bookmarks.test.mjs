@@ -1,0 +1,15 @@
+import assert from 'node:assert/strict';
+import { getResumeBookmark, saveResumeBookmark } from '../src/lib/resume-bookmarks.ts';
+const store = new Map();
+globalThis.localStorage = { getItem: key => store.get(key) ?? null, setItem: (key, value) => store.set(key, value) };
+globalThis.window = { dispatchEvent() {} };
+const reading = { surahNumber: 2, surahName: 'Al-Baqarah', slug: 'al-baqarah', ayah: 10 };
+const listening = { surahNumber: 1, surahName: 'Al-Fatihah', slug: 'al-fatihah', ayah: 3 };
+assert.equal(saveResumeBookmark('reading', reading), true);
+assert.equal(saveResumeBookmark('listening', listening), true);
+assert.deepEqual(getResumeBookmark('reading'), reading);
+assert.deepEqual(getResumeBookmark('listening'), listening);
+store.set('nurulquran.resume.listening.v1', '{invalid');
+assert.equal(getResumeBookmark('listening'), null);
+assert.deepEqual(getResumeBookmark('reading'), reading);
+console.log('PASS: reading and listening bookmarks remain separate and invalid saved data is ignored.');

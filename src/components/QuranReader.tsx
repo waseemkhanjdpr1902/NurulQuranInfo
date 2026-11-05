@@ -64,6 +64,7 @@ import AudioPlayer from "@/components/AudioPlayer/AudioPlayer";
 import { useQuranJourney } from "@/hooks/useQuranJourney";
 import { surahSlug } from "@/lib/quran-journey";
 import InlineTafsir from "@/components/InlineTafsir";
+import { getResumeBookmark, saveResumeBookmark, type ResumeBookmark } from "@/lib/resume-bookmarks";
 import {
   TAFSIR_EDITIONS,
   isTafsirLanguage,
@@ -118,6 +119,19 @@ export default function QuranReader({
   const [relaxedArabic, setRelaxedArabic] = useState(true);
   const { data: journey, update: updateJourney } = useQuranJourney();
   const currentSlug = surahSlug(surah.englishName);
+  const [savedListening, setSavedListening] = useState<ResumeBookmark | null>(null);
+  const [bookmarkMessage, setBookmarkMessage] = useState("");
+  useEffect(() => { setSavedListening(getResumeBookmark("listening")); }, []);
+  const savePlace = (kind: "reading" | "listening", verse: Verse) => {
+    const bookmark = { surahNumber: surah.number, surahName: surah.englishName, slug: currentSlug, ayah: verse.verse_number };
+    const saved = saveResumeBookmark(kind, bookmark);
+    if (saved && kind === "listening") setSavedListening(bookmark);
+    setBookmarkMessage(saved ? t("Bookmark saved on this device.", "बुकमार्क इस डिवाइस पर सहेजा गया।", "بک مارک اس آلے پر محفوظ ہو گیا۔") : t("Could not save bookmark on this device.", "बुकमार्क सहेजा नहीं जा सका।", "بک مارک محفوظ نہیں ہو سکا۔"));
+  };
+  useEffect(() => {
+    if (loading || !verses.length || !window.location.hash.match(/^#verse-\d+$/)) return;
+    document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: "center" });
+  }, [loading, verses]);
 
   useEffect(() => {
     const saved = localStorage.getItem("nurulquran.translation-language");
@@ -180,14 +194,13 @@ export default function QuranReader({
   const playVerse = useCallback(
     (verse: Verse) => {
       setAudioMode(mode => (mode === "kanzuliman" || mode === "cps-urdu") ? "arabic-urdu" : mode);
-      recordMeaningfulRead(verse);
       const fallbackAudio = `https://cdn.alquran.cloud/media/audio/ayah/${reciterId}/${verse.id}`;
       const audio = verse.audio_url || fallbackAudio;
       setAudioUrl(audio.startsWith("//") ? `https:${audio}` : audio);
       setPlayingVerseId(verse.id);
       setPlaybackRequest((request) => request + 1);
     },
-    [reciterId, recordMeaningfulRead],
+    [reciterId],
   );
 
   useEffect(() => {
@@ -370,6 +383,12 @@ export default function QuranReader({
         <h2 className="text-xl font-bold">{listening ? t("Listen to this surah", "यह सूरह सुनें", "یہ سورت سنیں") : t("Read this surah", "यह सूरह पढ़ें", "یہ سورت پڑھیں")}</h2>
         <p className="mt-2">{listening ? t("1. Choose a listening option below. 2. Tap Play in the audio player. More settings are available below.", "1. नीचे सुनने का तरीका चुनें। 2. ऑडियो प्लेयर में प्ले दबाएँ।", "۱۔ نیچے سننے کا طریقہ منتخب کریں۔ ۲۔ آڈیو پلیئر میں پلے دبائیں۔") : t("Choose your written translation and read the ayahs below.", "लिखित तर्जुमा चुनें और नीचे आयतें पढ़ें।", "تحریری ترجمہ منتخب کریں اور نیچے آیات پڑھیں۔")}</p>
         <Link className="mt-3 inline-block font-semibold underline" href={`${listening ? "/quran" : "/listen"}/${currentSlug}`}>{listening ? t("Switch to reading", "पढ़ने के लिए जाएँ", "پڑھنے کے لیے جائیں") : t("Switch to listening", "सुनने के लिए जाएँ", "سننے کے لیے جائیں")}</Link>
+      </div>
+      <div className="my-4 rounded-xl border border-gold/30 bg-white p-4 text-[#12352a]">
+        {playingVerseId && (audioMode === "arabic" || audioMode === "arabic-urdu") && <button type="button" className="min-h-11 rounded-xl bg-[#075c3a] px-4 font-semibold text-white" onClick={() => { const verse = verses.find(v => v.id === playingVerseId); if (verse) savePlace("listening", verse); }}>{t("Bookmark listening position", "सुनने की जगह सहेजें", "سننے کی جگہ محفوظ کریں")}</button>}
+        {savedListening?.surahNumber === surah.number && <button type="button" className="ms-2 min-h-11 rounded-xl border border-[#075c3a] px-4 font-semibold" onClick={() => { const verse = verses.find(v => v.verse_number === savedListening.ayah); if (verse) playVerse(verse); }}>{t("Play saved ayah", "सहेजी आयत सुनें", "محفوظ آیت سنیں")} {savedListening.ayah}</button>}
+        <p className="mt-2 text-sm">{t("Listening bookmarks resume from the beginning of the saved ayah.", "सुनना सहेजी आयत की शुरुआत से होगा।", "محفوظ آیت شروع سے چلے گی۔")}</p>
+        {bookmarkMessage && <p role="status" className="mt-2 text-sm">{bookmarkMessage}</p>}
       </div>
       <SurahNavigation prevSlug={prevSlug} nextSlug={nextSlug} listening={listening} />
       {/* Reciter Selection & Info */}
@@ -681,6 +700,7 @@ export default function QuranReader({
                 <Headphones size={18} aria-hidden="true" />{" "}
                 {t("Listen from here", "यहाँ से सुनें", "یہاں سے سنیں")}
               </button>
+              <button type="button" className="min-h-12 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658]" onClick={(event) => { event.stopPropagation(); savePlace("reading", verse); }}>{t("Bookmark for reading", "पढ़ने के लिए सहेजें", "پڑھنے کے لیے محفوظ کریں")}</button>
               {index < verses.length - 1 ? (
                 <button
                   type="button"
