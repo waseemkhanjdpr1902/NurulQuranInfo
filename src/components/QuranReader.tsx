@@ -129,9 +129,9 @@ export default function QuranReader({
     setBookmarkMessage(saved ? t("Bookmark saved on this device.", "बुकमार्क इस डिवाइस पर सहेजा गया।", "بک مارک اس آلے پر محفوظ ہو گیا۔") : t("Could not save bookmark on this device.", "बुकमार्क सहेजा नहीं जा सका।", "بک مارک محفوظ نہیں ہو سکا۔"));
   };
   useEffect(() => {
-    if (loading || !verses.length || !window.location.hash.match(/^#verse-\d+$/)) return;
+    if (loading || !verses.length || (listening && new URLSearchParams(window.location.search).has("saved")) || !window.location.hash.match(/^#verse-\d+$/)) return;
     document.getElementById(window.location.hash.slice(1))?.scrollIntoView({ block: "center" });
-  }, [loading, verses]);
+  }, [loading, verses, listening]);
 
   useEffect(() => {
     const saved = localStorage.getItem("nurulquran.translation-language");
@@ -387,7 +387,7 @@ export default function QuranReader({
       <div className="my-4 rounded-xl border border-gold/30 bg-white p-4 text-[#12352a]">
         {playingVerseId && (audioMode === "arabic" || audioMode === "arabic-urdu") && <button type="button" className="min-h-11 rounded-xl bg-[#075c3a] px-4 font-semibold text-white" onClick={() => { const verse = verses.find(v => v.id === playingVerseId); if (verse) savePlace("listening", verse); }}>{t("Bookmark listening position", "सुनने की जगह सहेजें", "سننے کی جگہ محفوظ کریں")}</button>}
         {savedListening?.surahNumber === surah.number && <button type="button" className="ms-2 min-h-11 rounded-xl border border-[#075c3a] px-4 font-semibold" onClick={() => { const verse = verses.find(v => v.verse_number === savedListening.ayah); if (verse) playVerse(verse); }}>{t("Play saved ayah", "सहेजी आयत सुनें", "محفوظ آیت سنیں")} {savedListening.ayah}</button>}
-        <p className="mt-2 text-sm">{t("Listening bookmarks resume from the beginning of the saved ayah.", "सुनना सहेजी आयत की शुरुआत से होगा।", "محفوظ آیت شروع سے چلے گی۔")}</p>
+        <p className="mt-2 text-sm">{t("Listening bookmarks resume from the beginning of the saved ayah. After opening a saved recitation, tap Play.", "सुनना सहेजी आयत की शुरुआत से होगा।", "محفوظ آیت شروع سے چلے گی۔")}</p>
         {bookmarkMessage && <p role="status" className="mt-2 text-sm">{bookmarkMessage}</p>}
       </div>
       <SurahNavigation prevSlug={prevSlug} nextSlug={nextSlug} listening={listening} />
@@ -700,6 +700,7 @@ export default function QuranReader({
                 <Headphones size={18} aria-hidden="true" />{" "}
                 {t("Listen from here", "यहाँ से सुनें", "یہاں سے سنیں")}
               </button>
+              {listening && <button type="button" className="min-h-12 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658]" onClick={(event) => { event.stopPropagation(); savePlace("listening", verse); }}>{t("Bookmark for listening", "सुनने के लिए सहेजें", "سننے کے لیے محفوظ کریں")}</button>}
               <button type="button" className="min-h-12 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658]" onClick={(event) => { event.stopPropagation(); savePlace("reading", verse); }}>{t("Bookmark for reading", "पढ़ने के लिए सहेजें", "پڑھنے کے لیے محفوظ کریں")}</button>
               {index < verses.length - 1 ? (
                 <button
@@ -769,7 +770,12 @@ export default function QuranReader({
         title={surah.englishName}
         subtitle={`${playingVerseId ? `${t("Ayah", "आयत", "آیت")} ${verses.find((verse) => verse.id === playingVerseId)?.verse_number} · ` : ""}${RECITERS.find((reciter) => reciter.id === reciterId)?.name || ""}`}
         onPlayRequest={() => {
-          if (verses[0]) playVerse(verses[memorise ? practiceStart - 1 : 0]);
+          const saved = listening && new URLSearchParams(window.location.search).get("saved") === "1" ? getResumeBookmark("listening") : null;
+          const savedVerse = saved?.surahNumber === surah.number ? verses.find(verse => verse.verse_number === saved.ayah) : undefined;
+          if (savedVerse) {
+            playVerse(savedVerse);
+            window.history.replaceState(null, "", window.location.pathname);
+          } else if (verses[0]) playVerse(verses[memorise ? practiceStart - 1 : 0]);
         }}
         onNext={playNextVerse}
         onPrev={playPrevVerse}
