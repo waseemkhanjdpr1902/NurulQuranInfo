@@ -64,6 +64,7 @@ export default function Navbar() {
     { name: t("Quick guide", "रहनुमाई", "رہنمائی"), href: "/#quick-guide", icon: Compass },
     { name: t("Read Quran", "क़ुरआन पढ़ें", "قرآن پڑھیں"), href: "/mushaf", icon: Book },
     { name: t("Listen", "सुनें", "سنیں"), href: "/listen", icon: Book },
+    { name: t("Daily duas *", "रोज़ की दुआएँ *", "روزانہ دعائیں *"), href: "/daily-duas", icon: Sparkles },
     {
       name: t("Topics", "विषय", "موضوعات"),
       href: "/quran-topics",
