@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { Heart, Search, BookOpen, Sun, Moon, Sunrise, Sunset, CloudSun, Loader2, Copy, Share2, Volume2, VolumeX } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Link from "next/link";
 
 const DUAS = [
   {
@@ -80,6 +81,7 @@ export default function DuaPage() {
         </div>
 
         <p role="status" className="mb-6 text-center text-parchment">{notice}</p>
+        <div className="mb-8 text-center"><Link href="/daily-duas" className="inline-flex min-h-12 items-center rounded-xl bg-[#075c3a] px-5 font-bold text-white">Daily life duas * — health, rizq, exams & more</Link></div>
         <div className="grid grid-cols-1 gap-8 max-w-4xl mx-auto">
           {DUAS.map((dua) => (
             <motion.div
