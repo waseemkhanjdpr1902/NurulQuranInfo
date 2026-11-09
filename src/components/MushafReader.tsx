@@ -145,6 +145,10 @@ export default function MushafReader() {
       </div>
 
       <div className="relative z-20 mt-3 rounded-2xl border border-[#c8ded4] bg-white p-3 shadow-sm">
+        <label className="mb-3 block text-base font-bold text-[#123d2a]">
+          {t("Search surahs by name or number", "नाम या नंबर से सूरह खोजें", "نام یا نمبر سے سورت تلاش کریں")}
+          <input type="search" value={surahQuery} onFocus={() => setShowIndex(true)} onChange={event => { setSurahQuery(event.target.value); setShowIndex(true); }} placeholder={t("Type a surah name or number…", "सूरह का नाम या नंबर लिखें…", "سورت کا نام یا نمبر لکھیں…")} className="mt-2 min-h-14 w-full rounded-xl border-2 border-[#82b29a] bg-white px-4 text-base text-[#123d2a] placeholder:text-[#526e60] focus:outline-none focus:ring-4 focus:ring-[#d8b85a]" />
+        </label>
         <div className="flex flex-wrap items-end gap-3">
           <button type="button" aria-pressed={largeControls} onClick={() => setLargeControls(value => !value)} className={button}>{t("Large controls", "बड़े बटन", "بڑے بٹن")}</button>
           <button type="button" aria-expanded={showIndex} onClick={() => setShowIndex(!showIndex)} className={button}>{t(showIndex ? "Close surah index" : "Surah index", showIndex ? "सूरह फ़ेहरिस्त बंद करें" : "सूरह फ़ेहरिस्त", showIndex ? "سورتوں کی فہرست بند کریں" : "سورتوں کی فہرست")}</button>
@@ -177,13 +181,8 @@ export default function MushafReader() {
 
       </div>
 
-      <MushafDownloads page={page} />
       {showIndex && <section aria-label={t("Surah index", "सूरह फ़ेहरिस्त", "سورتوں کی فہرست")} className="mt-3 rounded-xl border border-[#c8ded4] bg-white p-3">
         <h2 className="mb-3 text-lg font-bold">{t("Tap a surah to start reading", "पढ़ने के लिए सूरह पर टैप करें", "پڑھنے کے لیے سورت پر ٹیپ کریں")}</h2>
-        <label className="block text-sm font-semibold">
-          {t("Search surahs by name or number", "नाम या नंबर से सूरह खोजें", "نام یا نمبر سے سورت تلاش کریں")}
-          <input type="search" value={surahQuery} onChange={event => setSurahQuery(event.target.value)} className="mt-2 min-h-12 w-full rounded-xl border border-[#b9d8ca] bg-white px-3 text-base" />
-        </label>
         <p role="status" className="my-3 text-sm">{matchingSurahs.length} / 114</p>
         <div className="grid max-h-[55svh] gap-2 overflow-y-auto overscroll-contain sm:grid-cols-2" aria-label={t("Choose a surah", "सूरह चुनें", "سورت منتخب کریں")}>
           {matchingSurahs.map(surah => <button type="button" key={surah.number} onClick={() => {
@@ -200,6 +199,7 @@ export default function MushafReader() {
         <div className="grid gap-3 sm:grid-cols-2">{[620, 621].map((scan, i) => <a key={scan} href={`https://raw.githubusercontent.com/1uc1d23/IndoPak-15-Line-Naskh-Mushaf-Page-Images/a93e8947229889a2e486d9b414fe94e69c72c6e4/original_pages/${scan}.jpg`} target="_blank" rel="noreferrer"><Image src={`https://raw.githubusercontent.com/1uc1d23/IndoPak-15-Line-Naskh-Mushaf-Page-Images/a93e8947229889a2e486d9b414fe94e69c72c6e4/original_pages/${scan}.jpg`} alt={t(`Original surah index, part ${i + 1}`, `असली सूरह फ़ेहरिस्त, हिस्सा ${i + 1}`, `اصل سورتوں کی فہرست، حصہ ${i + 1}`)} width={1915} height={2736} unoptimized style={{width:"100%",height:"auto"}} /></a>)}</div>
         </details>
       </section>}
+      <MushafDownloads page={page} />
       <nav aria-label={t("Mushaf page navigation", "मुशहफ़ पन्नों की नेविगेशन", "مصحف صفحات کی رہنمائی")} className="my-3 flex items-center justify-between gap-2">
         <button type="button" onClick={() => go(page - 1)} disabled={page === 1} className={button}>{t("Previous page", "पिछला पन्ना", "پچھلا صفحہ")}</button>
         <p aria-live="polite" className="text-sm font-semibold" dir="ltr">{page + 1} / {MUSHAF_PAGE_COUNT + 1}</p>
