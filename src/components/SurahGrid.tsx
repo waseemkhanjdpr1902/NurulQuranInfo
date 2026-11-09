@@ -128,12 +128,17 @@ export default function SurahGrid({ limit, listening = false }: { limit?: number
         </div>
 
         <div className="relative w-full md:w-96">
+          <label htmlFor="surah-search" className="mb-2 block text-base font-bold text-parchment">
+            {t("Search surahs", "सूरह खोजें", "سورت تلاش کریں")}
+          </label>
+          <div className="relative">
           <Search
-            className="absolute left-4 top-1/2 -translate-y-1/2 text-parchment/30"
+            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#174a36]"
             size={20}
           />
           <input
-            type="text"
+            id="surah-search"
+            type="search"
             aria-label={t("Search surahs", "सूरह खोजें", "سورت تلاش کریں")}
             placeholder={t(
               "Search by name or number…",
@@ -142,8 +147,9 @@ export default function SurahGrid({ limit, listening = false }: { limit?: number
             )}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-12 pr-4 py-4 glass rounded-2xl text-parchment placeholder:text-parchment/20 focus:outline-none focus:border-gold/50 transition-colors"
+            className="w-full rounded-2xl border-2 border-[#a9ccb9] bg-white py-4 pl-12 pr-4 text-[#153b2b] placeholder:text-[#526e60] focus:outline-none focus:ring-4 focus:ring-[#d8b85a]"
           />
+          </div>
         </div>
       </div>
 

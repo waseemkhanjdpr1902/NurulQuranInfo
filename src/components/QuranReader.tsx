@@ -25,6 +25,9 @@ interface Verse {
   audio_url?: string;
 }
 
+// Reuse validated surah data during the current browsing session.
+const surahCache = new Map<string, Verse[]>();
+
 const RECITERS = [
   { id: "ar.alafasy", name: "Mishary Rashid Alafasy" },
   { id: "ar.abdulsamad", name: "AbdulBaset AbdulSamad" },
@@ -209,6 +212,12 @@ export default function QuranReader({
       setLoading(true);
       setLoadError(false);
       try {
+        const cacheKey = `${surah.number}:${urduEdition}:${reciterId}`;
+        const cached = surahCache.get(cacheKey);
+        if (cached && cached.length === surah.numberOfAyahs) {
+          setVerses(cached);
+          return;
+        }
         const res = await fetchWithTimeout(
           `https://api.alquran.cloud/v1/surah/${surah.number}/editions/quran-uthmani,en.sahih,hi.hindi,${urduEdition},${reciterId}`,
           { signal: controller.signal },
@@ -263,7 +272,10 @@ export default function QuranReader({
           };
         });
 
-        if (!controller.signal.aborted) setVerses(combinedVerses);
+        if (!controller.signal.aborted) {
+          surahCache.set(cacheKey, combinedVerses);
+          setVerses(combinedVerses);
+        }
       } catch (error) {
         if (controller.signal.aborted) return;
         setLoadError(true);
