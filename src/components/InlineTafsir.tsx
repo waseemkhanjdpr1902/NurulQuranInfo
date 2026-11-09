@@ -5,7 +5,7 @@ import { fetchWithTimeout } from "@/lib/fetch-with-timeout";
 import { useEffect, useRef, useState } from "react";
 import { Noto_Nastaliq_Urdu } from "next/font/google";
 import { BookOpen, ChevronDown, Loader2 } from "lucide-react";
-import { TAFSIR_EDITIONS, type TafsirLanguage } from "@/lib/tafsir-editions";
+import { TAFSIR_EDITIONS, isTafsirLanguage, type TafsirLanguage } from "@/lib/tafsir-editions";
 
 type Tafsir = {
   text: string;
@@ -25,9 +25,11 @@ const urduTafsirFont = Noto_Nastaliq_Urdu({
 export default function InlineTafsir({
   verseKey,
   language,
+  onLanguageChange,
 }: {
   verseKey: string;
   language: TafsirLanguage;
+  onLanguageChange: (language: TafsirLanguage) => void;
 }) {
   const { t } = useUILanguage();
   const [open, setOpen] = useState(false);
@@ -100,6 +102,17 @@ export default function InlineTafsir({
       </summary>
       {open && (
         <div className="border-t border-gold/20 p-4 sm:p-6">
+          <label className="mb-4 flex flex-wrap items-center gap-3 text-sm font-bold text-[#0d6658]">
+            {t("Tafsir language", "तफ़सीर की भाषा", "تفسیر کی زبان")}
+            <select
+              aria-label={t(`Tafsir language for ayah ${verseKey}`, `आयत ${verseKey} की तफ़सीर की भाषा`, `آیت ${verseKey} کی تفسیر کی زبان`)}
+              value={language}
+              onChange={(event) => { if (isTafsirLanguage(event.target.value)) onLanguageChange(event.target.value); }}
+              className="min-h-11 rounded-xl border-2 border-[#82b29a] bg-white px-3 text-base font-semibold text-[#123d2a] focus:outline-none focus:ring-4 focus:ring-[#d8b85a]"
+            >
+              {(Object.keys(TAFSIR_EDITIONS) as TafsirLanguage[]).map((item) => <option key={item} value={item}>{TAFSIR_EDITIONS[item].label}</option>)}
+            </select>
+          </label>
           {loading ? (
             <p
               role="status"
