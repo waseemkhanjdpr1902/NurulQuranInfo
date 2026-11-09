@@ -698,6 +698,10 @@ export default function QuranReader({
             <InlineTafsir
               verseKey={`${surah.number}:${verse.verse_number}`}
               language={tafsirLanguage}
+              onLanguageChange={(value) => {
+                setTafsirLanguage(value);
+                try { localStorage.setItem("nurulquran.tafsir-language", value); } catch { /* Keep the choice for this session. */ }
+              }}
             />
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
               <button
