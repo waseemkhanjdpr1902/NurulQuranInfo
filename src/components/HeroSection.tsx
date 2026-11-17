@@ -6,12 +6,6 @@ export default function HeroSection() {
   const { t, rtl } = useUILanguage();
   const actions = [
     {
-      href: "/dawah",
-      icon: Sparkles,
-      label: t("Dawah & learning", "दावत और तालीम", "دعوت اور تعلیم"),
-      help: t("Introductory reading with references", "हवालों के साथ बुनियादी बातें पढ़ें", "حوالوں کے ساتھ بنیادی باتیں پڑھیں"),
-    },
-    {
       href: "/mushaf",
       icon: BookOpen,
       label: t("Read Qur’an", "क़ुरआन पढ़ें", "قرآن پڑھیں"),
@@ -51,6 +45,12 @@ export default function HeroSection() {
         "دعاؤں کا مجموعہ دیکھیں",
       ),
     },
+    {
+      href: "/dawah",
+      icon: Sparkles,
+      label: t("Dawah & learning", "दावत और तालीम", "دعوت اور تعلیم"),
+      help: t("Introductory reading with references", "हवालों के साथ बुनियादी बातें पढ़ें", "حوالوں کے ساتھ بنیادی باتیں پڑھیں"),
+    },
   ];
   return (
     <section
@@ -81,13 +81,13 @@ export default function HeroSection() {
             <Link
               key={a.href}
               href={a.href}
-              className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl border border-gold/25 bg-white p-4 text-parchment shadow-sm transition-colors hover:bg-gold/10"
+              className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl border border-[#c8ded4] bg-white p-4 text-[#12352a] shadow-sm transition-colors hover:bg-[#edf7f1] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
             >
-              <a.icon size={26} className="text-gold" />
+              <a.icon size={26} className="text-[#08714e]" />
               <span className="text-base font-semibold sm:text-lg">
                 {a.label}
               </span>
-              <span className="text-xs leading-relaxed text-parchment/75 sm:text-sm">
+              <span className="text-xs leading-relaxed text-[#365c50] sm:text-sm">
                 {a.help}
               </span>
             </Link>

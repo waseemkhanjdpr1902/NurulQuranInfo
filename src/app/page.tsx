@@ -20,8 +20,8 @@ export default function Home() {
 
       {/* Main Content Areas */}
       <div className="relative z-10">
-        <QuickGuide />
         <SurahGrid limit={6} />
+        <QuickGuide />
 
         <HomeSections />
 
