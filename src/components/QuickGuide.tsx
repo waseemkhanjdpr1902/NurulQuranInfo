@@ -49,7 +49,7 @@ export default function QuickGuide() {
         <p className="mt-3 text-base leading-relaxed">{t("On mobile, tap the menu button at the top right. On a computer, use the links across the top. Choose English, Hindi or Urdu from the language selector next to the menu.", "मोबाइल पर ऊपर दाईं तरफ मेनू बटन दबाएँ। कंप्यूटर पर ऊपर दिए लिंक इस्तेमाल करें। मेनू के पास भाषा विकल्प से English, हिंदी या उर्दू चुनें।", "موبائل پر اوپر دائیں طرف مینو بٹن دبائیں۔ کمپیوٹر پر اوپر دیے گئے لنکس استعمال کریں۔ مینو کے پاس زبان کے انتخاب سے انگریزی، ہندی یا اردو منتخب کریں۔")}</p>
         <div className="mt-5 grid gap-3 sm:grid-cols-2">
           {items.map((item, index) => (
-            <details open key={item.title} className="rounded-2xl border border-[#c8ded4] bg-[#f4f9f6] p-4">
+            <details key={item.title} className="rounded-2xl border border-[#c8ded4] bg-[#f4f9f6] p-4">
               <summary className="min-h-11 cursor-pointer text-base font-bold leading-relaxed focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0d6658]">{index + 1}. {item.title}</summary>
               <p className="mt-3 text-base leading-relaxed">{item.text}</p>
               <Link href={item.href} className="mt-3 inline-flex min-h-11 items-center rounded-xl bg-[#075c3a] px-4 py-2 font-semibold text-white hover:bg-[#064b30] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#075c3a]">{t("Open this section", "यह हिस्सा खोलें", "یہ حصہ کھولیں")}</Link>
