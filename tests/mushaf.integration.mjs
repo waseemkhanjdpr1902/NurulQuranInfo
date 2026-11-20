@@ -49,7 +49,7 @@ await act(async()=>document.querySelector("img").dispatchEvent(new dom.window.Ev
 assert.ok(find("Retry"));
 await act(async()=>find("Retry").click());
 assert.ok(document.querySelector("img").getAttribute("src").includes("retry=1"));
-await act(async()=>find("Surah index").click());
+await act(async()=>find("Surah").click());
 assert.equal(document.querySelectorAll('section[aria-label="Surah index"] img').length,2);
 const { MUSHAF_SURAHS } = unwrap(await import("../src/data/mushaf-surahs.ts"));
 assert.equal(MUSHAF_SURAHS.length,114);
@@ -60,18 +60,18 @@ for (const [number, printedPage] of [[1,2],[2,3],[18,294],[36,441],[55,532],[67,
   const button = [...document.querySelectorAll('section button')].find(b=>b.textContent.startsWith(`${number}. `));
   assert.ok(button);
   await act(async()=>button.click());
-  assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,String(printedPage));
+  assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).page, printedPage - 1);
   assert.equal(new URL(document.querySelector('div[role="region"] img').getAttribute('src'),window.location.href).pathname, `/api/indopak-mushaf/${printedPage - 1}`);
   assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).zoom,125, "surah selection preserves zoom");
-  await act(async()=>find("Surah index").click());
+  await act(async()=>find("Surah").click());
 }
 // All 114 controls have the correct reading-page offset, including shared start pages.
 for (const surah of MUSHAF_SURAHS) {
   assert.ok(validMushafPage(surah.printedPage - 1));
   const button = [...document.querySelectorAll('section button')].find(b=>b.textContent.startsWith(`${surah.number}. `));
   await act(async()=>button.click());
-  assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,String(surah.printedPage));
-  await act(async()=>find("Surah index").click());
+  assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).page, surah.printedPage - 1);
+  await act(async()=>find("Surah").click());
 }
 const search=document.querySelector('input[type="search"]');
 for (const term of ['al kahf','الكهف']) {
@@ -85,8 +85,8 @@ await act(async()=>{
   Object.getOwnPropertyDescriptor(dom.window.HTMLInputElement.prototype,'value').set.call(search,'');
   search.dispatchEvent(new dom.window.Event('input',{bubbles:true}));
 });
-await act(async()=>find("Close surah index").click());
-assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,"611");
+await act(async()=>find("Surah").click());
+assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).page,610);
 assert.equal(mushafSourceUrl(610).endsWith("/615.jpg"),true,"last Quran page excludes back matter");
 await act(async()=>find("Full screen").click());
 assert.ok(find("Exit full screen"), "in-page full-screen fallback works without native browser support");
@@ -95,6 +95,7 @@ await act(async()=>find("Exit full screen").click());
 assert.ok(find("Full screen"));
 assert.ok(new URL(document.querySelector("img").getAttribute("src"),window.location.href).pathname.startsWith("/api/indopak-mushaf/610"));
 // Save a meaningful position within a zoomed scan, then restore it on remount.
+await act(async()=>find("More options").click());
 await act(async()=>find("Large controls").click());
 const region = document.querySelector('div[role="region"]');
 Object.defineProperties(region, {scrollHeight:{value:2000,configurable:true},clientHeight:{value:500,configurable:true},scrollWidth:{value:1000,configurable:true},clientWidth:{value:500,configurable:true}});
@@ -109,6 +110,7 @@ root=createRoot(document.getElementById("root"));
 await render();
 assert.ok(new URL(document.querySelector("img").getAttribute("src"),window.location.href).pathname.startsWith("/api/indopak-mushaf/610"),"saved page restored");
 assert.equal(document.querySelector('[aria-label="Zoom level"]').textContent,"125%");
+await act(async()=>find("More options").click());
 assert.equal(find("Large controls").getAttribute("aria-pressed"),"true");
 const restored = document.querySelector('div[role="region"]');
 Object.defineProperties(restored, {scrollHeight:{value:3000},clientHeight:{value:600},scrollWidth:{value:1500},clientWidth:{value:500}});
@@ -118,11 +120,12 @@ assert.equal(restored.scrollLeft,250);
 const { MUSHAF_PARAS } = unwrap(await import("../src/data/mushaf-paras.ts"));
 assert.equal(MUSHAF_PARAS.length,30);
 for (const para of MUSHAF_PARAS) {
+  await act(async()=>find("Para").click());
   await act(async()=>{
     const select=document.querySelector('[aria-label="Choose para"]');
     select.value=String(para.printedPage);select.dispatchEvent(new dom.window.Event("change",{bubbles:true}));
   });
-  assert.equal(document.querySelector('input[aria-label="Printed page number"]').value,String(para.printedPage));
+  assert.equal(JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY)).page, para.printedPage - 1);
 }
 await act(async()=>root.unmount());
 console.log("Mushaf: page limits, unchanged image proxy, network recovery, navigation, zoom and saved position passed.");
