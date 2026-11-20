@@ -22,6 +22,9 @@ export default function MushafReader() {
   const [failed, setFailed] = useState(false);
   const [retry, setRetry] = useState(0);
   const [showIndex, setShowIndex] = useState(false);
+  const [panel, setPanel] = useState<"para" | "page" | "more" | null>(null);
+  const [bookmark, setBookmark] = useState<number | null>(null);
+  const [bookmarkError, setBookmarkError] = useState(false);
   const [surahQuery, setSurahQuery] = useState("");
   const query = surahQuery.trim().toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[أإآٱ]/g, "ا").replace(/[^\p{L}\p{N}]/gu, "");
   const matchingSurahs = MUSHAF_SURAHS.filter(surah => !query || `${surah.number} ${surah.name} ${surah.arabic}`.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "").replace(/[أإآٱ]/g, "ا").replace(/[^\p{L}\p{N}]/gu, "").includes(query));
@@ -36,6 +39,7 @@ export default function MushafReader() {
     let savedPage: number | null = null;
     let savedZoom = 100;
     try {
+      setBookmark(validMushafPage(localStorage.getItem("nurulquran-mushaf-bookmark")));
       const saved = JSON.parse(localStorage.getItem(MUSHAF_STORAGE_KEY) || "null");
       savedPage = validMushafPage(saved?.page);
       setLargeControls(saved?.largeControls === true);
@@ -109,7 +113,7 @@ export default function MushafReader() {
     const next = validMushafPage(value);
     if (next === null) return;
     pendingPosition.current = null; position.current = {top:0, left:0};
-    setShowIndex(false);
+    setShowIndex(false); setPanel(null);
     viewport.current?.scrollTo({ top: 0, left: 0 });
     if (next === page) return;
     setPage(next); setPageInput(String(next + 1)); setLoaded(false); setFailed(false); setInvalid(false); setRetry(0);
@@ -145,31 +149,38 @@ export default function MushafReader() {
       </div>
 
       <div className="relative z-20 mt-3 rounded-2xl border border-[#c8ded4] bg-white p-3 shadow-sm">
-        <label className="mb-3 block text-base font-bold text-[#123d2a]">
+        <div className="flex flex-wrap gap-2" aria-label={t("Reading controls", "पढ़ने के विकल्प", "پڑھنے کے اختیارات")}>
+          <button type="button" className={button} aria-expanded={showIndex} onClick={() => {setShowIndex(!showIndex); setPanel(null);}}>{t("Surah", "सूरह", "سورت")}</button>
+          <button type="button" className={button} aria-expanded={panel === "para"} onClick={() => {setPanel(panel === "para" ? null : "para"); setShowIndex(false);}}>{t("Para", "पारा", "پارہ")}</button>
+          <button type="button" className={button} aria-expanded={panel === "page"} onClick={() => {setPanel(panel === "page" ? null : "page"); setShowIndex(false);}}>{t("Go to page", "पन्ना खोलें", "صفحہ کھولیں")}</button>
+          <button type="button" className={button} onClick={() => {try {localStorage.setItem("nurulquran-mushaf-bookmark", String(page)); setBookmark(page); setBookmarkError(false);} catch {setBookmarkError(true);}}}>{t("Save bookmark", "निशान लगाएँ", "نشان لگائیں")}</button>
+          <button type="button" className={button} aria-expanded={panel === "more"} onClick={() => {setPanel(panel === "more" ? null : "more"); setShowIndex(false);}}>{t("More options", "और विकल्प", "مزید اختیارات")}</button>
+        </div>
+        {bookmark !== null && <p className="mt-3 text-sm" role="status">{t("Saved bookmark", "सहेजा हुआ निशान", "محفوظ نشان")}: {t("Page", "पन्ना", "صفحہ")} {bookmark + 1} <button type="button" className="ms-2 font-semibold underline" onClick={() => go(bookmark)}>{t("Open bookmark", "निशान खोलें", "نشان کھولیں")}</button></p>}
+        {bookmarkError && <p role="alert" className="mt-2 text-red-700">{t("Could not save the bookmark on this device.", "इस डिवाइस पर निशान सेव नहीं हो सका।", "اس ڈیوائس پر نشان محفوظ نہیں ہو سکا۔")}</p>}
+        {showIndex && <div className="mt-3">        <label className="mb-3 block text-base font-bold text-[#123d2a]">
           {t("Search surahs by name or number", "नाम या नंबर से सूरह खोजें", "نام یا نمبر سے سورت تلاش کریں")}
           <input type="search" value={surahQuery} onFocus={() => setShowIndex(true)} onChange={event => { setSurahQuery(event.target.value); setShowIndex(true); }} placeholder={t("Type a surah name or number…", "सूरह का नाम या नंबर लिखें…", "سورت کا نام یا نمبر لکھیں…")} className="mt-2 min-h-14 w-full rounded-xl border-2 border-[#82b29a] bg-white px-4 text-base text-[#123d2a] placeholder:text-[#526e60] focus:outline-none focus:ring-4 focus:ring-[#d8b85a]" />
         </label>
-        <div className="flex flex-wrap items-end gap-3">
-          <button type="button" aria-pressed={largeControls} onClick={() => setLargeControls(value => !value)} className={button}>{t("Large controls", "बड़े बटन", "بڑے بٹن")}</button>
-          <button type="button" aria-expanded={showIndex} onClick={() => setShowIndex(!showIndex)} className={button}>{t(showIndex ? "Close surah index" : "Surah index", showIndex ? "सूरह फ़ेहरिस्त बंद करें" : "सूरह फ़ेहरिस्त", showIndex ? "سورتوں کی فہرست بند کریں" : "سورتوں کی فہرست")}</button>
-          <label className="flex flex-col gap-1 text-sm font-semibold">
+</div>}
+        {panel === "para" && <div className="mt-3">          <label className="flex flex-col gap-1 text-sm font-semibold">
             {t("Para / Juz", "पारा / जुज़", "پارہ / جز")}
             <select aria-label={t("Choose para", "पारा चुनें", "پارہ منتخب کریں")} value="" onChange={event => { if (event.target.value) go(Number(event.target.value) - 1); }} className="min-h-14 rounded-xl border border-[#b9d8ca] bg-white px-3 text-lg">
               <option value="">{t("Choose para", "पारा चुनें", "پارہ منتخب کریں")}</option>
               {MUSHAF_PARAS.map(para => <option key={para.number} value={para.printedPage}>{t("Para", "पारा", "پارہ")} {para.number} · {t("Page", "पन्ना", "صفحہ")} {para.printedPage}</option>)}
             </select>
           </label>
-          <form onSubmit={e => {e.preventDefault(); const value = validMushafPage(Number(pageInput) - 1); setInvalid(value === null); if (value !== null) go(value);}} className="flex items-end gap-2">
+<p className="mt-2 text-sm">{t("A para may begin partway down its opening page.", "पारा अपने पहले पन्ने के बीच से भी शुरू हो सकता है।", "پارہ اپنے پہلے صفحے کے درمیان سے بھی شروع ہو سکتا ہے।")}</p></div>}
+        {panel === "page" && <div className="mt-3">          <form onSubmit={e => {e.preventDefault(); const value = validMushafPage(Number(pageInput) - 1); setInvalid(value === null); if (value !== null) go(value);}} className="flex items-end gap-2">
             <label className="flex flex-col gap-1 text-sm font-semibold">
               {t("Printed page", "किताब का पन्ना", "کتاب کا صفحہ")}
               <input aria-label={t("Printed page number", "किताब के पन्ने का नंबर", "کتاب کا صفحہ نمبر")} aria-invalid={invalid} type="number" min={2} max={611} inputMode="numeric" value={pageInput} onChange={e => {setPageInput(e.target.value); setInvalid(false);}} className="min-h-11 w-20 rounded-xl border border-[#b9d8ca] bg-white px-2" />
             </label>
             <button type="submit" className={button}>{t("Go", "खोलें", "کھولیں")}</button>
           </form>
-        </div>
-        <p className="mt-2 text-sm">{t("A para may begin partway down its opening page.", "पारा अपने पहले पन्ने के बीच से भी शुरू हो सकता है।", "پارہ اپنے پہلے صفحے کے درمیان سے بھی شروع ہو سکتا ہے۔")}</p>
         {invalid && <p role="alert" className="mt-2 text-sm text-red-700">{t("Enter a printed page from 2 to 611.", "2 से 611 के बीच पन्ना चुनें।", "2 سے 611 کے درمیان صفحہ منتخب کریں۔")}</p>}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+</div>}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <div className="flex items-center gap-2" dir="ltr">
             <button type="button" aria-label={t("Zoom out", "ज़ूम कम करें", "زوم کم کریں")} disabled={zoom <= 100} onClick={() => setZoom(z => Math.max(100, z - 25))} className={button}>−</button>
             <output aria-label={t("Zoom level", "ज़ूम स्तर", "زوم کی سطح")} className="w-14 text-center text-sm">{zoom}%</output>
@@ -199,7 +210,7 @@ export default function MushafReader() {
         <div className="grid gap-3 sm:grid-cols-2">{[620, 621].map((scan, i) => <a key={scan} href={`https://raw.githubusercontent.com/1uc1d23/IndoPak-15-Line-Naskh-Mushaf-Page-Images/a93e8947229889a2e486d9b414fe94e69c72c6e4/original_pages/${scan}.jpg`} target="_blank" rel="noreferrer"><Image src={`https://raw.githubusercontent.com/1uc1d23/IndoPak-15-Line-Naskh-Mushaf-Page-Images/a93e8947229889a2e486d9b414fe94e69c72c6e4/original_pages/${scan}.jpg`} alt={t(`Original surah index, part ${i + 1}`, `असली सूरह फ़ेहरिस्त, हिस्सा ${i + 1}`, `اصل سورتوں کی فہرست، حصہ ${i + 1}`)} width={1915} height={2736} unoptimized style={{width:"100%",height:"auto"}} /></a>)}</div>
         </details>
       </section>}
-      <MushafDownloads page={page} />
+      {panel === "more" && <div className="mt-3"><button type="button" aria-pressed={largeControls} onClick={() => setLargeControls(value => !value)} className={button}>{t("Large controls", "बड़े बटन", "بڑے بٹن")}</button><MushafDownloads page={page} /></div>}
       <nav aria-label={t("Mushaf page navigation", "मुशहफ़ पन्नों की नेविगेशन", "مصحف صفحات کی رہنمائی")} className="my-3 flex items-center justify-between gap-2">
         <button type="button" onClick={() => go(page - 1)} disabled={page === 1} className={button}>{t("Previous page", "पिछला पन्ना", "پچھلا صفحہ")}</button>
         <p aria-live="polite" className="text-sm font-semibold" dir="ltr">{page + 1} / {MUSHAF_PAGE_COUNT + 1}</p>
