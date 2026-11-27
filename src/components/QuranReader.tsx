@@ -123,12 +123,20 @@ export default function QuranReader({
   const { data: journey, update: updateJourney } = useQuranJourney();
   const currentSlug = surahSlug(surah.englishName);
   const [savedListening, setSavedListening] = useState<ResumeBookmark | null>(null);
+  const [savedReading, setSavedReading] = useState<ResumeBookmark | null>(null);
   const [bookmarkMessage, setBookmarkMessage] = useState("");
-  useEffect(() => { setSavedListening(getResumeBookmark("listening")); }, []);
+  useEffect(() => {
+    const refresh = () => { setSavedListening(getResumeBookmark("listening")); setSavedReading(getResumeBookmark("reading")); };
+    refresh();
+    window.addEventListener("nurulquran:resume", refresh);
+    window.addEventListener("storage", refresh);
+    return () => { window.removeEventListener("nurulquran:resume", refresh); window.removeEventListener("storage", refresh); };
+  }, []);
   const savePlace = (kind: "reading" | "listening", verse: Verse) => {
     const bookmark = { surahNumber: surah.number, surahName: surah.englishName, slug: currentSlug, ayah: verse.verse_number };
     const saved = saveResumeBookmark(kind, bookmark);
     if (saved && kind === "listening") setSavedListening(bookmark);
+    if (saved && kind === "reading") setSavedReading(bookmark);
     setBookmarkMessage(saved ? t("Bookmark saved on this device.", "बुकमार्क इस डिवाइस पर सहेजा गया।", "بک مارک اس آلے پر محفوظ ہو گیا۔") : t("Could not save bookmark on this device.", "बुकमार्क सहेजा नहीं जा सका।", "بک مارک محفوظ نہیں ہو سکا۔"));
   };
   useEffect(() => {
@@ -716,8 +724,8 @@ export default function QuranReader({
                 <Headphones size={18} aria-hidden="true" />{" "}
                 {t("Listen from here", "यहाँ से सुनें", "یہاں سے سنیں")}
               </button>
-              {listening && <button type="button" className="min-h-12 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658]" onClick={(event) => { event.stopPropagation(); savePlace("listening", verse); }}>{t("Bookmark for listening", "सुनने के लिए सहेजें", "سننے کے لیے محفوظ کریں")}</button>}
-              <button type="button" className="min-h-12 rounded-2xl border border-gold/30 bg-white px-4 text-sm font-semibold text-[#0d6658]" onClick={(event) => { event.stopPropagation(); savePlace("reading", verse); }}>{t("Bookmark for reading", "पढ़ने के लिए सहेजें", "پڑھنے کے لیے محفوظ کریں")}</button>
+              {listening && <button type="button" aria-pressed={savedListening?.surahNumber === surah.number && savedListening?.ayah === verse.verse_number} className={`min-h-12 rounded-2xl border px-4 text-sm font-semibold ${savedListening?.surahNumber === surah.number && savedListening?.ayah === verse.verse_number ? "border-[#075c3a] bg-[#075c3a] text-white" : "border-gold/30 bg-white text-[#0d6658]"}`} onClick={(event) => { event.stopPropagation(); savePlace("listening", verse); }}>{savedListening?.surahNumber === surah.number && savedListening?.ayah === verse.verse_number ? t("✓ Listening bookmark saved", "✓ सुनने का बुकमार्क सहेजा गया", "✓ سننے کا بک مارک محفوظ ہے") : t("Bookmark for listening", "सुनने के लिए सहेजें", "سننے کے لیے محفوظ کریں")}</button>}
+              <button type="button" aria-pressed={savedReading?.surahNumber === surah.number && savedReading?.ayah === verse.verse_number} className={`min-h-12 rounded-2xl border px-4 text-sm font-semibold ${savedReading?.surahNumber === surah.number && savedReading?.ayah === verse.verse_number ? "border-[#075c3a] bg-[#075c3a] text-white" : "border-gold/30 bg-white text-[#0d6658]"}`} onClick={(event) => { event.stopPropagation(); savePlace("reading", verse); }}>{savedReading?.surahNumber === surah.number && savedReading?.ayah === verse.verse_number ? t("✓ Reading bookmark saved", "✓ पढ़ने का बुकमार्क सहेजा गया", "✓ پڑھنے کا بک مارک محفوظ ہے") : t("Bookmark for reading", "पढ़ने के लिए सहेजें", "پڑھنے کے لیے محفوظ کریں")}</button>
               {index < verses.length - 1 ? (
                 <button
                   type="button"
